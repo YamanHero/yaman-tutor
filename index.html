@@ -226,6 +226,25 @@ aside#teacher{position:sticky;top:calc(env(safe-area-inset-top,0px) + 76px);alig
 .lvl{display:flex;gap:18px;align-items:center;flex-wrap:wrap}
 .reward{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:8px 14px;align-items:center;padding:12px 14px;border-radius:12px;border:1.5px solid var(--line);background:var(--surface)}
 .reward .bar>i{background:var(--gold)}
+@keyframes spin{to{transform:rotate(360deg)}}
+.orbit{transform-origin:200px 110px;transform-box:view-box;animation:spin linear infinite}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.5}}
+.pulse{animation:pulse 1.3s ease-in-out infinite}
+.flip3{perspective:900px;background:none!important;border:0!important;padding:0!important;width:100%;min-height:140px;display:block}
+.flip3 .in{position:relative;display:block;width:100%;min-height:140px;transition:transform .6s cubic-bezier(.3,1.3,.5,1);transform-style:preserve-3d}
+.flip3.on .in{transform:rotateY(180deg)}
+.flip3 .f,.flip3 .b{position:absolute;inset:0;backface-visibility:hidden;-webkit-backface-visibility:hidden;border-radius:var(--radius);border:2px solid var(--fc);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:6px;padding:10px;background:color-mix(in srgb,var(--fc) 7%,var(--surface))}
+.flip3 .b{transform:rotateY(180deg);background:color-mix(in srgb,var(--fc) 16%,var(--surface))}
+@keyframes popin{from{opacity:0;transform:translateY(8px) scale(.85)}to{opacity:1;transform:none}}
+.popin{animation:popin .45s cubic-bezier(.3,1.5,.5,1) both}
+@keyframes bounce{0%,100%{transform:none}40%{transform:translateY(-8px)}}
+.bounce{animation:bounce .5s ease both}
+@keyframes shake{0%,100%{transform:none}25%{transform:translateX(-5px)}75%{transform:translateX(5px)}}
+.shake{animation:shake .4s ease both}
+.zoomg{transition:transform .8s cubic-bezier(.4,0,.2,1);transform-origin:0 0}
+.hero-link{display:flex;align-items:center;gap:12px;text-decoration:none;color:inherit;border:1.5px solid color-mix(in srgb,#E2552E 40%,var(--line));background:color-mix(in srgb,#E2552E 7%,var(--surface))}
+.hero-link:hover{border-color:#E2552E}
+.hero-ic{width:44px;height:44px;border-radius:12px;background:#E2552E;color:#fff;display:grid;place-items:center;font-weight:800;flex:none}
 /* overlay */
 .overlay{position:fixed;inset:0;z-index:50;background:color-mix(in srgb,var(--bg) 82%,transparent);display:grid;place-items:center;padding:16px}
 .overlay .card{max-width:520px;width:100%;display:flex;flex-direction:column;gap:14px;align-items:center;text-align:center}
@@ -651,6 +670,7 @@ function lessonPct(id){return S.lessons[id]?.score??null}
 function mast(id){const m=S.mastery[id];return m&&m.t?Math.round(100*m.r/m.t):null}
 function subjProgress(sid){const ts=T.filter(t=>t.s===sid);const done=ts.filter(t=>S.lessons[t.id]?.done).length;return {done,total:ts.length,pct:ts.length?Math.round(100*done/ts.length):0}}
 
+const HERO_URL='https://heroyaman-new-production.up.railway.app/';
 /* ============ MOTIVATION ============ */
 const STAR='<svg viewBox="0 0 24 24" class="star" aria-hidden="true"><path d="M12 2.6l2.85 5.95 6.55.88-4.78 4.55 1.2 6.5L12 17.33l-5.82 3.15 1.2-6.5L2.6 9.43l6.55-.88z"/></svg>';
 const LEVELS=[[0,'مبتدئ'],[60,'مستكشف'],[160,'مثابر'],[320,'باحث'],[540,'متمكّن'],[820,'خبير'],[1160,'بطل التعلّم'],[1560,'نجم الصف'],[2020,'نجم المدرسة'],[2540,'أستاذ المستقبل']];
@@ -697,7 +717,7 @@ function levelUp(i){const o=$('overlay');o.hidden=false;const nx=LEVELS[i+1];o.i
 function checkBadges(){S.badges=S.badges||{};const fresh=BADGES.filter(b=>!S.badges[b.id]&&b.t());fresh.forEach((b,i)=>{S.badges[b.id]=Date.now();S.stars=totalStars()+10;setTimeout(()=>{toast(`<span class="medal" style="display:inline-grid;place-items:center;width:28px;height:28px;border-radius:50%;background:var(--gold);color:#3A2A00;font-size:.8em">${b.ic}</span><span>وسام جديد: <b style="color:var(--ink)">${b.n}</b> (+10)</span>`,3600);chime()},1400+i*1900)});if(fresh.length){updateStarChip();persist()}}
 function goalState(){const d=today(),min=S.minutes[d]||0;const learned=Object.values(S.lessons).some(l=>l.ts&&dayOf(l.ts)===d)||EXAMS.some(x=>!x.review&&dayOf(x.ts)===d);const due=dueReviews().length,rev=EXAMS.some(x=>x.review&&dayOf(x.ts)===d);
   return [{n:'20 دقيقة تعلّم',sub:`${min} من 20 دقيقة`,ok:min>=20,p:Math.min(1,min/20)},{n:'درس أو امتحان',sub:learned?'تمّ':'لم يبدأ بعد',ok:learned,p:learned?1:0},{n:'مراجعة اليوم',sub:rev?'تمّت':due?`${due} أسئلة تنتظرك`:'لا توجد أسئلة اليوم',ok:rev||!due,p:rev||!due?1:0}]}
-function checkGoal(){const d=today();S.goalDone=S.goalDone||{};if(S.goalDone[d])return;if(goalState().every(g=>g.ok)){S.goalDone[d]=1;addStars(15,'أكملت هدف اليوم');teacherSay('أكملت هدف اليوم كاملًا يا يمان. عمل رائع. يمكنك أن ترتاح الآن أو تكمل إذا أحببت.');checkBadges()}}
+function checkGoal(){const d=today();S.goalDone=S.goalDone||{};if(S.goalDone[d])return;if(goalState().every(g=>g.ok)){S.goalDone[d]=1;addStars(15,'أكملت هدف اليوم');teacherSay('أكملت هدف اليوم كاملًا يا يمان. عمل رائع. لا تنسَ أن تسجّل المهمة في Hero Family. يمكنك أن ترتاح الآن أو تكمل إذا أحببت.');toast(`<a href="${HERO_URL}" target="_blank" rel="noopener" style="pointer-events:auto;color:inherit">سجّل المهمة في Hero Family ←</a>`,6000);checkBadges()}}
 const ring=p=>{const r=18,c=2*Math.PI*r;return `<svg class="ring" viewBox="0 0 44 44" aria-hidden="true"><circle cx="22" cy="22" r="${r}" style="fill:none;stroke:var(--line)" stroke-width="5"/><circle cx="22" cy="22" r="${r}" style="fill:none;stroke:${p>=1?'var(--good)':'var(--gold)'}" stroke-width="5" stroke-linecap="round" stroke-dasharray="${(c*p).toFixed(1)} ${c.toFixed(1)}" transform="rotate(-90 22 22)"/>${p>=1?'<path d="M15 22l5 5 9-10" style="fill:none;stroke:var(--good)" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round"/>':''}</svg>`};
 function greeting(){const h=+new Intl.DateTimeFormat('en-US',{hour:'numeric',hour12:false,timeZone:'Asia/Jerusalem'}).format(new Date());return h<12?'صباح الخير يا يمان':h<18?'مرحبًا يا يمان':'مساء الخير يا يمان'}
 let REWARDS={rewards:[],given:[]};
@@ -843,7 +863,7 @@ window.addEventListener('offline',()=>chip('بدون إنترنت – التعل
 
 /* ============ ROUTER ============ */
 let VIEW='home', CUR={sub:'math',tid:'linear'}, L=null, E=null, LAB=null, examSetup=null, lastReview=null;
-function go(v){VIEW=v;stopSpeak();if(v!=='lesson')LAB=null;setHash(v==='lesson'&&L?'lesson-'+L.tid:v==='examres'&&lastReview?'result-'+lastReview.rec.ts:v==='examrun'?'exam':v==='learn'?'learn-'+CUR.sub:v);render();window.scrollTo({top:0,behavior:reduceMotion()?'auto':'smooth'})}
+function go(v){VIEW=v;stopSpeak();if(typeof animTok!=='undefined')animTok++;if(v!=='lesson')LAB=null;setHash(v==='lesson'&&L?'lesson-'+L.tid:v==='examres'&&lastReview?'result-'+lastReview.rec.ts:v==='examrun'?'exam':v==='learn'?'learn-'+CUR.sub:v);render();window.scrollTo({top:0,behavior:reduceMotion()?'auto':'smooth'})}
 document.querySelectorAll('[data-nav]').forEach(b=>b.onclick=()=>{if(E&&!E.done&&VIEW==='examrun'){confirmBox('الامتحان لم ينتهِ بعد. هل تريد الخروج؟ لن تُحفظ النتيجة.','نعم، اخرج','أكمل الامتحان',()=>{E=null;go(b.dataset.nav)});return}go(b.dataset.nav==='learn'?'learn':b.dataset.nav)});
 function render(){
   document.querySelectorAll('[data-nav]').forEach(b=>b.setAttribute('aria-current',(b.dataset.nav===VIEW||(VIEW==='lesson'&&b.dataset.nav==='learn')||(VIEW.startsWith('exam')&&b.dataset.nav==='exam'))?'page':'false'));
@@ -869,6 +889,7 @@ function vHome(v){
    <div class="card" style="--pc:var(--s-chem)"><div class="pic">${PICS.breath}</div><span class="step-n">الخطوة 2 · استراحة قصيرة</span><h3>دقيقتان للتنفّس</h3><p class="muted small" style="margin:0">دائرة تكبر وتصغر. نتنفّس معها ببطء.</p><div style="margin-top:auto"><button data-break>ابدأ الاستراحة</button></div></div>
    ${due.length?`<div class="card" style="--pc:var(--s-he)"><div class="pic">${PICS.check}</div><span class="step-n">الخطوة 3 · مراجعة اليوم</span><h3>${due.length} ${due.length===1?'سؤال':due.length<=10?'أسئلة':'سؤالًا'} للمراجعة</h3><p class="muted small" style="margin:0">أسئلة أخطأت فيها من قبل. كل سؤال تجيب عليه صحيحًا يرجع بعد أيام أكثر، حتى تتقنه.</p><div style="margin-top:auto"><button class="btn-p" data-review>ابدأ المراجعة</button></div></div>`:`<div class="card" style="--pc:var(--s-ar)"><div class="pic">${PICS.check}</div><span class="step-n">الخطوة 3 · امتحان قصير</span><h3>${wt?'مراجعة: '+esc(wt.n):'5 أسئلة سريعة'}</h3><p class="muted small" style="margin:0">${wt?'هذا الموضوع يحتاج تقوية حسب نتائجك.':'أسئلة من الدروس التي تعلّمتها، مع ملاحظات بعد كل سؤال.'}</p><div style="margin-top:auto"><button data-quick="${wt?wt.id:''}">ابدأ التدريب</button></div></div>`}
   </section>
+  <a class="card hero-link" href="${HERO_URL}" target="_blank" rel="noopener"><span class="hero-ic">H</span><span style="flex:1"><b>مهامي في Hero Family</b><br><span class="muted small">بعد الدراسة، افتح تطبيق المهام وسجّل أنك أنهيت مراجعة الدروس.</span></span><span class="chip">افتح</span></a>
   <section class="card"><div class="row between" style="margin-bottom:12px"><h3>المواد</h3><span class="muted small">اضغط على مادة لترى دروسها</span></div>
    <div class="grid subjects">${SUBJ.filter(s=>T.some(t=>t.s===s.id)).map(s=>{const p=subjProgress(s.id);return `<button class="subj" style="--sc:var(${s.c})" data-sub="${s.id}"><span class="ic">${s.ic}</span><b>${s.n}</b><span class="muted small">${p.done} / ${p.total} دروس</span><span class="bar"><i style="width:${p.pct}%"></i></span></button>`}).join('')}</div></section>`;
   v.querySelectorAll('[data-start]').forEach(b=>b.onclick=()=>startLesson(b.dataset.start));
@@ -963,7 +984,7 @@ function vAddTopic(v){
 
 /* ============ LESSON ============ */
 function startLesson(id){const t=topic(id);CUR.sub=t.s;CUR.tid=id;L={tid:id,step:0,sel:null,checked:false,ok:false,tries:{},hint:false,results:{}};initLab();markDay();persist();go('lesson')}
-function initLab(){const t=topic(L.tid),st=t.steps[L.step];LAB={kind:t.lab,st:LABS[t.lab].init({...(st.p||{})})}}
+function initLab(){animTok++;const t=topic(L.tid),st=t.steps[L.step];LAB={kind:t.lab,st:LABS[t.lab].init({...(st.p||{})})}}
 function vLesson(v){
   if(!L){go('learn');return}
   const t=topic(L.tid),s=subj(t.s);
@@ -1020,176 +1041,222 @@ function vLessonDone(v,t,s){
 }
 
 /* ============ LABS ============ */
+/* ---------- animation helpers ---------- */
+let animTok=0;
+function animate(dur,step,done){const my=animTok;if(reduceMotion()){step(1);done&&done();return}const t0=performance.now();const f=ts=>{if(my!==animTok)return;const p=Math.min(1,(ts-t0)/dur);step(p);if(p<1)requestAnimationFrame(f);else if(done)done()};requestAnimationFrame(f)}
+const ease=p=>p<.5?2*p*p:1-Math.pow(-2*p+2,2)/2;
+function outLab(s){const o=$('labOut');if(o&&LAB&&LAB.st===s)o.innerHTML=LABS[LAB.kind].out(s)}
+function relab(s){if(LAB&&LAB.st===s)renderLab()}
 function renderLab(){
   const el=$('lab');if(!el||!LAB)return;const Lb=LABS[LAB.kind];
   el.innerHTML=`<div class="lab-head"><h3>الصورة التوضيحية · جرّب بنفسك</h3><span class="muted small">${esc(Lb.tip)}</span></div><div class="ctrls-wrap">${Lb.ctrls?Lb.ctrls(LAB.st):''}</div><div class="out" id="labOut">${Lb.out(LAB.st)}</div>`;
   el.oninput=e=>{const k=e.target.dataset.in;if(!k)return;LAB.st[k]=+e.target.value;if(Lb.onIn)Lb.onIn(LAB.st,k);const lbl=el.querySelector(`[data-val="${k}"]`);if(lbl)lbl.textContent=fmt(LAB.st[k]);$('labOut').innerHTML=Lb.out(LAB.st)};
-  el.onclick=e=>{const b=e.target.closest('[data-act]');if(!b)return;S.labActs=(S.labActs||0)+1;if(S.labActs%10===0)checkBadges();Lb.act(LAB.st,b.dataset.act,b);if(Lb.keepCtrls){$('labOut').innerHTML=Lb.out(LAB.st)}else renderLab()};
+  el.onclick=e=>{const b=e.target.closest('[data-act]');if(!b||b.disabled)return;S.labActs=(S.labActs||0)+1;if(S.labActs%10===0)checkBadges();const r=Lb.act(LAB.st,b.dataset.act,b);if(r==='noop')return;if(Lb.keepCtrls&&r!=='full')$('labOut').innerHTML=Lb.out(LAB.st);else renderLab()};
   if(Lb.after)Lb.after(LAB.st);
 }
 const fmt=x=>Number.isInteger(x)?String(x):x.toFixed(1);
 const slider=(k,label,min,max,step,val)=>`<label>${label}: <b class="ltr" data-val="${k}">${fmt(val)}</b><input type="range" data-in="${k}" min="${min}" max="${max}" step="${step}" value="${val}" aria-label="${label}"></label>`;
+const PIPS={1:[[.5,.5]],2:[[.25,.25],[.75,.75]],3:[[.25,.25],[.5,.5],[.75,.75]],4:[[.25,.25],[.75,.25],[.25,.75],[.75,.75]],5:[[.25,.25],[.75,.25],[.5,.5],[.25,.75],[.75,.75]],6:[[.25,.22],[.75,.22],[.25,.5],[.75,.5],[.25,.78],[.75,.78]]};
+const die=(x,y,sz,n,rot=0)=>`<g transform="translate(${x+sz/2} ${y+sz/2}) rotate(${rot}) translate(${-sz/2} ${-sz/2})"><rect width="${sz}" height="${sz}" rx="${sz*.18}" style="fill:var(--surface);stroke:var(--ink)" stroke-width="3"/>${PIPS[n].map(([a,b])=>`<circle cx="${a*sz}" cy="${b*sz}" r="${sz*.085}" style="fill:${n%2===0?'var(--r-e)':'var(--ink)'}"/>`).join('')}</g>`;
+const CELLC={animal:{nucleus:[175,110],mito:[265,90],vac:[270,150],ribo:[130,170]},plant:{nucleus:[140,110],mito:[115,178],vac:[270,107],chloro:[90,60],ribo:[130,170]}};
+const cellTf=(s,k)=>{const c=k&&s.zoom&&CELLC[s.type][k];return c?`translate(${200-c[0]*1.9}px,${120-c[1]*1.9}px) scale(1.9)`:'translate(0px,0px) scale(1)'};
 const LABS={
- concepts:{tip:'اضغط على كل بطاقة لترى معنى المصطلح',
+ concepts:{tip:'اضغط على كل بطاقة لتقلبها وترى معنى المصطلح',
   init:p=>({k:p.k||[],open:{}}),
-  act(s,a){if(a.startsWith('c:')){const i=+a.slice(2);s.open[i]=!s.open[i]}else if(a==='all'){const all=s.k.every((_,i)=>s.open[i]);s.k.forEach((_,i)=>s.open[i]=!all)}},
-  ctrls:s=>s.k.length?`<div class="row"><button data-act="all">اكشف أو أخفِ الكل</button></div>`:'',
+  act(s,a,b){if(a.startsWith('c:')){const i=+a.slice(2);s.open[i]=!s.open[i];b.classList.toggle('on',!!s.open[i]);return 'noop'}
+   if(a==='all'){const all=s.k.every((_,i)=>s.open[i]);s.k.forEach((_,i)=>s.open[i]=!all);document.querySelectorAll('#labOut .flip3').forEach((el,i)=>el.classList.toggle('on',!!s.open[i]));return 'noop'}},
+  ctrls:s=>s.k.length?`<div class="row"><button data-act="all">اقلب كل البطاقات</button></div>`:'',
   out(s){if(!s.k.length)return '<p class="muted">لا توجد بطاقات لهذه الخطوة.</p>';const cols=['a','b','e','d','f','c'];
-   return `<div class="grid" style="grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:10px">${s.k.map(([term,mean],i)=>{const r=cols[i%cols.length];return `<button class="flip" data-act="c:${i}" style="min-height:120px;border-color:var(--r-${r});background:color-mix(in srgb,var(--r-${r}) ${s.open[i]?14:7}%,var(--surface))"><span style="font-size:1.25em;font-weight:700;color:var(--r-${r})">${esc(term)}</span>${s.open[i]?`<span class="small">${esc(mean)}</span>`:'<span class="muted small">اضغط لترى المعنى</span>'}</button>`}).join('')}</div>`}},
- balance:{tip:'كل عملية في جهة نعملها في الجهة الأخرى',
-  init:p=>({a:p.a||1,L:p.b||0,R:p.c||7,o:p,tilt:0,msg:''}),
-  ctrls:s=>`<div class="row"><button data-act="sub">اطرح 1 من الجهتين</button><button data-act="div" ${s.a>1?'':'disabled'}>اقسم الجهتين على ${s.a}</button><button data-act="one">اطرح 1 من جهة واحدة فقط</button><button data-act="reset" class="btn-ghost">من البداية</button></div>`,
-  act(s,a){s.msg='';s.tilt=0;
-   if(a==='reset'){Object.assign(s,LABS.balance.init(s.o));return}
-   if(a==='sub'){if(s.L>0&&s.R>0){s.L--;s.R--;s.msg='طرحنا 1 من الجهتين. الميزان بقي متوازنًا.'}else s.msg='لا يوجد عدد بجانب x لنطرحه.'}
-   if(a==='div'){if(s.L>0)s.msg='أولًا أزل الأعداد التي بجانب x، ثم اقسم.';else if(s.R%s.a===0){s.R=s.R/s.a;s.a=1;s.msg='قسمنا الجهتين. الآن نرى قيمة x.'}else s.msg='القسمة لا تعطي عددًا صحيحًا هنا.'}
-   if(a==='one'){s.tilt=s.L>0?-9:9;s.msg='انتبه: الميزان مال! عندما نغيّر جهة واحدة فقط يضيع التوازن.';setTimeout(()=>{if(LAB&&LAB.st===s){s.tilt=0;const o=$('labOut');if(o)o.innerHTML=LABS.balance.out(s)}},1800)}
-  },
+   return `<div class="grid" style="grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:10px">${s.k.map(([term,mean],i)=>{const r=cols[i%cols.length];return `<button class="flip3 popin ${s.open[i]?'on':''}" data-act="c:${i}" style="--fc:var(--r-${r});animation-delay:${i*90}ms" aria-label="${esc(term)}"><span class="in"><span class="f"><span style="font-size:1.25em;font-weight:700;color:var(--r-${r})">${esc(term)}</span><span class="muted small">اضغط لتقلب</span></span><span class="b"><b style="color:var(--r-${r})">${esc(term)}</b><span class="small">${esc(mean)}</span></span></span></button>`}).join('')}</div>`}},
+ balance:{tip:'كل عملية في جهة نعملها في الجهة الأخرى. اضغط «شاهد الحل» لترى الخطوات تتحرّك',
+  init:p=>({a:p.a||1,L:p.b||0,R:p.c||7,o:p,tilt:0,msg:'',fx:null,busy:false}),
+  ctrls:s=>`<div class="row"><button class="btn-p" data-act="play" ${s.busy?'disabled':''}>▶ شاهد الحل خطوة خطوة</button><button data-act="sub" ${s.busy?'disabled':''}>اطرح 1 من الجهتين</button><button data-act="div" ${s.a>1&&!s.busy?'':'disabled'}>اقسم الجهتين على ${s.a}</button><button data-act="one" ${s.busy?'disabled':''}>اطرح 1 من جهة واحدة فقط</button><button data-act="reset" class="btn-ghost">من البداية</button></div>`,
+  act(s,a){if(a==='reset'){animTok++;Object.assign(s,LABS.balance.init(s.o));return}if(s.busy)return 'noop';s.msg='';s.tilt=0;
+   if(a==='sub'){LABS.balance.sub(s);return 'noop'}
+   if(a==='div'){LABS.balance.div(s);return 'noop'}
+   if(a==='play'){LABS.balance.play(s);return 'noop'}
+   if(a==='one'){s.tilt=s.L>0?-9:9;s.msg='انتبه: الميزان مال! عندما نغيّر جهة واحدة فقط يضيع التوازن.';setTimeout(()=>{if(LAB&&LAB.st===s){s.tilt=0;outLab(s)}},1800);outLab(s);return 'noop'}},
+  sub(s,cb){if(!(s.L>0&&s.R>0)){s.msg='لا يوجد عدد بجانب x لنطرحه.';outLab(s);return}s.busy=true;relab(s);s.fx={t:'sub',p:0};s.msg='نطرح 1 من الجهة اليسرى ومن الجهة اليمنى معًا…';
+   animate(700,p=>{s.fx.p=ease(p);outLab(s)},()=>{s.fx=null;s.L--;s.R--;s.busy=false;s.msg='طرحنا 1 من الجهتين. الميزان بقي متوازنًا.';relab(s);cb&&cb()})},
+  div(s,cb){if(s.L>0){s.msg='أولًا أزل الأعداد التي بجانب x، ثم اقسم.';outLab(s);return}if(s.R%s.a){s.msg='القسمة لا تعطي عددًا صحيحًا هنا.';outLab(s);return}
+   s.busy=true;relab(s);s.fx={t:'div',p:0};s.msg=`نقسم الدوائر إلى ${s.a} مجموعات متساوية، لكل x مجموعة واحدة…`;
+   animate(1500,p=>{s.fx.p=p;outLab(s)},()=>{s.fx=null;s.R=s.R/s.a;s.a=1;s.busy=false;s.msg='قسمنا الجهتين. الآن نرى قيمة x.';relab(s);cb&&cb()})},
+  play(s){animTok++;Object.assign(s,LABS.balance.init(s.o));s.busy=true;relab(s);s.busy=false;const go2=()=>{if(!LAB||LAB.st!==s)return;if(s.L>0)setTimeout(()=>LABS.balance.sub(s,go2),reduceMotion()?0:400);else if(s.a>1)setTimeout(()=>LABS.balance.div(s,go2),reduceMotion()?0:500)};setTimeout(go2,250)},
   out(s){
-   const xs=[];for(let i=0;i<s.a;i++)xs.push(`<rect x="${40+(i%3)*30}" y="${78-Math.floor(i/3)*30}" width="26" height="26" rx="5" style="fill:var(--r-a)"/><text x="${53+(i%3)*30}" y="${97-Math.floor(i/3)*30}" text-anchor="middle" font-size="16" font-weight="700" style="fill:var(--surface)">x</text>`);
-   const dots=(n,x0)=>{let r='';for(let i=0;i<n;i++)r+=`<circle cx="${x0+(i%6)*17}" cy="${95-Math.floor(i/6)*17}" r="7" style="fill:var(--r-b)"/>`;return r};
-   const solved=s.a===1&&s.L===0;
-   const eq=`${s.a>1?s.a:''}x${s.L>0?' + '+s.L:''} = ${s.R}`;
+   const fx=s.fx,p=fx?fx.p:0,grpP=fx&&fx.t==='div'?Math.min(1,p/.45):0,fadeP=fx&&fx.t==='div'?Math.max(0,(p-.5)/.5):0;
+   const xs=[];for(let i=0;i<s.a;i++){const keep=!(fx&&fx.t==='div')||i===0;xs.push(`<g style="opacity:${keep?1:(1-fadeP).toFixed(2)}" transform="translate(${40+(i%3)*30},${78-Math.floor(i/3)*30-(keep?0:fadeP*30)})"><rect width="26" height="26" rx="5" style="fill:var(${fx&&fx.t==='div'?['--r-a','--r-d','--r-e','--r-f','--r-b','--r-c'][i%6]:'--r-a'})"/><text x="13" y="19" text-anchor="middle" font-size="16" font-weight="700" style="fill:var(--surface)">x</text></g>`)}
+   const per=fx&&fx.t==='div'?s.R/s.a:0;
+   const dots=(n,x0,right)=>{let r='';for(let i=0;i<n;i++){let op=1,dy=0,col='--r-b';
+     if(fx&&fx.t==='sub'&&i===n-1){op=1-p;dy=-30*p}
+     if(right&&per){const g=Math.floor(i/per);col=grpP>0?['--r-a','--r-d','--r-e','--r-f','--r-b','--r-c'][g%6]:'--r-b';if(g>0){op=1-fadeP;dy=-28*fadeP}}
+     r+=`<circle cx="${x0+(i%6)*17}" cy="${95-Math.floor(i/6)*17+dy}" r="${right&&per&&grpP>0?7+1.5*Math.sin(grpP*Math.PI):7}" style="fill:var(${col});opacity:${op.toFixed(2)}"/>`}return r};
+   const solved=s.a===1&&s.L===0;const eq=`${s.a>1?s.a:''}x${s.L>0?' + '+s.L:''} = ${s.R}`;
    return `<svg viewBox="0 0 400 190" role="img" aria-label="ميزان المعادلة ${eq}">
     <rect x="190" y="40" width="20" height="130" rx="6" style="fill:var(--line)"/><rect x="140" y="166" width="120" height="14" rx="7" style="fill:var(--muted)"/>
-    <g style="transform-origin:200px 44px;transform:rotate(${s.tilt}deg);transition:transform .6s">
+    <g style="transform-origin:200px 44px;transform:rotate(${s.tilt}deg);transition:transform .6s cubic-bezier(.3,1.6,.5,1)">
      <rect x="20" y="40" width="360" height="8" rx="4" style="fill:var(--muted)"/>
      <rect x="22" y="110" width="170" height="8" rx="4" style="fill:var(--r-a);opacity:.5"/><rect x="208" y="110" width="170" height="8" rx="4" style="fill:var(--r-b);opacity:.5"/>
      <line x1="30" y1="48" x2="30" y2="110" style="stroke:var(--line)" stroke-width="2"/><line x1="184" y1="48" x2="184" y2="110" style="stroke:var(--line)" stroke-width="2"/>
      <line x1="216" y1="48" x2="216" y2="110" style="stroke:var(--line)" stroke-width="2"/><line x1="370" y1="48" x2="370" y2="110" style="stroke:var(--line)" stroke-width="2"/>
-     ${xs.join('')}${dots(s.L,s.a>3?140:135)}${dots(s.R,225)}
+     ${xs.join('')}${dots(s.L,s.a>3?140:135,false)}${dots(s.R,225,true)}
     </g></svg>
     <div class="formula" style="font-size:1.4em">${paint(eq,{auto:1})}</div>
     <div class="readout" style="margin-top:8px"><span class="chip"><i style="width:12px;height:12px;border-radius:3px;background:var(--r-a);display:inline-block"></i> مربع = x</span><span class="chip"><i style="width:12px;height:12px;border-radius:50%;background:var(--r-b);display:inline-block"></i> دائرة = 1</span></div>
-    ${solved?`<div class="notice good" style="margin-top:10px"><b>وجدت الحل: x = ${s.R}</b></div>`:s.msg?`<div class="notice ${s.tilt?'warn':''}" style="margin-top:10px">${esc(s.msg)}</div>`:''}`;
-  }},
- parabola:{tip:'غيّر a و b و c وشاهد أين يقطع الرسم محور x',keepCtrls:1,
-  init:p=>({a:p.a??1,b:p.b??0,c:p.c??-4}),
-  ctrls:s=>`<div class="ctrls">${slider('a','a',-3,3,0.5,s.a)}${slider('b','b',-6,6,1,s.b)}${slider('c','c',-9,9,1,s.c)}</div>`,
+    ${solved?`<div class="notice good popin" style="margin-top:10px"><b>وجدت الحل: x = ${s.R}</b></div>`:s.msg?`<div class="notice ${s.tilt?'warn':''}" style="margin-top:10px">${esc(s.msg)}</div>`:''}`}},
+ parabola:{tip:'غيّر a و b و c، وحرّك النقطة على المنحنى، أو اضغط «ارسم»',keepCtrls:1,
+  init:p=>({a:p.a??1,b:p.b??0,c:p.c??-4,tx:2,draw:1}),
+  ctrls:s=>`<div class="ctrls">${slider('a','a',-3,3,0.5,s.a)}${slider('b','b',-6,6,1,s.b)}${slider('c','c',-9,9,1,s.c)}${slider('tx','حرّك النقطة: x',-6,6,0.5,s.tx)}</div><div class="row" style="margin-top:6px"><button class="btn-p" data-act="draw">▶ ارسم المنحنى أمامي</button></div>`,
   onIn:s=>{if(s.a===0)s.a=0.5},
+  act(s,a){if(a==='draw'){s.draw=0;animate(1800,p=>{s.draw=p;outLab(s)},()=>{s.draw=1;outLab(s)});return 'noop'}},
   out(s){
-   const W=400,H=260,X=x=>200+x*30,Y=y=>130-y*11;let d='';
-   for(let i=0;i<=160;i++){const x=-6.5+i*13/160,y=s.a*x*x+s.b*x+s.c;d+=(i?'L':'M')+X(x).toFixed(1)+' '+Y(Math.max(-14,Math.min(14,y))).toFixed(1)}
+   const X=x=>200+x*30,Y=y=>130-y*11,f=x=>s.a*x*x+s.b*x+s.c;let d='';const N=Math.max(2,Math.round(160*s.draw));
+   for(let i=0;i<=N;i++){const x=-6.5+i*13/160,y=f(x);d+=(i?'L':'M')+X(x).toFixed(1)+' '+Y(Math.max(-14,Math.min(14,y))).toFixed(1)}
    const D=s.b*s.b-4*s.a*s.c;let roots=[];if(D>0)roots=[(-s.b-Math.sqrt(D))/(2*s.a),(-s.b+Math.sqrt(D))/(2*s.a)];else if(D===0)roots=[-s.b/(2*s.a)];
-   const vx=-s.b/(2*s.a),vy=s.a*vx*vx+s.b*vx+s.c;
+   const vx=-s.b/(2*s.a),vy=f(vx),ty=f(s.tx),tIn=Math.abs(ty)<=11.5;
    let grid='';for(let i=-6;i<=6;i++)grid+=`<line x1="${X(i)}" y1="10" x2="${X(i)}" y2="250" style="stroke:var(--line)" stroke-width="${i?0.6:0}"/>`+(i&&i%2===0?`<text x="${X(i)}" y="146" font-size="11" text-anchor="middle" class="svgmuted">${i}</text>`:'');
-   const sgn=v=>v<0?' − '+Math.abs(v):' + '+v;
-   const eq=`y = ${s.a===1?'':s.a===-1?'−':fmt(s.a)}x²${s.b?sgn(s.b)+'x':''}${s.c?sgn(s.c):''}`;
-   return `<svg viewBox="0 0 ${W} ${H}" role="img" aria-label="رسم القطع المكافئ"><defs><clipPath id="pc"><rect x="0" y="5" width="400" height="250"/></clipPath></defs>${grid}
+   const sgn=v=>v<0?' − '+Math.abs(v):' + '+v;const eq=`y = ${s.a===1?'':s.a===-1?'−':fmt(s.a)}x²${s.b?sgn(s.b)+'x':''}${s.c?sgn(s.c):''}`;
+   const done=s.draw>=1;
+   return `<svg viewBox="0 0 400 260" role="img" aria-label="رسم القطع المكافئ"><defs><clipPath id="pc"><rect x="0" y="5" width="400" height="250"/></clipPath></defs>${grid}
     <line x1="10" y1="130" x2="390" y2="130" style="stroke:var(--muted)" stroke-width="1.5"/><line x1="200" y1="8" x2="200" y2="252" style="stroke:var(--muted)" stroke-width="1.5"/>
     <text x="388" y="124" font-size="12" text-anchor="end" class="svgmuted">x</text><text x="207" y="18" font-size="12" class="svgmuted">y</text>
-    <path d="${d}" clip-path="url(#pc)" style="fill:none;stroke:var(--r-a)" stroke-width="3.5"/>
-    ${Math.abs(vy)<14?`<circle cx="${X(vx)}" cy="${Y(vy)}" r="6" style="fill:var(--r-d)"/>`:''}
-    ${roots.map(r=>`<circle cx="${X(r)}" cy="130" r="7" style="fill:var(--r-e);stroke:var(--surface)" stroke-width="2"/>`).join('')}</svg>
+    <path d="${d}" clip-path="url(#pc)" style="fill:none;stroke:var(--r-a)" stroke-width="3.5" stroke-linecap="round"/>
+    ${done&&Math.abs(vy)<14?`<circle cx="${X(vx)}" cy="${Y(vy)}" r="6" style="fill:var(--r-d)"/>`:''}
+    ${done?roots.map(r=>`<circle class="pulse" cx="${X(r)}" cy="130" r="8" style="fill:var(--r-e);stroke:var(--surface)" stroke-width="2"/>`).join(''):''}
+    ${done&&tIn?`<line x1="${X(s.tx)}" y1="130" x2="${X(s.tx)}" y2="${Y(ty)}" style="stroke:var(--r-b)" stroke-dasharray="4 3" stroke-width="2"/><line x1="200" y1="${Y(ty)}" x2="${X(s.tx)}" y2="${Y(ty)}" style="stroke:var(--r-b)" stroke-dasharray="4 3" stroke-width="2"/><circle cx="${X(s.tx)}" cy="${Y(ty)}" r="7" style="fill:var(--r-b);stroke:var(--surface)" stroke-width="2"/><rect x="${Math.min(300,X(s.tx)+8)}" y="${Math.max(8,Y(ty)-26)}" width="92" height="20" rx="6" style="fill:var(--surface);stroke:var(--r-b)"/><text x="${Math.min(300,X(s.tx)+8)+46}" y="${Math.max(8,Y(ty)-26)+14}" font-size="12" text-anchor="middle" style="fill:var(--r-b)">(${fmt(s.tx)}, ${fmt(+ty.toFixed(2))})</text>`:''}</svg>
     <div class="formula" style="font-size:1.3em">${paint(eq,{auto:1})}</div>
-    <div class="readout" style="margin-top:8px"><span class="chip ltr">Δ = ${fmt(D)}</span><span class="chip" style="color:var(--r-e)">${roots.length===2?'حلّان: x = '+fmt(+roots[0].toFixed(2))+' ، x = '+fmt(+roots[1].toFixed(2)):roots.length===1?'حلّ واحد: x = '+fmt(+roots[0].toFixed(2)):'لا يوجد حل حقيقي'}</span><span class="chip" style="color:var(--r-d)">الرأس: x = ${fmt(+vx.toFixed(2))}</span></div>`;
-  }},
- dice:{tip:'ارمِ النرد مرات كثيرة وقارن مع الاحتمال النظري',
-  init:()=>({f:[0,0,0,0,0,0],last:null}),
-  ctrls:()=>`<div class="row"><button data-act="1">ارمِ مرة</button><button data-act="10">ارمِ 10 مرات</button><button data-act="100">ارمِ 100 مرة</button><button data-act="r" class="btn-ghost">صفّر</button></div>`,
-  act(s,a){if(a==='r'){s.f=[0,0,0,0,0,0];s.last=null;return}for(let i=0;i<+a;i++){const k=Math.floor(Math.random()*6);s.f[k]++;s.last=k+1}},
-  out(s){const N=s.f.reduce((a,b)=>a+b,0),mx=Math.max(1,...s.f);const ev=s.f[1]+s.f[3]+s.f[5];
-   const bars=s.f.map((v,i)=>{const h=v/mx*140;return `<rect x="${30+i*60}" y="${170-h}" width="44" height="${h}" rx="5" style="fill:var(${(i+1)%2===0?'--r-e':'--r-a'})"/><text x="${52+i*60}" y="190" text-anchor="middle" font-size="15" class="svgtxt">${i+1}</text><text x="${52+i*60}" y="${163-h}" text-anchor="middle" font-size="12" class="svgmuted">${v}</text>`}).join('');
-   return `<svg viewBox="0 0 400 200" role="img" aria-label="تكرار نتائج النرد"><line x1="20" y1="170" x2="390" y2="170" style="stroke:var(--line)"/>${bars}</svg>
-   <div class="readout"><span class="chip">عدد الرميات: ${N}</span>${s.last?`<span class="chip">آخر رمية: ${s.last}</span>`:''}<span class="chip" style="color:var(--r-e)">زوجي تجريبيًا: ${N?(ev/N).toFixed(2):'–'}</span><span class="chip">زوجي نظريًا: 0.50</span><span class="chip">الرقم 6 تجريبيًا: ${N?(s.f[5]/N).toFixed(2):'–'} (نظريًا 0.17)</span></div>`}},
- line:{tip:'غيّر الميل m ونقطة التقاطع b',keepCtrls:1,
-  init:p=>({m:p.m??2,b:p.b??1}),
-  ctrls:s=>`<div class="ctrls">${slider('m','الميل m',-4,4,0.5,s.m)}${slider('b','التقاطع b',-5,5,1,s.b)}</div>`,
+    <div class="readout" style="margin-top:8px"><span class="chip ltr">Δ = ${fmt(D)}</span><span class="chip" style="color:var(--r-e)">${roots.length===2?'حلّان: x = '+fmt(+roots[0].toFixed(2))+' ، x = '+fmt(+roots[1].toFixed(2)):roots.length===1?'حلّ واحد: x = '+fmt(+roots[0].toFixed(2)):'لا يوجد حل حقيقي'}</span><span class="chip" style="color:var(--r-d)">الرأس: x = ${fmt(+vx.toFixed(2))}</span><span class="chip" style="color:var(--r-b)">عندما x = ${fmt(s.tx)}، y = ${fmt(+ty.toFixed(2))}</span></div>`}},
+ dice:{tip:'ارمِ النرد وشاهده يدور، ثم قارن النتائج مع الاحتمال النظري',
+  init:()=>({f:[0,0,0,0,0,0],shown:[0,0,0,0,0,0],face:3,rot:0,rolling:false}),
+  ctrls:s=>`<div class="row"><button class="btn-p" data-act="1" ${s.rolling?'disabled':''}>ارمِ مرة</button><button data-act="10" ${s.rolling?'disabled':''}>ارمِ 10 مرات</button><button data-act="100" ${s.rolling?'disabled':''}>ارمِ 100 مرة</button><button data-act="r" class="btn-ghost">صفّر</button></div>`,
+  act(s,a){if(a==='r'){animTok++;Object.assign(s,LABS.dice.init());return}if(s.rolling)return 'noop';
+   const old=[...s.f];let last=1;for(let i=0;i<+a;i++){const k=Math.floor(Math.random()*6);s.f[k]++;last=k+1}const nw=[...s.f];s.rolling=true;relab(s);let lastSwap=0;
+   animate(+a===1?900:1300,p=>{if(p<.6){if(performance.now()-lastSwap>85){s.face=1+Math.floor(Math.random()*6);lastSwap=performance.now()}s.rot=Math.sin(p*30)*25*(1-p)}else{s.face=last;s.rot=0}const q=ease(Math.max(0,(p-.45)/.55));s.shown=old.map((o,i)=>o+(nw[i]-o)*q);outLab(s)},()=>{s.rolling=false;s.shown=nw;s.face=last;relab(s)});return 'noop'},
+  out(s){const N=s.f.reduce((a,b)=>a+b,0),mx=Math.max(1,...s.shown);const ev=s.f[1]+s.f[3]+s.f[5];
+   const bars=s.shown.map((v,i)=>{const h=v/mx*130,x=130+i*45;return `<rect x="${x}" y="${170-h}" width="34" height="${h}" rx="5" style="fill:var(${(i+1)%2===0?'--r-e':'--r-a'})"/><text x="${x+17}" y="190" text-anchor="middle" font-size="15" class="svgtxt">${i+1}</text><text x="${x+17}" y="${163-h}" text-anchor="middle" font-size="12" class="svgmuted">${Math.round(v)}</text>`}).join('');
+   return `<svg viewBox="0 0 400 200" role="img" aria-label="النرد وتكرار النتائج">${die(16,50,84,s.face,s.rot)}<text x="58" y="160" text-anchor="middle" font-size="12" class="svgmuted">${s.rolling?'يدور…':N?'آخر رمية: '+s.face:'اضغط ارمِ'}</text><line x1="122" y1="170" x2="394" y2="170" style="stroke:var(--line)"/>${bars}</svg>
+   <div class="readout"><span class="chip">عدد الرميات: ${N}</span><span class="chip" style="color:var(--r-e)">زوجي تجريبيًا: ${N?(ev/N).toFixed(2):'–'} (نظريًا 0.50)</span><span class="chip">الرقم 6: ${N?(s.f[5]/N).toFixed(2):'–'} (نظريًا 0.17)</span></div>`}},
+ line:{tip:'غيّر الميل والتقاطع، أو اضغط «امشِ على الخط» لترى معنى الميل',keepCtrls:1,
+  init:p=>({m:p.m??2,b:p.b??1,walk:null}),
+  ctrls:s=>`<div class="ctrls">${slider('m','الميل m',-4,4,0.5,s.m)}${slider('b','التقاطع b',-5,5,1,s.b)}</div><div class="row" style="margin-top:6px"><button class="btn-p" data-act="walk">▶ امشِ على الخط خطوة خطوة</button></div>`,
+  onIn:s=>{s.walk=null},
+  act(s,a){if(a==='walk'){const x0=-3,x1=3;s.walk=x0;animate(3600,p=>{s.walk=x0+(x1-x0)*p;outLab(s)},()=>{s.walk=x1;outLab(s)});return 'noop'}},
   out(s){const X=x=>200+x*30,Y=y=>130-y*12;let grid='';for(let i=-6;i<=6;i++)grid+=`<line x1="${X(i)}" y1="8" x2="${X(i)}" y2="252" style="stroke:var(--line)" stroke-width="${i?0.6:0}"/>`;
-   const y1=s.m*-7+s.b,y2=s.m*7+s.b;const sgn=v=>v<0?' − '+Math.abs(v):' + '+v;
+   const f=x=>s.m*x+s.b;const sgn=v=>v<0?' − '+Math.abs(v):' + '+v;
    const eq=`y = ${s.m===1?'':s.m===-1?'−':fmt(s.m)}x${s.b?sgn(s.b):''}`.replace('y = 0x','y = ').replace('=  + ','= ').replace('=  − ','= −');
-   const tri=s.m?`<path d="M${X(0)} ${Y(s.b)} L${X(1)} ${Y(s.b)} L${X(1)} ${Y(s.b+s.m)}" style="fill:none;stroke:var(--r-b)" stroke-width="3" stroke-dasharray="5 4"/><text x="${X(0.5)}" y="${Y(s.b)+(s.m>0?16:-8)}" text-anchor="middle" font-size="12" style="fill:var(--r-b)">1</text><text x="${X(1)+8}" y="${Y(s.b+s.m/2)+4}" font-size="12" style="fill:var(--r-b)">${fmt(s.m)}</text>`:'';
+   let stairs='';if(s.walk!==null){for(let k=-3;k<3;k++){const prog=Math.max(0,Math.min(1,s.walk-k));if(prog<=0)break;const hx=Math.min(1,prog*2),vy=Math.max(0,prog*2-1);
+     stairs+=`<line x1="${X(k)}" y1="${Y(f(k))}" x2="${X(k+hx)}" y2="${Y(f(k))}" style="stroke:var(--r-b)" stroke-width="4" stroke-linecap="round"/>`;if(vy>0)stairs+=`<line x1="${X(k+1)}" y1="${Y(f(k))}" x2="${X(k+1)}" y2="${Y(f(k)+s.m*vy)}" style="stroke:var(--r-e)" stroke-width="4" stroke-linecap="round"/>`;
+     if(prog>=1&&k===Math.min(2,Math.floor(s.walk)-1))stairs+=`<text x="${X(k+.5)}" y="${Y(f(k))+(s.m>=0?15:-7)}" text-anchor="middle" font-size="14" font-weight="700" style="fill:var(--r-b)">1</text><text x="${X(k+1)+6}" y="${Y(f(k)+s.m/2)+5}" font-size="14" font-weight="700" style="fill:var(--r-e)">${fmt(s.m)}</text>`}}
+   const wx=s.walk;
    return `<svg viewBox="0 0 400 260" role="img" aria-label="رسم الخط"><defs><clipPath id="lc"><rect x="0" y="5" width="400" height="250"/></clipPath></defs>${grid}<line x1="10" y1="130" x2="390" y2="130" style="stroke:var(--muted)" stroke-width="1.5"/><line x1="200" y1="8" x2="200" y2="252" style="stroke:var(--muted)" stroke-width="1.5"/>
-   <line x1="${X(-7)}" y1="${Y(y1)}" x2="${X(7)}" y2="${Y(y2)}" clip-path="url(#lc)" style="stroke:var(--r-a)" stroke-width="3.5"/>${tri}<circle cx="${X(0)}" cy="${Y(s.b)}" r="6" style="fill:var(--r-e)"/></svg>
+   <line x1="${X(-7)}" y1="${Y(f(-7))}" x2="${X(7)}" y2="${Y(f(7))}" clip-path="url(#lc)" style="stroke:var(--r-a);opacity:${s.walk===null?1:.35}" stroke-width="3.5"/><g clip-path="url(#lc)">${stairs}</g><circle cx="${X(0)}" cy="${Y(s.b)}" r="6" style="fill:var(--r-e)"/>
+   ${wx!==null?`<circle cx="${X(wx)}" cy="${Y(f(wx))}" r="9" style="fill:var(--r-d);stroke:var(--surface)" stroke-width="3" clip-path="url(#lc)"/>`:''}</svg>
    <div class="formula" style="font-size:1.3em">${paint(eq,{auto:1})}</div>
-   <div class="readout" style="margin-top:8px"><span class="chip" style="color:var(--r-b)">الميل ${fmt(s.m)}: ${s.m>0?'الخط يصعد':s.m<0?'الخط ينزل':'خط أفقي'}</span><span class="chip" style="color:var(--r-e)">يقطع محور y في (0, ${s.b})</span></div>`}},
- motion:{tip:'اختر السرعة والزمن، ثم اضغط "شغّل"',keepCtrls:1,
-  init:p=>({v:p.v??10,t:p.t??5,now:p.t??5}),
-  ctrls:s=>`<div class="ctrls">${slider('v','السرعة (م/ث)',1,30,1,s.v)}${slider('t','الزمن (ث)',1,10,1,s.t)}</div><div class="row" style="margin-top:6px"><button data-act="play" class="btn-p">شغّل</button></div>`,
+   <div class="readout" style="margin-top:8px"><span class="chip" style="color:var(--r-b)">كل خطوة 1 إلى اليمين</span><span class="chip" style="color:var(--r-e)">الخط ${s.m>0?'يصعد':s.m<0?'ينزل':'لا يتغيّر'} ${fmt(Math.abs(s.m))}</span><span class="chip" style="color:var(--r-e)">يقطع محور y في (0, ${s.b})</span></div>`}},
+ motion:{tip:'اختر السرعة والزمن واضغط «شغّل». جرّب أيضًا السباق بين سيارتين',keepCtrls:1,
+  init:p=>({v:p.v??10,t:p.t??5,now:p.t??5,race:0,v2:6}),
+  ctrls:s=>`<div class="ctrls">${slider('v','سرعة السيارة البنفسجية (م/ث)',1,30,1,s.v)}${s.race?slider('v2','سرعة السيارة البرتقالية (م/ث)',1,30,1,s.v2):''}${slider('t','الزمن (ث)',1,10,1,s.t)}</div><div class="row" style="margin-top:6px"><button data-act="play" class="btn-p">▶ شغّل</button><button data-act="race">${s.race?'سيارة واحدة':'سباق: سيارتان'}</button></div>`,
   onIn:s=>{s.now=s.t},
-  act(s,a){if(a!=='play')return;if(reduceMotion()){s.now=s.t;return}s.now=0;const t0=performance.now(),dur=s.t*400;const step=ts=>{if(!LAB||LAB.st!==s)return;s.now=Math.min(s.t,(ts-t0)/dur*s.t);const o=$('labOut');if(o)o.innerHTML=LABS.motion.out(s);if(s.now<s.t)requestAnimationFrame(step)};requestAnimationFrame(step)},
-  out(s){const d=s.v*s.now,D=s.v*s.t,max=300,px=x=>20+Math.min(x,max)/max*330;
-   let ticks='';for(let m=0;m<=300;m+=50)ticks+=`<line x1="${px(m)}" y1="92" x2="${px(m)}" y2="100" style="stroke:var(--muted)"/><text x="${px(m)}" y="115" font-size="11" text-anchor="middle" class="svgmuted">${m}م</text>`;
-   const gx=t=>230+t*15,gy=x=>250-Math.min(x,300)/300*100;
-   return `<svg viewBox="0 0 400 265" role="img" aria-label="حركة السيارة">
-    <rect x="15" y="80" width="345" height="12" rx="6" style="fill:var(--line)"/>${ticks}
-    <g transform="translate(${px(d)-30},50)"><rect x="0" y="6" width="44" height="22" rx="6" style="fill:var(--r-d)"/><rect x="8" y="0" width="24" height="12" rx="4" style="fill:var(--r-d);opacity:.7"/><circle cx="10" cy="30" r="5" style="fill:var(--ink)"/><circle cx="34" cy="30" r="5" style="fill:var(--ink)"/></g>
-    <text x="20" y="160" font-size="14" class="svgtxt">الزمن الآن: ${s.now.toFixed(1)} ث</text><text x="20" y="184" font-size="14" class="svgtxt">المسافة: ${d.toFixed(0)} م</text><text x="20" y="208" font-size="12" class="svgmuted">${D>300?'المسار أطول من 300 م':''}</text>
-    <line x1="${gx(0)}" y1="250" x2="${gx(10)}" y2="250" style="stroke:var(--muted)"/><line x1="${gx(0)}" y1="250" x2="${gx(0)}" y2="145" style="stroke:var(--muted)"/>
-    <line x1="${gx(0)}" y1="250" x2="${gx(s.now)}" y2="${gy(d)}" style="stroke:var(--r-a)" stroke-width="3"/>
-    <text x="${gx(10)}" y="262" font-size="10" text-anchor="end" class="svgmuted">زمن</text><text x="${gx(0)+4}" y="152" font-size="10" class="svgmuted">مسافة</text></svg>
-    <div class="formula" style="font-size:1.25em">${paint(`d = ${s.v} × ${s.t} = ${D}`,{auto:1})}</div>`}},
- newton:{tip:'غيّر القوة والكتلة وشاهد التسارع',keepCtrls:1,
-  init:p=>({F:p.F??10,m:p.m??2}),
-  ctrls:s=>`<div class="ctrls">${slider('F','القوة F (نيوتن)',0,50,1,s.F)}${slider('m','الكتلة m (كغ)',1,20,1,s.m)}</div>`,
-  out(s){const a=s.F/s.m,box=26+s.m*3,arrow=s.F*4;
+  act(s,a){if(a==='race'){s.race=1-s.race;s.now=s.t;return 'full'}if(a!=='play')return;s.now=0;animate(s.t*450,p=>{s.now=p*s.t;outLab(s)},()=>{s.now=s.t;outLab(s)});return 'noop'},
+  out(s){const max=300,px=x=>20+Math.min(x,max)/max*330,car=(x,y,col)=>`<g transform="translate(${px(x)-30},${y})"><rect x="0" y="6" width="44" height="22" rx="6" style="fill:var(${col})"/><rect x="8" y="0" width="24" height="12" rx="4" style="fill:var(${col});opacity:.7"/><circle cx="10" cy="30" r="5" style="fill:var(--ink)"/><circle cx="34" cy="30" r="5" style="fill:var(--ink)"/></g>`;
+   const d1=s.v*s.now,d2=s.v2*s.now;let ticks='';for(let m=0;m<=300;m+=50)ticks+=`<line x1="${px(m)}" y1="${s.race?132:92}" x2="${px(m)}" y2="${s.race?140:100}" style="stroke:var(--muted)"/><text x="${px(m)}" y="${s.race?154:115}" font-size="11" text-anchor="middle" class="svgmuted">${m}م</text>`;
+   const gx=t=>232+t*15,gy=x=>(s.race?285:250)-Math.min(x,300)/300*95,gy0=s.race?285:250;
+   const H=s.race?300:265;
+   return `<svg viewBox="0 0 400 ${H}" role="img" aria-label="حركة السيارات">
+    <rect x="15" y="80" width="345" height="12" rx="6" style="fill:var(--line)"/>${car(d1,50,'--r-d')}
+    ${s.race?`<rect x="15" y="120" width="345" height="12" rx="6" style="fill:var(--line)"/>${car(d2,90,'--r-b')}`:''}${ticks}
+    <text x="20" y="${s.race?185:150}" font-size="14" class="svgtxt">الزمن: ${s.now.toFixed(1)} ث</text>
+    <text x="20" y="${s.race?207:172}" font-size="14" style="fill:var(--r-d)">المسافة: ${d1.toFixed(0)} م</text>
+    ${s.race?`<text x="20" y="229" font-size="14" style="fill:var(--r-b)">المسافة: ${d2.toFixed(0)} م</text>${s.now>=s.t&&s.v!==s.v2?`<text x="20" y="253" font-size="13" class="svgtxt">${s.v>s.v2?'البنفسجية':'البرتقالية'} أسرع بـ ${Math.abs(s.v-s.v2)} م/ث</text>`:''}`:''}
+    <line x1="${gx(0)}" y1="${gy0}" x2="${gx(10)}" y2="${gy0}" style="stroke:var(--muted)"/><line x1="${gx(0)}" y1="${gy0}" x2="${gx(0)}" y2="${gy0-105}" style="stroke:var(--muted)"/>
+    <line x1="${gx(0)}" y1="${gy0}" x2="${gx(s.now)}" y2="${gy(d1)}" style="stroke:var(--r-d)" stroke-width="3"/>${s.race?`<line x1="${gx(0)}" y1="${gy0}" x2="${gx(s.now)}" y2="${gy(d2)}" style="stroke:var(--r-b)" stroke-width="3"/>`:''}
+    <text x="${gx(10)}" y="${gy0+12}" font-size="10" text-anchor="end" class="svgmuted">زمن</text><text x="${gx(0)+4}" y="${gy0-98}" font-size="10" class="svgmuted">مسافة</text></svg>
+    <div class="formula" style="font-size:1.2em">${paint(`d = ${s.v} × ${s.t} = ${s.v*s.t}`,{auto:1})}</div>`}},
+ newton:{tip:'غيّر القوة والكتلة، ثم اضغط «ادفع» وشاهد الصندوق يتسارع',keepCtrls:1,
+  init:p=>({F:p.F??10,m:p.m??2,tt:0}),
+  ctrls:s=>`<div class="ctrls">${slider('F','القوة F (نيوتن)',0,50,1,s.F)}${slider('m','الكتلة m (كغ)',1,20,1,s.m)}</div><div class="row" style="margin-top:6px"><button class="btn-p" data-act="push">▶ ادفع الصندوق</button></div>`,
+  onIn:s=>{s.tt=0},
+  act(s,a){if(a!=='push')return;s.tt=0;animate(2600,p=>{s.tt=3*p;outLab(s)},()=>{s.tt=3;outLab(s)});return 'noop'},
+  out(s){const a=s.F/s.m,box=26+s.m*3,dist=Math.min(250,0.5*a*s.tt*s.tt*5),bx=80+dist,v=a*s.tt,arrow=s.F*3;
+   const moving=s.tt>0&&s.tt<3&&a>0;
    return `<svg viewBox="0 0 400 190" role="img" aria-label="صندوق تدفعه قوة"><rect x="10" y="150" width="380" height="6" rx="3" style="fill:var(--line)"/>
-    <rect x="${250-box/2}" y="${150-box}" width="${box}" height="${box}" rx="6" style="fill:var(--r-b)"/><text x="250" y="${150-box/2+5}" text-anchor="middle" font-size="13" font-weight="700" style="fill:var(--surface)">${s.m} كغ</text>
-    ${s.F?`<line x1="${250-box/2-6-arrow}" y1="${150-box/2}" x2="${250-box/2-10}" y2="${150-box/2}" style="stroke:var(--r-d)" stroke-width="6"/><path d="M${250-box/2-4} ${150-box/2} l-12 -9 v18 z" style="fill:var(--r-d)"/><text x="${250-box/2-arrow/2-8}" y="${150-box/2-14}" text-anchor="middle" font-size="13" style="fill:var(--r-d)">${s.F} N</text>`:''}
-    <text x="20" y="30" font-size="13" class="svgmuted">التسارع</text><rect x="20" y="38" width="360" height="14" rx="7" style="fill:var(--surface)"/><rect x="20" y="38" width="${Math.min(360,a*14.4)}" height="14" rx="7" style="fill:var(--r-e)"/></svg>
-    <div class="formula" style="font-size:1.25em">${paint(`a = ${s.F} ÷ ${s.m} = ${fmt(+a.toFixed(2))} m/s²`,{auto:1})}</div>
-    <div class="readout" style="margin-top:8px"><span class="chip">بعد 3 ثوانٍ تصبح السرعة: ${fmt(+(a*3).toFixed(1))} م/ث</span></div>`}},
- atom:{tip:'أضف أو أزل بروتونات ونيوترونات وإلكترونات',
-  init:p=>({p:p.p??1,n:p.n??0,e:p.e??1}),
-  ctrls:s=>`<div class="ctrls">${['p:بروتونات p⁺','n:نيوترونات n⁰','e:إلكترونات e⁻'].map(x=>{const[k,l]=x.split(':');return `<div class="row" style="justify-content:space-between;background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:6px 10px"><span>${l}: <b>${s[k]}</b></span><span class="row" style="gap:4px"><button data-act="${k}-" aria-label="أزل">−</button><button data-act="${k}+" aria-label="أضف">+</button></span></div>`}).join('')}</div>`,
-  act(s,a){const k=a[0],d=a[1]==='+'?1:-1;const lim={p:[1,12],n:[0,14],e:[0,14]}[k];s[k]=Math.max(lim[0],Math.min(lim[1],s[k]+d))},
-  out(s){const ch=s.p-s.e;let nuc='';const parts=[];for(let i=0;i<Math.max(s.p,s.n);i++){if(i<s.p)parts.push('p');if(i<s.n)parts.push('n')}parts.forEach((t,i)=>{const ang=i*2.4,r=4.2*Math.sqrt(i);nuc+=`<circle cx="${(200+r*Math.cos(ang)*1.7).toFixed(1)}" cy="${(110+r*Math.sin(ang)*1.7).toFixed(1)}" r="7" style="fill:var(${t==='p'?'--r-f':'--r-c'})"/>`});
+    ${moving?[0,1,2].map(i=>`<line x1="${bx-box/2-18-i*10}" y1="${150-box/2-8+i*8}" x2="${bx-box/2-34-i*10-v}" y2="${150-box/2-8+i*8}" style="stroke:var(--muted);opacity:.6" stroke-width="2" stroke-linecap="round"/>`).join(''):''}
+    <rect x="${bx-box/2}" y="${150-box}" width="${box}" height="${box}" rx="6" style="fill:var(--r-b)"/><text x="${bx}" y="${150-box/2+5}" text-anchor="middle" font-size="13" font-weight="700" style="fill:var(--surface)">${s.m} كغ</text>
+    ${s.F?`<line x1="${bx-box/2-6-arrow}" y1="${150-box/2}" x2="${bx-box/2-10}" y2="${150-box/2}" style="stroke:var(--r-d)" stroke-width="6"/><path d="M${bx-box/2-4} ${150-box/2} l-12 -9 v18 z" style="fill:var(--r-d)"/><text x="${bx-box/2-arrow/2-8}" y="${150-box/2-14}" text-anchor="middle" font-size="13" style="fill:var(--r-d)">${s.F} N</text>`:''}
+    <text x="20" y="22" font-size="12" class="svgmuted">التسارع</text><rect x="20" y="28" width="170" height="12" rx="6" style="fill:var(--surface)"/><rect x="20" y="28" width="${Math.min(170,a*6.8)}" height="12" rx="6" style="fill:var(--r-e)"/>
+    <text x="210" y="22" font-size="12" class="svgmuted">السرعة الآن</text><rect x="210" y="28" width="170" height="12" rx="6" style="fill:var(--surface)"/><rect x="210" y="28" width="${Math.min(170,v*2.3)}" height="12" rx="6" style="fill:var(--r-a)"/></svg>
+    <div class="formula" style="font-size:1.2em">${paint(`a = ${s.F} ÷ ${s.m} = ${fmt(+a.toFixed(2))} m/s²`,{auto:1})}</div>
+    <div class="readout" style="margin-top:8px"><span class="chip">الزمن: ${s.tt.toFixed(1)} ث</span><span class="chip" style="color:var(--r-a)">السرعة: ${fmt(+v.toFixed(1))} م/ث</span><span class="chip">كل ثانية تزيد السرعة ${fmt(+a.toFixed(2))} م/ث</span></div>`}},
+ atom:{tip:'أضف أو أزل جسيمات، وشاهد الإلكترونات تدور حول النواة',
+  init:p=>({p:p.p??1,n:p.n??0,e:p.e??1,spin:true,last:null}),
+  ctrls:s=>`<div class="ctrls">${['p:بروتونات p⁺','n:نيوترونات n⁰','e:إلكترونات e⁻'].map(x=>{const[k,l]=x.split(':');return `<div class="row" style="justify-content:space-between;background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:6px 10px"><span>${l}: <b>${s[k]}</b></span><span class="row" style="gap:4px"><button data-act="${k}-" aria-label="أزل">−</button><button data-act="${k}+" aria-label="أضف">+</button></span></div>`}).join('')}</div><div class="row" style="margin-top:6px"><button data-act="spin">${s.spin?'⏸ أوقف الدوران':'▶ شغّل الدوران'}</button></div>`,
+  act(s,a){if(a==='spin'){s.spin=!s.spin;return}const k=a[0],d=a[1]==='+'?1:-1;const lim={p:[1,12],n:[0,14],e:[0,14]}[k];const nv=Math.max(lim[0],Math.min(lim[1],s[k]+d));s.last=nv!==s[k]?k+(d>0?'+':'-'):null;s[k]=nv},
+  out(s){const ch=s.p-s.e;let nuc='';const parts=[];for(let i=0;i<Math.max(s.p,s.n);i++){if(i<s.p)parts.push('p');if(i<s.n)parts.push('n')}
+   const lastIdx=s.last==='p+'?parts.lastIndexOf('p'):s.last==='n+'?parts.lastIndexOf('n'):-1;
+   parts.forEach((t,i)=>{const ang=i*2.4,r=4.2*Math.sqrt(i);nuc+=`<circle class="${i===lastIdx?'popin':''}" cx="${(200+r*Math.cos(ang)*1.7).toFixed(1)}" cy="${(110+r*Math.sin(ang)*1.7).toFixed(1)}" r="7" style="fill:var(${t==='p'?'--r-f':'--r-c'});transform-box:fill-box;transform-origin:center"/>`});
    const shells=[[2,55],[8,85],[8,112]];let el='',left=s.e,orb='';
-   shells.forEach(([cap,R],si)=>{const k=Math.min(cap,left);left-=k;if(si===0||k>0||s.e>shells.slice(0,si).reduce((a,b)=>a+b[0],0))orb+=`<circle cx="200" cy="110" r="${R}" style="fill:none;stroke:var(--line)" stroke-width="1.5" stroke-dasharray="4 4"/>`;for(let i=0;i<k;i++){const ang=i/k*Math.PI*2-Math.PI/2;el+=`<circle cx="${(200+R*Math.cos(ang)).toFixed(1)}" cy="${(110+R*Math.sin(ang)).toFixed(1)}" r="6" style="fill:var(--r-a)"/>`}});
+   shells.forEach(([cap,R],si)=>{const k=Math.min(cap,left);left-=k;if(si===0||k>0)orb+=`<circle cx="200" cy="110" r="${R}" style="fill:none;stroke:var(--line)" stroke-width="1.5" stroke-dasharray="4 4"/>`;let g='';for(let i=0;i<k;i++){const ang=i/k*Math.PI*2-Math.PI/2;g+=`<circle cx="${(200+R*Math.cos(ang)).toFixed(1)}" cy="${(110+R*Math.sin(ang)).toFixed(1)}" r="6" style="fill:var(--r-a)"/>`}if(g)el+=`<g class="${s.spin?'orbit':''}" style="animation-duration:${6+si*4}s;${si%2?'animation-direction:reverse;':''}">${g}</g>`});
    return `<svg viewBox="0 0 400 225" role="img" aria-label="نموذج الذرة">${orb}${nuc}${el}</svg>
    <div class="readout"><span class="chip"><b>${esc(ELEM[s.p])}</b></span><span class="chip">العدد الذري: ${s.p}</span><span class="chip">العدد الكتلي: ${s.p+s.n}</span><span class="chip ${ch===0?'good':'warn'}">${ch===0?'ذرة متعادلة':ch>0?'أيون موجب +'+ch:'أيون سالب '+ch}</span></div>
    <div class="legend"><span><i style="background:var(--r-f);border-radius:50%"></i>بروتون +</span><span><i style="background:var(--r-c);border-radius:50%"></i>نيوترون</span><span><i style="background:var(--r-a);border-radius:50%"></i>إلكترون −</span></div>`}},
- ph:{tip:'حرّك المؤشر وشاهد اللون والمثال',keepCtrls:1,
-  init:p=>({ph:p.ph??7}),
-  ctrls:s=>`<div class="ctrls">${slider('ph','قيمة pH',0,14,1,s.ph)}</div>`,
-  out(s){const cat=s.ph<7?'حمضي':s.ph>7?'قاعدي':'متعادل';
-   return `<svg viewBox="0 0 400 150" role="img" aria-label="مقياس pH">${PHC.map((c,i)=>`<rect x="${10+i*25.3}" y="20" width="25.3" height="36" fill="${c}" style="fill:${c}"/><text x="${22.6+i*25.3}" y="74" text-anchor="middle" font-size="11" class="svgmuted">${i}</text>`).join('')}
-    <path d="M${22.6+s.ph*25.3} 16 l-9 -12 h18 z" style="fill:var(--ink)"/>
-    <text x="10" y="98" font-size="12" class="svgmuted">حمضي</text><text x="200" y="98" font-size="12" text-anchor="middle" class="svgmuted">متعادل</text><text x="390" y="98" font-size="12" text-anchor="end" class="svgmuted">قاعدي</text>
-    <rect x="130" y="108" width="140" height="36" rx="18" style="fill:${PHC[s.ph]}"/><text x="200" y="131" text-anchor="middle" font-size="14" font-weight="700" style="fill:${s.ph>=3&&s.ph<=8?'#1A1A1A':'#FFFFFF'}">pH ${s.ph}</text></svg>
+ ph:{tip:'أضف قطرات حمض أو قاعدة وشاهد لون المحلول يتغيّر',
+  init:p=>({ph:p.ph??7,drop:null}),
+  ctrls:s=>`<div class="ctrls">${slider('ph','قيمة pH',0,14,1,s.ph)}</div><div class="row" style="margin-top:6px"><button data-act="acid" style="border-color:#D7263D">أضف قطرة حمض</button><button data-act="base" style="border-color:#3D5BB5">أضف قطرة قاعدة</button><button data-act="water" class="btn-ghost">أضف ماء</button></div>`,
+  onIn:()=>{},
+  act(s,a){if(s.drop)return 'noop';const to=a==='acid'?Math.max(0,s.ph-1):a==='base'?Math.min(14,s.ph+1):s.ph+(s.ph<7?1:s.ph>7?-1:0);const col=a==='acid'?'#D7263D':a==='base'?'#3D5BB5':'#7FB7E6';
+   s.drop={p:0,col};animate(800,p=>{s.drop.p=p;outLab(s)},()=>{s.drop=null;s.ph=to;relab(s)});return 'noop'},
+  out(s){const cat=s.ph<7?'حمضي':s.ph>7?'قاعدي':'متعادل',c=PHC[s.ph],dp=s.drop?s.drop.p:0;
+   const dy=s.drop?20+dp*dp*120:0,splash=s.drop&&dp>.85;
+   return `<svg viewBox="0 0 400 230" role="img" aria-label="مقياس pH">
+    ${PHC.map((cc,i)=>`<rect x="${10+i*25.3}" y="10" width="25.3" height="26" style="fill:${cc}"/><text x="${22.6+i*25.3}" y="50" text-anchor="middle" font-size="11" class="svgmuted">${i}</text>`).join('')}
+    <path d="M${22.6+s.ph*25.3} 8 l-8 -8 h16 z" style="fill:var(--ink)"/>
+    <path d="M150 90 v110 q0 20 20 20 h60 q20 0 20 -20 v-110" style="fill:none;stroke:var(--muted)" stroke-width="3"/>
+    <rect x="152" y="130" width="96" height="88" rx="8" style="fill:${c};opacity:.85"/>
+    ${s.drop&&!splash?`<path d="M200 ${60+dy-10} q-7 10 0 16 q7 -6 0 -16z" style="fill:${s.drop.col}" transform="translate(0,0)"/>`:''}
+    ${splash?[0,1,2,3].map(i=>`<circle cx="${186+i*9}" cy="${126-(dp-.85)*90*(i%2?1:.6)}" r="3" style="fill:${s.drop.col}"/>`).join(''):''}
+    <text x="200" y="182" text-anchor="middle" font-size="16" font-weight="700" style="fill:${s.ph>=3&&s.ph<=8?'#1A1A1A':'#FFFFFF'}">pH ${s.ph}</text>
+    <text x="40" y="150" font-size="12" class="svgmuted">حمضي ←</text><text x="360" y="150" font-size="12" text-anchor="end" class="svgmuted">→ قاعدي</text></svg>
     <div class="readout"><span class="chip ${s.ph===7?'good':'warn'}">${cat}</span><span class="chip">مثال: ${PHX[s.ph]}</span></div>`}},
- cell:{tip:'اضغط على جزء لتعرف اسمه ووظيفته، أو العب "ابحث عن"',
-  init:p=>({type:p.type||'animal',sel:p.sel||null,quiz:null,qmsg:''}),
-  ctrls:s=>`<div class="row"><div class="seg"><button data-act="animal" aria-pressed="${s.type==='animal'}">خلية حيوانية</button><button data-act="plant" aria-pressed="${s.type==='plant'}">خلية نباتية</button></div><button data-act="quiz">العب: ابحث عن…</button></div>`,
-  act(s,a,b){
+ cell:{tip:'اضغط على جزء: يكبر وترى اسمه ووظيفته. أو العب «ابحث عن»',
+  init:p=>({type:p.type||'animal',sel:p.sel||null,quiz:null,qmsg:'',zoom:true}),
+  ctrls:s=>`<div class="row"><div class="seg"><button data-act="animal" aria-pressed="${s.type==='animal'}">خلية حيوانية</button><button data-act="plant" aria-pressed="${s.type==='plant'}">خلية نباتية</button></div><button data-act="quiz">العب: ابحث عن…</button><button data-act="whole" class="btn-ghost">اعرض الخلية كاملة</button></div>`,
+  act(s,a){
    if(a==='animal'||a==='plant'){s.type=a;s.sel=null;s.quiz=null;s.qmsg='';return}
-   if(a==='quiz'){const keys=Object.keys(ORG).filter(k=>s.type==='plant'||!['wall','chloro'].includes(k));s.quiz=keys[Math.floor(Math.random()*keys.length)];s.qmsg='';s.sel=null;return}
-   if(a.startsWith('o:')){const k=a.slice(2);s.sel=k;if(s.quiz){if(k===s.quiz){s.qmsg='good';s.quiz=null}else s.qmsg='no'}}
-  },
+   if(a==='quiz'){const keys=Object.keys(ORG).filter(k=>s.type==='plant'||!['wall','chloro'].includes(k));s.quiz=keys[Math.floor(Math.random()*keys.length)];s.qmsg='';const prev=s.sel;s.sel=null;LABS.cell.zoomTo(s,prev,null);return 'noop'}
+   if(a==='whole'){const prev=s.sel;s.sel=null;LABS.cell.zoomTo(s,prev,null);return 'noop'}
+   if(a.startsWith('o:')){const k=a.slice(2),prev=s.sel;s.sel=k;if(s.quiz){if(k===s.quiz){s.qmsg='good';s.quiz=null}else s.qmsg='no'}LABS.cell.zoomTo(s,prev,k);return 'noop'}},
+  zoomTo(s,from,to){s.zfrom=from;outLab(s);requestAnimationFrame(()=>requestAnimationFrame(()=>{const g=document.querySelector('#labOut .zoomg');if(g)g.style.transform=cellTf(s,to)}))},
   out(s){const P=s.type==='plant';
-   const sty=(k,fill,stroke,w)=>` style="fill:${fill};stroke:${s.sel===k?'var(--focus)':stroke};cursor:pointer" stroke-width="${s.sel===k?4.5:w}"`;
+   const sty=(k,fill,stroke,w)=>` class="${s.sel===k?'pulse':''}" style="fill:${fill};stroke:${s.sel===k?'var(--focus)':stroke};cursor:pointer" stroke-width="${s.sel===k?4.5:w}"`;
    const g=(k,shape)=>`<g data-act="o:${k}" role="button" aria-label="${ORG[k][0]}">${shape}</g>`;
    const tint=(v,p)=>`color-mix(in srgb,var(${v}) ${p}%,var(--surface))`;
    const ribs=[[110,80],[130,170],[285,165],[300,75],[160,195],[250,50],[95,130]].map(([x,y])=>`<circle cx="${x}" cy="${y}" r="5"${sty('ribo','var(--r-c)','var(--r-c)',1)}/>`).join('');
    const outer=P?`<rect x="57" y="32" width="286" height="176" rx="10"`:`<ellipse cx="200" cy="120" rx="165" ry="100"`;
-   const shapes=
-    (P?g('wall',`<rect x="45" y="20" width="310" height="200" rx="14"${sty('wall',tint('--r-e',35),'var(--r-e)',2)}/>`):'')+
+   const shapes=(P?g('wall',`<rect x="45" y="20" width="310" height="200" rx="14"${sty('wall',tint('--r-e',35),'var(--r-e)',2)}/>`):'')+
     g('cyto',`${outer}${sty('cyto',tint('--r-a',9),'transparent',0)}/>`)+
     g('membrane',`${outer} style="fill:none;stroke:${s.sel==='membrane'?'var(--focus)':'var(--r-a)'};cursor:pointer;pointer-events:stroke" stroke-width="${s.sel==='membrane'?7:5}"/>`)+
     (P?g('vac',`<rect x="215" y="55" width="110" height="105" rx="40"${sty('vac',tint('--r-a',24),'var(--r-a)',1.5)}/>`):g('vac',`<ellipse cx="270" cy="150" rx="22" ry="15"${sty('vac',tint('--r-a',24),'var(--r-a)',1.5)}/>`))+
     g('nucleus',`<circle cx="${P?140:175}" cy="110" r="36"${sty('nucleus',tint('--r-d',30),'var(--r-d)',2)}/><circle cx="${P?140:175}" cy="110" r="11" style="fill:var(--r-d);cursor:pointer"/>`)+
     g('mito',`<ellipse cx="${P?115:265}" cy="${P?178:90}" rx="26" ry="12"${sty('mito',tint('--r-b',40),'var(--r-b)',2)}/><path d="M${P?95:245} ${P?178:90} q6 -8 10 0 t10 0 t10 0 t10 0" style="fill:none;stroke:var(--r-b);pointer-events:none" stroke-width="1.5"/>`)+
-    (P?g('chloro',[[90,60],[300,185],[195,185]].map(([x,y])=>`<ellipse cx="${x}" cy="${y}" rx="20" ry="11"${sty('chloro','var(--r-e)','var(--r-e)',1)}/>`).join('')):'')+
-    g('ribo',ribs);
+    (P?g('chloro',[[90,60],[300,185],[195,185]].map(([x,y])=>`<ellipse cx="${x}" cy="${y}" rx="20" ry="11"${sty('chloro','var(--r-e)','var(--r-e)',1)}/>`).join('')):'')+g('ribo',ribs);
    const info=s.sel?ORG[s.sel]:null;
-   return `<svg viewBox="0 0 400 240" role="img" aria-label="رسم الخلية">${shapes}</svg>
-    ${s.quiz?`<div class="notice">ابحث عن: <b>${ORG[s.quiz][0]}</b> واضغط عليه.${s.qmsg==='no'?' <span style="color:var(--bad)">ليس هذا. جرّب جزءًا آخر.</span>':''}</div>`:s.qmsg==='good'?`<div class="notice good"><b>صحيح!</b> اضغط "ابحث عن…" لسؤال جديد.</div>`:''}
-    ${info?`<div class="notice"><b>${info[0]}:</b> ${info[1]}</div>`:'<div class="notice muted">اضغط على أي جزء في الخلية.</div>'}`}},
+   return `<svg viewBox="0 0 400 240" role="img" aria-label="رسم الخلية" style="overflow:hidden"><g class="zoomg" style="transform:${cellTf(s,s.zfrom!==undefined?s.zfrom:s.sel)}">${shapes}</g></svg>
+    ${s.quiz?`<div class="notice">ابحث عن: <b>${ORG[s.quiz][0]}</b> واضغط عليه.${s.qmsg==='no'?' <span style="color:var(--bad)">ليس هذا. جرّب جزءًا آخر.</span>':''}</div>`:s.qmsg==='good'?`<div class="notice good popin"><b>صحيح!</b> اضغط «ابحث عن…» لسؤال جديد.</div>`:''}
+    ${info?`<div class="notice popin"><b>${info[0]}:</b> ${info[1]}</div>`:'<div class="notice muted">اضغط على أي جزء في الخلية.</div>'}`}},
  sentence:{tip:'اضغط على كل كلمة لتختار دورها، ثم تحقّق',
-  init:p=>({i:p.i??0,pick:{},checked:false}),
+  init:p=>({i:p.i??0,pick:{},checked:false,bump:-1}),
   ctrls:s=>`<div class="row"><label style="flex-direction:row;align-items:center;gap:8px">الجملة: <select data-sel="1" aria-label="اختر جملة">${SENT.map((x,i)=>`<option value="${i}" ${i===s.i?'selected':''}>${x.w.map(w=>w[0]).join(' ')}</option>`).join('')}</select></label><button data-act="check" class="btn-p">تحقّق</button><button data-act="clear" class="btn-ghost">امسح</button></div>`,
-  act(s,a,b){if(a==='check')s.checked=true;else if(a==='clear'){s.pick={};s.checked=false}else if(a.startsWith('w:')){const k=+a.slice(2);const roles=[...new Set(SENT[s.i].w.map(w=>w[1]).concat(SENT[s.i].w[0][1]==='ناسخ'?[]:['فعل','فاعل','مبتدأ','خبر','مفعول به']))];const cur=s.pick[k];const idx=cur?roles.indexOf(cur):-1;s.pick[k]=roles[(idx+1)%roles.length];s.checked=false}},
+  act(s,a){s.bump=-1;if(a==='check')s.checked=true;else if(a==='clear'){s.pick={};s.checked=false}else if(a.startsWith('w:')){const k=+a.slice(2);const roles=[...new Set(SENT[s.i].w.map(w=>w[1]).concat(SENT[s.i].w[0][1]==='ناسخ'?[]:['فعل','فاعل','مبتدأ','خبر','مفعول به']))];const cur=s.pick[k];const idx=cur?roles.indexOf(cur):-1;s.pick[k]=roles[(idx+1)%roles.length];s.checked=false;s.bump=k}},
   after(s){const sel=document.querySelector('[data-sel]');if(sel)sel.onchange=e=>{s.i=+e.target.value;s.pick={};s.checked=false;renderLab()}},
   out(s){const w=SENT[s.i].w;let right=0;
-   const html=w.map((x,k)=>{const p=s.pick[k];const col=p?ROLECOL[p]:null;const ok=s.checked&&p===x[1];if(ok)right++;return `<button class="word ${col?'r r-'+col:''} ${s.checked?(ok?'ok':'no'):''}" data-act="w:${k}">${esc(x[0])}<small>${p?esc(p):'اضغط'}</small></button>`}).join('');
-   return `<div class="row" style="justify-content:center;gap:12px;padding:10px 0">${html}</div>${s.checked?`<div class="notice ${right===w.length?'good':'warn'}">${right===w.length?'كل الأدوار صحيحة.':`${right} من ${w.length} صحيحة. الكلمات ذات الإطار الأحمر تحتاج تغييرًا.`}</div>`:''}
+   const html=w.map((x,k)=>{const p=s.pick[k];const col=p?ROLECOL[p]:null;const ok=s.checked&&p===x[1];if(ok)right++;return `<button class="word ${col?'r r-'+col:''} ${s.checked?(ok?'ok bounce':'no shake'):''} ${s.bump===k?'popin':''}" style="animation-delay:${s.checked?k*90:0}ms" data-act="w:${k}">${esc(x[0])}<small>${p?esc(p):'اضغط'}</small></button>`}).join('');
+   return `<div class="row" style="justify-content:center;gap:12px;padding:10px 0">${html}</div>${s.checked?`<div class="notice ${right===w.length?'good':'warn'} popin">${right===w.length?'كل الأدوار صحيحة.':`${right} من ${w.length} صحيحة. الكلمات ذات الإطار الأحمر تحتاج تغييرًا.`}</div>`:''}
    <div class="legend"><span><i style="background:var(--r-d)"></i>فعل / ناسخ</span><span><i style="background:var(--r-a)"></i>فاعل / مبتدأ / اسم الناسخ</span><span><i style="background:var(--r-b)"></i>مفعول به</span><span><i style="background:var(--r-e)"></i>خبر</span></div>`}},
- cards:{tip:'اضغط على البطاقة لترى المعنى، واسمع النطق',
+ cards:{tip:'اضغط على البطاقة لتقلبها وترى المعنى، واسمع النطق',
   init:p=>({i:p.i??0,flip:false}),
   ctrls:()=>`<div class="row"><button data-act="prev">السابقة</button><button data-act="next">التالية</button><button data-act="say">اسمع بالعبرية</button></div>`,
-  act(s,a){if(a==='next'){s.i=(s.i+1)%CARDS.length;s.flip=false}else if(a==='prev'){s.i=(s.i-1+CARDS.length)%CARDS.length;s.flip=false}else if(a==='flip')s.flip=!s.flip;else if(a==='say')speak(CARDS[s.i][0],'he-IL')},
+  act(s,a,b){if(a==='next'){s.i=(s.i+1)%CARDS.length;s.flip=false}else if(a==='prev'){s.i=(s.i-1+CARDS.length)%CARDS.length;s.flip=false}else if(a==='flip'){s.flip=!s.flip;b.classList.toggle('on',s.flip);return 'noop'}else if(a==='say'){speak(CARDS[s.i][0],'he-IL');return 'noop'}},
   out(s){const c=CARDS[s.i],col=CARDCOL[c[3]];
-   return `<button class="flip" data-act="flip" style="border-color:var(--r-${col})" aria-label="اقلب البطاقة"><span class="chip r r-${col}">${c[3]}</span>${s.flip?`<span style="font-size:1.6em;font-weight:600">${esc(c[1])}</span><span class="muted">النطق: ${esc(c[2])}</span><span class="he" style="font-size:1.1em">${esc(c[0])}</span>`:`<span class="big he">${esc(c[0])}</span><span class="muted small">اضغط لترى المعنى</span>`}</button><div class="muted small" style="text-align:center;margin-top:6px">بطاقة ${s.i+1} من ${CARDS.length}</div>`}},
+   return `<button class="flip3 popin ${s.flip?'on':''}" data-act="flip" style="--fc:var(--r-${col});min-height:170px" aria-label="اقلب البطاقة"><span class="in" style="min-height:170px"><span class="f"><span class="chip r r-${col}">${c[3]}</span><span class="he" style="font-size:2.2em">${esc(c[0])}</span><span class="muted small">اضغط لتقلب</span></span><span class="b"><span style="font-size:1.6em;font-weight:600">${esc(c[1])}</span><span class="muted">النطق: ${esc(c[2])}</span><span class="he" style="font-size:1.1em">${esc(c[0])}</span></span></span></button><div class="muted small" style="text-align:center;margin-top:6px">بطاقة ${s.i+1} من ${CARDS.length}</div>`}},
  builder:{tip:'اختر الفاعل والفعل والزمن، وشاهد كيف تتغيّر الجملة',
   init:p=>({s:p.s||'I',v:p.v||'play',t:p.t||'pres',f:p.f||'+'}),
   ctrls:s=>{const seg=(k,arr)=>`<div class="seg ltr">${arr.map(([v,l])=>`<button data-act="${k}:${v}" aria-pressed="${s[k]===v}">${l}</button>`).join('')}</div>`;
@@ -1208,7 +1275,7 @@ const LABS={
     else{out.push(['Did','d']);out.push([s.s==='I'?'I':s.s.toLowerCase(),'a']);out.push([s.v,'b']);out.push(['?','c'])}
    }return out},
   out(s){const ps=LABS.builder.parts(s);const third=['He','She'].includes(s.s);
-   const html=ps.map(p=>p[1]==='c'?p[0]:`<span class="r r-${p[1]}">${esc(p[0])}</span>${p[2]?`<span class="r r-f">${esc(p[2])}</span>`:''}`).join(' ').replace(' ?','?');
+   const html=ps.map((p,i)=>p[1]==='c'?p[0]:`<span class="r r-${p[1]} popin" style="animation-delay:${i*120}ms">${esc(p[0])}</span>${p[2]?`<span class="r r-f popin" style="animation-delay:${i*120+260}ms">${esc(p[2])}</span>`:''}`).join(' ').replace(' ?','?');
    let rule='';if(s.t==='pres'){rule=s.f==='+'?(third?'مع He / She نضيف s (أو es / ies) للفعل.':'مع I / You / We / They الفعل بدون إضافة.'):s.f==='-'?(third?"مع He / She نستعمل doesn't والفعل بدون s.":"مع I / You / We / They نستعمل don't."):(third?'مع He / She يبدأ السؤال بـ Does.':'مع I / You / We / They يبدأ السؤال بـ Do.')}
    else{rule=s.f==='+'?(['go','eat'].includes(s.v)?`فعل غير منتظم: ${s.v} ← ${VERBS[s.v][1]}. يجب حفظه.`:'فعل منتظم: نضيف ed.'):s.f==='-'?"في النفي: didn't + الفعل الأصلي، لكل الفاعلين.":'في السؤال: Did + الفاعل + الفعل الأصلي.'}
    return `<div class="formula" style="font-size:1.6em">${html}${s.f!=='?'?'.':''}</div><div class="notice" style="margin-top:10px">${rule} <span class="muted">(${esc(VERBS[s.v][2])})</span></div><div class="row" style="margin-top:8px"><button data-act="say:1">اسمع الجملة</button></div>`}}

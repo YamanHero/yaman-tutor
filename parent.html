@@ -162,7 +162,7 @@ function draw(){
   const weak=rows.filter(r=>r.st[1]==='bad'||(r.l&&r.l.score<70));
   const claims=(S.claims||[]),pend=claims.filter(c=>!RW.given.includes(c.id));
   $('app').innerHTML=`
-  <header class="row between"><div><h1>${t('title')}</h1><div class="muted small">${t('last')}: ${esc(last)}</div></div><div class="row"><a class="go" href="/" target="_blank" rel="noopener">${t('open')}</a><button id="rf">${t('refresh')}</button><button id="lg">${t('lang')}</button></div></header>
+  <header class="row between"><div><h1>${t('title')}</h1><div class="muted small">${t('last')}: ${esc(last)}</div></div><div class="row"><a class="go" href="/" target="_blank" rel="noopener">${t('open')}</a><a class="go" href="https://heroyaman-new-production.up.railway.app/" target="_blank" rel="noopener">Hero Family</a><button id="rf">${t('refresh')}</button><button id="lg">${t('lang')}</button></div></header>
   <section class="stats">
    <a class="stat" href="/#achieve" target="_blank" style="--sc:#D49400"><b>${STAR} ${stars}</b>${t('level')}: ${LEVELS_AR[li]} · ${Object.keys(S.badges||{}).length} ${t('badges')}</a>
    <a class="stat" href="/#progress" target="_blank" style="--sc:var(--accent)"><b>${mins[today]||0}</b>${t('minToday')}</a>
