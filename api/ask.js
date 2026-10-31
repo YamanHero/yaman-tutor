@@ -12,11 +12,17 @@ export default async function handler(req, res) {
   const body = typeof req.body === 'string' ? JSON.parse(req.body) : req.body;
   const messages = Array.isArray(body?.messages) ? body.messages : [];
   const clean = messages
-    .filter(m => m && (m.role === 'user' || m.role === 'assistant') && typeof m.content === 'string')
+    .filter(m => m && (m.role === 'user' || m.role === 'assistant') && (typeof m.content === 'string' || Array.isArray(m.content)))
     .slice(-12)
-    .map(m => ({ role: m.role, content: m.content.slice(0, 20000) }));
+    .map(m => ({
+      role: m.role,
+      content: typeof m.content === 'string' ? m.content.slice(0, 30000) : m.content.slice(0, 6).map(c =>
+        c && c.type === 'image' && c.source?.type === 'base64' && /^image\/(jpeg|png|webp)$/.test(c.source.media_type)
+          ? { type: 'image', source: { type: 'base64', media_type: c.source.media_type, data: String(c.source.data).slice(0, 3_000_000) } }
+          : { type: 'text', text: String(c?.text || '').slice(0, 30000) }),
+    }));
   if (!clean.length || clean[clean.length - 1].role !== 'user') return res.status(400).json({ code: 'bad_request' });
-  const max = Math.min(Math.max(Number(body.max) || 900, 100), 3000);
+  const max = Math.min(Math.max(Number(body.max) || 900, 100), 8000);
 
   try {
     const r = await fetch('https://api.anthropic.com/v1/messages', {
