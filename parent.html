@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<title>מעקב הורים – יאמן</title>
+<title>متابعة الأهل | מעקב הורים</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Readex+Pro:wght@400;500;600;700&family=Noto+Sans+Hebrew:wght@400;600;700&display=swap">
@@ -62,66 +62,122 @@ table{border-collapse:collapse;width:100%;font-size:.92em}th,td{text-align:start
 .login{max-width:420px;margin:12vh auto;display:flex;flex-direction:column;gap:12px;text-align:center}
 .login input{border:1.5px solid var(--line);border-radius:12px;padding:.55em;text-align:center;font-size:1.15em;background:var(--surface)}
 .notice{padding:10px 14px;border-radius:12px;background:var(--warn-bg)}
+a{color:var(--accent)} a.lnk{text-decoration:none;color:inherit;border-bottom:1.5px dashed color-mix(in srgb,var(--accent) 60%,transparent)} a.lnk:hover{color:var(--accent)}
+a.go{display:inline-flex;align-items:center;gap:4px;font-size:.82em;padding:2px 10px;border-radius:20px;border:1px solid var(--line);text-decoration:none;color:var(--accent);background:var(--surface);white-space:nowrap}
+a.go:hover{border-color:var(--accent)}
+a.stat{text-decoration:none;color:inherit;display:block} a.stat:hover{border-color:var(--sc,var(--accent))}
+.seg{display:inline-flex;border:1.5px solid var(--line);border-radius:12px;overflow:hidden}.seg button{border:0;border-radius:0;min-height:36px}.seg button[aria-pressed="true"]{background:var(--accent);color:var(--accent-ink)}
+.rw{display:grid;grid-template-columns:minmax(0,1fr) 110px auto;gap:8px;align-items:center;margin-bottom:6px}.rw input{border:1.5px solid var(--line);border-radius:10px;padding:.4em .6em;background:var(--surface);min-width:0}
+@media(max-width:520px){.rw{grid-template-columns:minmax(0,1fr) 80px auto}}
+
 :focus-visible{outline:3px solid var(--focus);outline-offset:2px}
 </style>
 </head>
 <body>
 <main class="wrap" id="app"></main>
 <script>
-const META={"topics":[{"id":"linear","s":"math","n":"المعادلة الخطية"},{"id":"linfunc","s":"math","n":"الدالة الخطية والميل"},{"id":"quadratic","s":"math","n":"المعادلة التربيعية"},{"id":"probability","s":"math","n":"الاحتمالات"},{"id":"motion","s":"phys","n":"الحركة المنتظمة والسرعة"},{"id":"newton","s":"phys","n":"قانون نيوتن الثاني"},{"id":"atom","s":"chem","n":"الذرّة ومكوّناتها"},{"id":"ph","s":"chem","n":"الحموض والقواعد (pH)"},{"id":"cell","s":"bio","n":"الخلية وعضيّاتها"},{"id":"sentence","s":"ar","n":"الجملة الاسمية والفعلية"},{"id":"kana","s":"ar","n":"كان وإنّ وأخواتهما"},{"id":"he_basic","s":"he","n":"משפט פשוט – جملة بسيطة"},{"id":"he_past","s":"he","n":"זמן עבר – الماضي بالعبرية"},{"id":"en_present","s":"en","n":"Present Simple – المضارع البسيط"},{"id":"en_past","s":"en","n":"Past Simple – الماضي البسيط"}],"subj":[{"id":"math","n":"מתמטיקה","c":"--s-math"},{"id":"phys","n":"פיזיקה","c":"--s-phys"},{"id":"chem","n":"כימיה","c":"--s-chem"},{"id":"bio","n":"ביולוגיה","c":"--s-bio"},{"id":"ar","n":"ערבית","c":"--s-ar"},{"id":"he","n":"עברית","c":"--s-he"},{"id":"en","n":"אנגלית","c":"--s-en"}]};
-const LS='yaman_parent_code';
-let CODE='';try{CODE=localStorage.getItem(LS)||''}catch(e){}
+const META={"topics": [{"id": "linear", "s": "math", "n": "المعادلة الخطية"}, {"id": "linfunc", "s": "math", "n": "الدالة الخطية والميل"}, {"id": "quadratic", "s": "math", "n": "المعادلة التربيعية"}, {"id": "probability", "s": "math", "n": "الاحتمالات"}, {"id": "motion", "s": "phys", "n": "الحركة المنتظمة والسرعة"}, {"id": "newton", "s": "phys", "n": "قانون نيوتن الثاني"}, {"id": "atom", "s": "chem", "n": "الذرّة ومكوّناتها"}, {"id": "ph", "s": "chem", "n": "الحموض والقواعد (pH)"}, {"id": "cell", "s": "bio", "n": "الخلية وعضيّاتها"}, {"id": "sentence", "s": "ar", "n": "الجملة الاسمية والفعلية"}, {"id": "kana", "s": "ar", "n": "كان وإنّ وأخواتهما"}, {"id": "he_basic", "s": "he", "n": "משפט פשוט – جملة بسيطة"}, {"id": "he_past", "s": "he", "n": "זמן עבר – الماضي بالعبرية"}, {"id": "en_present", "s": "en", "n": "Present Simple – المضارع البسيط"}, {"id": "en_past", "s": "en", "n": "Past Simple – الماضي البسيط"}], "subj": [{"id": "math", "c": "--s-math", "he": "מתמטיקה", "ar": "الرياضيات"}, {"id": "phys", "c": "--s-phys", "he": "פיזיקה", "ar": "الفيزياء"}, {"id": "chem", "c": "--s-chem", "he": "כימיה", "ar": "الكيمياء"}, {"id": "bio", "c": "--s-bio", "he": "ביולוגיה", "ar": "الأحياء"}, {"id": "ar", "c": "--s-ar", "he": "ערבית", "ar": "العربية"}, {"id": "he", "c": "--s-he", "he": "עברית", "ar": "العبرية"}, {"id": "en", "c": "--s-en", "he": "אנגלית", "ar": "الإنجليزية"}]};
+const STAR='<svg viewBox="0 0 24 24" style="width:1.1em;height:1.1em;fill:#D49400;vertical-align:-.18em" aria-hidden="true"><path d="M12 2.6l2.85 5.95 6.55.88-4.78 4.55 1.2 6.5L12 17.33l-5.82 3.15 1.2-6.5L2.6 9.43l6.55-.88z"/></svg>';
+const LEVELS_AR=['مبتدئ','مستكشف','مثابر','باحث','متمكّن','خبير','بطل التعلّم','نجم الصف','نجم المدرسة','أستاذ المستقبل'],LV=[0,60,160,320,540,820,1160,1560,2020,2540];
+const I={he:{
+ title:'מעקב הורים – יאמן',login:'הכנס את קוד המשפחה של אפליקציית הלימוד של יאמן.',code:'קוד משפחה',enter:'כניסה',bad:'הקוד שגוי.',loading:'טוען נתונים…',fail:'לא הצלחתי לטעון את הנתונים. בדוק חיבור ונסה שוב.',retry:'נסה שוב',
+ last:'פעילות אחרונה',none:'עדיין אין פעילות',open:'פתח את אפליקציית הלימוד',refresh:'רענון',
+ minToday:'דקות למידה היום',minWeek:'דקות השבוע',lessons:'שיעורים שהושלמו',avgWeek:'ממוצע מבחנים השבוע',review:'שאלות לחזרה היום',of:'מתוך',stars:'כוכבים',level:'רמה',badges:'אותות',
+ weak:'נושאים שכדאי לחזק',weakHint:'לחיצה פותחת מבחן תרגול בנושא',week:'דקות למידה ב־7 הימים האחרונים',scores:'ציוני המבחנים האחרונים',pink:'נקודה ורודה = מבחן חזרה',noEx:'עוד אין מבחנים.',
+ bySubj:'לפי מקצוע',less:'שיעורים',acc:'דיוק במבחנים',all:'כל הנושאים',topic:'נושא',subj:'מקצוע',lscore:'ציון שיעור',state:'מצב',actions:'מעבר',
+ st:['לא התחיל','למד את השיעור','שולט','בדרך','צריך חיזוק'],toLesson:'שיעור',toExam:'מבחן',toLearn:'שיעורים',
+ recent:'מבחנים אחרונים',date:'תאריך',type:'סוג',score:'ציון',right:'נכונות',time:'זמן',types:['חזרה','מבחן','תרגול'],seeAns:'תשובות',
+ rewards:'פרסים',rwHint:'יאמן צובר כוכבים ויכול לבקש פרס כשיש לו מספיק. שמות הפרסים יוצגו לו כפי שתכתוב אותם (מומלץ בערבית).',rwName:'שם הפרס',rwCost:'כוכבים',add:'הוסף',del:'מחק',save:'שמור פרסים',saved:'נשמר',suggest:'הוסף הצעות',
+ claims:'בקשות של יאמן',noClaims:'אין בקשות כרגע.',give:'סמן שניתן',given:'ניתן',pending:'ממתין',
+ sumApi:'כתובת לסיכום יומי עבור אפליקציות אחרות (למשל Hero Family):',lang:'العربية'},
+ar:{
+ title:'متابعة الأهل – يمان',login:'اكتب رمز العائلة لتطبيق التعلّم الخاص بيمان.',code:'رمز العائلة',enter:'دخول',bad:'الرمز غير صحيح.',loading:'جارٍ تحميل البيانات…',fail:'لم أستطع تحميل البيانات. تأكّد من الاتصال وجرّب مرة أخرى.',retry:'جرّب مرة أخرى',
+ last:'آخر نشاط',none:'لا يوجد نشاط بعد',open:'افتح تطبيق التعلّم',refresh:'تحديث',
+ minToday:'دقائق تعلّم اليوم',minWeek:'دقائق هذا الأسبوع',lessons:'دروس مكتملة',avgWeek:'معدّل امتحانات الأسبوع',review:'أسئلة مراجعة اليوم',of:'من',stars:'نجمة',level:'المستوى',badges:'أوسمة',
+ weak:'مواضيع تحتاج تقوية',weakHint:'الضغط يفتح امتحانًا تدريبيًا في الموضوع',week:'دقائق التعلّم في آخر 7 أيام',scores:'علامات آخر الامتحانات',pink:'النقطة الوردية = امتحان مراجعة',noEx:'لا توجد امتحانات بعد.',
+ bySubj:'حسب المادة',less:'دروس',acc:'دقّة الامتحانات',all:'كل المواضيع',topic:'الموضوع',subj:'المادة',lscore:'علامة الدرس',state:'الحالة',actions:'انتقال',
+ st:['لم يبدأ','تعلّم الدرس','متمكّن','في الطريق','يحتاج تقوية'],toLesson:'الدرس',toExam:'امتحان',toLearn:'الدروس',
+ recent:'آخر الامتحانات',date:'التاريخ',type:'النوع',score:'العلامة',right:'الصحيحة',time:'الوقت',types:['مراجعة','امتحان','تدريب'],seeAns:'الإجابات',
+ rewards:'المكافآت',rwHint:'يجمع يمان النجوم ويمكنه طلب مكافأة عندما تكفي نجومه. يرى يمان اسم المكافأة كما تكتبه.',rwName:'اسم المكافأة',rwCost:'نجوم',add:'أضف',del:'احذف',save:'احفظ المكافآت',saved:'تم الحفظ',suggest:'أضف اقتراحات',
+ claims:'طلبات يمان',noClaims:'لا توجد طلبات الآن.',give:'أعطيتها له',given:'أُعطيت',pending:'بانتظارك',
+ sumApi:'رابط الملخّص اليومي لتطبيقات أخرى (مثل Hero Family):',lang:'עברית'}};
+let LANG='he';try{LANG=localStorage.getItem('yaman_parent_lang')||'he'}catch(e){}
+const t=k=>I[LANG][k];
+let CODE='';try{CODE=localStorage.getItem('yaman_parent_code')||''}catch(e){}
+let DATA=null,RW={rewards:[],given:[]};
 const $=id=>document.getElementById(id);
 const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const fmtDay=d=>new Intl.DateTimeFormat('en-CA',{timeZone:'Asia/Jerusalem'}).format(d);
+const loc=()=>LANG==='he'?'he':'ar';
 const subj=id=>META.subj.find(s=>s.id===id);
+const sn=s=>LANG==='he'?s.he:s.ar;
+const link=(h,txt,cls='go')=>`<a class="${cls}" href="/#${h}" target="_blank" rel="noopener">${txt}</a>`;
+function setLang(l){LANG=l;try{localStorage.setItem('yaman_parent_lang',l)}catch(e){}document.documentElement.lang=l;document.title=t('title');DATA?draw():login()}
+const hdr=api=>({'x-family-code':CODE,...api});
 function login(err){
-  $('app').innerHTML=`<form class="card login" id="f"><h1>מעקב הורים</h1><p class="muted" style="margin:0">הכנס את קוד המשפחה של אפליקציית הלימוד של יאמן.</p><input id="c" aria-label="קוד משפחה" autocomplete="off">${err?`<div class="notice">${esc(err)}</div>`:''}<button class="btn-p">כניסה</button></form>`;
-  $('c').focus();$('f').onsubmit=e=>{e.preventDefault();CODE=$('c').value.trim();if(!CODE)return;try{localStorage.setItem(LS,CODE)}catch(_){}load()};
+  $('app').innerHTML=`<form class="card login" id="f"><div class="row" style="justify-content:flex-end"><button type="button" id="lg" class="small">${t('lang')}</button></div><h1>${t('title')}</h1><p class="muted" style="margin:0">${t('login')}</p><input id="c" aria-label="${t('code')}" autocomplete="off">${err?`<div class="notice">${esc(err)}</div>`:''}<button class="btn-p">${t('enter')}</button></form>`;
+  $('lg').onclick=()=>setLang(LANG==='he'?'ar':'he');
+  $('c').focus();$('f').onsubmit=e=>{e.preventDefault();CODE=$('c').value.trim();if(!CODE)return;try{localStorage.setItem('yaman_parent_code',CODE)}catch(_){}load()};
 }
 async function load(){
   if(!CODE)return login();
-  $('app').innerHTML='<div class="card muted">טוען נתונים…</div>';
+  $('app').innerHTML=`<div class="card muted">${t('loading')}</div>`;
   try{
-    const r=await fetch('/api/state',{headers:{'x-family-code':CODE},cache:'no-store'});
-    if(r.status===401){CODE='';try{localStorage.removeItem(LS)}catch(_){}return login('הקוד שגוי.')}
-    if(!r.ok)throw 0;const j=await r.json();draw(j.data);
-  }catch(e){$('app').innerHTML='<div class="card">לא הצלחתי לטעון את הנתונים. בדוק חיבור ונסה שוב. <button onclick="load()">נסה שוב</button></div>'}
+    const [r,w]=await Promise.all([fetch('/api/state',{headers:hdr(),cache:'no-store'}),fetch('/api/rewards',{headers:hdr(),cache:'no-store'})]);
+    if(r.status===401){CODE='';try{localStorage.removeItem('yaman_parent_code')}catch(_){}return login(t('bad'))}
+    if(!r.ok)throw 0;DATA=(await r.json()).data||{};if(w.ok)RW=await w.json();draw();
+  }catch(e){$('app').innerHTML=`<div class="card">${t('fail')} <button id="rt">${t('retry')}</button></div>`;$('rt').onclick=load}
 }
-function draw(data){
-  const S=data?.S||{},E=data?.E||[],now=Date.now(),today=fmtDay(new Date());
+function draw(){
+  const data=DATA,S=data?.S||{},E=data?.E||[],now=Date.now(),today=fmtDay(new Date());
   const mins=S.minutes||{},lessons=S.lessons||{},mast=S.mastery||{},rev=Object.values(S.review||{});
-  const days=[];for(let i=6;i>=0;i--){const d=new Date(now-i*864e5);days.push({k:fmtDay(d),l:new Intl.DateTimeFormat('he',{weekday:'short',timeZone:'Asia/Jerusalem'}).format(d),m:mins[fmtDay(d)]||0})}
-  const week=days.reduce((a,b)=>a+b.m,0),done=META.topics.filter(t=>lessons[t.id]?.done).length;
+  const days=[];for(let i=6;i>=0;i--){const d=new Date(now-i*864e5);days.push({k:fmtDay(d),l:new Intl.DateTimeFormat(loc(),{weekday:'short',timeZone:'Asia/Jerusalem'}).format(d),m:mins[fmtDay(d)]||0})}
+  const week=days.reduce((a,b)=>a+b.m,0),done=META.topics.filter(x=>lessons[x.id]?.done).length;
   const weekEx=E.filter(x=>now-x.ts<7*864e5),avg=weekEx.length?Math.round(weekEx.reduce((a,b)=>a+b.score,0)/weekEx.length):null;
-  const due=rev.filter(r=>r.due<=now).length;
-  const last=data?.updated?new Intl.DateTimeFormat('he',{dateStyle:'medium',timeStyle:'short',timeZone:'Asia/Jerusalem'}).format(new Date(data.updated)):'עדיין אין פעילות';
+  const due=rev.filter(r=>r.due<=now).length,stars=S.stars||0;let li=0;LV.forEach((v,k)=>{if(stars>=v)li=k});
+  const last=data?.updated?new Intl.DateTimeFormat(loc(),{dateStyle:'medium',timeStyle:'short',timeZone:'Asia/Jerusalem'}).format(new Date(data.updated)):t('none');
   const mx=Math.max(30,...days.map(d=>d.m));
-  const bars=`<svg viewBox="0 0 420 190" style="width:100%;height:auto" role="img" aria-label="דקות למידה ב-7 הימים האחרונים">${[0,mx/2,mx].map(g=>`<line x1="34" x2="410" y1="${150-g/mx*120}" y2="${150-g/mx*120}" style="stroke:var(--line)"/><text x="28" y="${154-g/mx*120}" font-size="11" text-anchor="end" style="fill:var(--muted)">${Math.round(g)}</text>`).join('')}${days.map((d,i)=>{const h=d.m/mx*120,x=48+i*52;return `<rect x="${x}" y="${150-h}" width="34" height="${h}" rx="5" style="fill:var(${d.k===today?'--accent':'--s-math'});opacity:${d.k===today?1:.75}"/>${d.m?`<text x="${x+17}" y="${144-h}" font-size="11" text-anchor="middle" style="fill:var(--ink)">${d.m}</text>`:''}<text x="${x+17}" y="170" font-size="12" text-anchor="middle" style="fill:var(--muted)">${d.l}</text>`}).join('')}</svg>`;
-  const ex=E.slice(-12);let chart='<p class="muted">עוד אין מבחנים.</p>';
-  if(ex.length){const W=420,H=190,X=i=>40+(ex.length===1?170:i*360/(ex.length-1)),Y=s=>150-s*1.2;const pts=ex.map((e,i)=>`${X(i)},${Y(e.score)}`).join(' ');
-    chart=`<svg viewBox="0 0 ${W} ${H}" style="width:100%;height:auto" role="img" aria-label="ציוני מבחנים">${[0,50,100].map(g=>`<line x1="34" x2="410" y1="${Y(g)}" y2="${Y(g)}" style="stroke:var(--line)"/><text x="28" y="${Y(g)+4}" font-size="11" text-anchor="end" style="fill:var(--muted)">${g}</text>`).join('')}<polyline points="${pts}" style="fill:none;stroke:var(--accent)" stroke-width="3"/>${ex.map((e,i)=>`<circle cx="${X(i)}" cy="${Y(e.score)}" r="${i===ex.length-1?6:4}" style="fill:var(${e.review?'--s-he':'--accent'})"/><text x="${X(i)}" y="${Y(e.score)-10}" font-size="11" text-anchor="middle" style="fill:var(--ink)">${e.score}</text><text x="${X(i)}" y="172" font-size="10" text-anchor="middle" style="fill:var(--muted)">${new Date(e.ts).toLocaleDateString('he',{day:'numeric',month:'numeric'})}</text>`).join('')}</svg>`}
-  const rows=META.topics.map(t=>{const l=lessons[t.id],m=mast[t.id],mp=m&&m.t?Math.round(100*m.r/m.t):null,s=subj(t.s);
-    const st=!l?['לא התחיל','']:mp===null?['למד את השיעור','']:mp>=80?['שולט','good']:mp>=60?['בדרך','warn']:['צריך חיזוק','bad'];
-    return {t,l,mp,m,s,st}});
+  const bars=`<svg viewBox="0 0 420 190" style="width:100%;height:auto" role="img" aria-label="${t('week')}">${[0,mx/2,mx].map(g=>`<line x1="34" x2="410" y1="${150-g/mx*120}" y2="${150-g/mx*120}" style="stroke:var(--line)"/><text x="28" y="${154-g/mx*120}" font-size="11" text-anchor="end" style="fill:var(--muted)">${Math.round(g)}</text>`).join('')}${days.map((d,i)=>{const h=d.m/mx*120,x=48+i*52;return `<rect x="${x}" y="${150-h}" width="34" height="${h}" rx="5" style="fill:var(${d.k===today?'--accent':'--s-math'});opacity:${d.k===today?1:.75}"/>${d.m?`<text x="${x+17}" y="${144-h}" font-size="11" text-anchor="middle" style="fill:var(--ink)">${d.m}</text>`:''}<text x="${x+17}" y="170" font-size="12" text-anchor="middle" style="fill:var(--muted)">${d.l}</text>`}).join('')}</svg>`;
+  const ex=E.slice(-12);let chart=`<p class="muted">${t('noEx')}</p>`;
+  if(ex.length){const X=i=>40+(ex.length===1?170:i*360/(ex.length-1)),Y=s=>150-s*1.2;const pts=ex.map((e,i)=>`${X(i)},${Y(e.score)}`).join(' ');
+    chart=`<svg viewBox="0 0 420 190" style="width:100%;height:auto" role="img" aria-label="${t('scores')}">${[0,50,100].map(g=>`<line x1="34" x2="410" y1="${Y(g)}" y2="${Y(g)}" style="stroke:var(--line)"/><text x="28" y="${Y(g)+4}" font-size="11" text-anchor="end" style="fill:var(--muted)">${g}</text>`).join('')}<polyline points="${pts}" style="fill:none;stroke:var(--accent)" stroke-width="3"/>${ex.map((e,i)=>`<a href="/#result-${e.ts}" target="_blank"><circle cx="${X(i)}" cy="${Y(e.score)}" r="${i===ex.length-1?7:5}" style="fill:var(${e.review?'--s-he':'--accent'});cursor:pointer"/></a><text x="${X(i)}" y="${Y(e.score)-11}" font-size="11" text-anchor="middle" style="fill:var(--ink)">${e.score}</text><text x="${X(i)}" y="172" font-size="10" text-anchor="middle" style="fill:var(--muted)">${new Date(e.ts).getDate()}.${new Date(e.ts).getMonth()+1}</text>`).join('')}</svg>`}
+  const rows=META.topics.map(x=>{const l=lessons[x.id],m=mast[x.id],mp=m&&m.t?Math.round(100*m.r/m.t):null,s=subj(x.s);const S_=t('st');
+    const st=!l?[S_[0],'']:mp===null?[S_[1],'']:mp>=80?[S_[2],'good']:mp>=60?[S_[3],'warn']:[S_[4],'bad'];return {x,l,mp,m,s,st}});
   const weak=rows.filter(r=>r.st[1]==='bad'||(r.l&&r.l.score<70));
+  const claims=(S.claims||[]),pend=claims.filter(c=>!RW.given.includes(c.id));
   $('app').innerHTML=`
-  <header class="row between"><div><h1>מעקב הורים – יאמן</h1><div class="muted small">פעילות אחרונה: ${esc(last)}</div></div><div class="row"><a class="small" href="/" style="color:var(--accent)">לאפליקציית הלימוד</a><button id="rf">רענון</button></div></header>
+  <header class="row between"><div><h1>${t('title')}</h1><div class="muted small">${t('last')}: ${esc(last)}</div></div><div class="row"><a class="go" href="/" target="_blank" rel="noopener">${t('open')}</a><button id="rf">${t('refresh')}</button><button id="lg">${t('lang')}</button></div></header>
   <section class="stats">
-   <div class="stat" style="--sc:var(--accent)"><b>${mins[today]||0}</b>דקות למידה היום</div>
-   <div class="stat" style="--sc:var(--s-math)"><b>${week}</b>דקות השבוע</div>
-   <div class="stat" style="--sc:var(--s-bio)"><b>${done} / ${META.topics.length}</b>שיעורים שהושלמו</div>
-   <div class="stat" style="--sc:var(--s-ar)"><b>${avg!==null?avg+'%':'–'}</b>ממוצע מבחנים השבוע (${weekEx.length})</div>
-   <div class="stat" style="--sc:var(--s-he)"><b>${due}</b>שאלות לחזרה היום (מתוך ${rev.length})</div>
+   <a class="stat" href="/#achieve" target="_blank" style="--sc:#D49400"><b>${STAR} ${stars}</b>${t('level')}: ${LEVELS_AR[li]} · ${Object.keys(S.badges||{}).length} ${t('badges')}</a>
+   <a class="stat" href="/#progress" target="_blank" style="--sc:var(--accent)"><b>${mins[today]||0}</b>${t('minToday')}</a>
+   <a class="stat" href="/#progress" target="_blank" style="--sc:var(--s-math)"><b>${week}</b>${t('minWeek')}</a>
+   <a class="stat" href="/#learn" target="_blank" style="--sc:var(--s-bio)"><b>${done} / ${META.topics.length}</b>${t('lessons')}</a>
+   <a class="stat" href="/#exam" target="_blank" style="--sc:var(--s-ar)"><b>${avg!==null?avg+'%':'–'}</b>${t('avgWeek')} (${weekEx.length})</a>
+   <a class="stat" href="/#review" target="_blank" style="--sc:var(--s-he)"><b>${due}</b>${t('review')} (${t('of')} ${rev.length})</a>
   </section>
-  ${weak.length?`<section class="card" style="border-inline-start:5px solid var(--bad)"><h2>נושאים שכדאי לחזק</h2><div class="row">${weak.map(r=>`<span class="chip bad ar">${esc(r.t.n)}</span>`).join('')}</div></section>`:''}
-  <section class="two"><div class="card"><h2>דקות למידה ב־7 הימים האחרונים</h2>${bars}</div><div class="card"><h2>ציוני המבחנים האחרונים</h2>${chart}<div class="muted small">נקודה ורודה = מבחן חזרה</div></div></section>
-  <section class="card"><h2>לפי מקצוע</h2><div style="display:grid;gap:10px">${META.subj.map(s=>{const ts=rows.filter(r=>r.t.s===s.id),d=ts.filter(r=>r.l).length;const ms=ts.map(r=>r.mp).filter(x=>x!==null);const m=ms.length?Math.round(ms.reduce((a,b)=>a+b,0)/ms.length):null;return `<div style="--sc:var(${s.c})"><div class="row between small"><b style="color:var(${s.c})">${s.n}</b><span>${d}/${ts.length} שיעורים${m!==null?' · דיוק במבחנים '+m+'%':''}</span></div><div class="bar"><i style="width:${Math.round(100*d/ts.length)}%"></i></div></div>`}).join('')}</div></section>
-  <section class="card"><h2>כל הנושאים</h2><div class="tbl"><table><thead><tr><th>נושא</th><th>מקצוע</th><th>ציון שיעור</th><th>דיוק במבחנים</th><th>מצב</th></tr></thead><tbody>${rows.map(r=>`<tr><td class="ar"><b>${esc(r.t.n)}</b></td><td style="color:var(${r.s.c})">${r.s.n}</td><td class="num">${r.l?r.l.score+'%':'–'}</td><td class="num">${r.mp!==null?`${r.mp}% <span class="muted small">(${r.m.r}/${r.m.t})</span>`:'–'}</td><td><span class="chip ${r.st[1]}">${r.st[0]}</span></td></tr>`).join('')}</tbody></table></div></section>
-  <section class="card"><h2>מבחנים אחרונים</h2>${E.length?`<div class="tbl"><table><thead><tr><th>תאריך</th><th>סוג</th><th>ציון</th><th>נכונות</th><th>זמן</th></tr></thead><tbody>${E.slice(-10).reverse().map(x=>`<tr><td>${new Date(x.ts).toLocaleString('he',{dateStyle:'short',timeStyle:'short'})}</td><td>${x.review?'חזרה':x.mode==='exam'?'מבחן':'תרגול'}</td><td class="num"><b>${x.score}%</b></td><td class="num">${x.right}/${x.n}</td><td class="num">${Math.floor((x.sec||0)/60)}:${String((x.sec||0)%60).padStart(2,'0')}</td></tr>`).join('')}</tbody></table></div>`:'<p class="muted">עוד אין מבחנים.</p>'}</section>
-  <p class="muted small">כתובת לסיכום יומי עבור אפליקציות אחרות (למשל Hero Family): <span dir="ltr">/api/summary?code=…</span></p>`;
-  $('rf').onclick=load;
+  ${pend.length?`<section class="card" style="border-inline-start:5px solid #D49400"><h2>${STAR} ${t('claims')}</h2>${pend.map(c=>`<div class="row between" style="padding:6px 0;border-bottom:1px solid var(--line)"><span class="ar"><b>${esc(c.name)}</b> · ${c.cost} ${t('stars')} · <span class="muted small">${new Date(c.ts).toLocaleDateString(loc())}</span></span><button class="btn-p" data-give="${esc(c.id)}">${t('give')}</button></div>`).join('')}</section>`:''}
+  ${weak.length?`<section class="card" style="border-inline-start:5px solid var(--bad)"><h2>${t('weak')}</h2><p class="muted small" style="margin:0 0 8px">${t('weakHint')}</p><div class="row">${weak.map(r=>`<a class="chip bad ar" style="text-decoration:none" href="/#exam-${r.x.id}" target="_blank">${esc(r.x.n)}</a>`).join('')}</div></section>`:''}
+  <section class="two"><div class="card"><h2>${t('week')}</h2>${bars}</div><div class="card"><h2>${t('scores')}</h2>${chart}<div class="muted small">${t('pink')}</div></div></section>
+  <section class="card"><h2>${t('bySubj')}</h2><div style="display:grid;gap:10px">${META.subj.map(s=>{const ts=rows.filter(r=>r.x.s===s.id),d=ts.filter(r=>r.l).length;const ms=ts.map(r=>r.mp).filter(x=>x!==null);const m=ms.length?Math.round(ms.reduce((a,b)=>a+b,0)/ms.length):null;return `<div style="--sc:var(${s.c})"><div class="row between small"><a class="lnk" href="/#learn-${s.id}" target="_blank" style="color:var(${s.c});font-weight:700">${sn(s)}</a><span>${d}/${ts.length} ${t('less')}${m!==null?' · '+t('acc')+' '+m+'%':''}</span></div><div class="bar"><i style="width:${Math.round(100*d/ts.length)}%"></i></div></div>`}).join('')}</div></section>
+  <section class="card"><h2>${t('all')}</h2><div class="tbl"><table><thead><tr><th>${t('topic')}</th><th>${t('subj')}</th><th>${t('lscore')}</th><th>${t('acc')}</th><th>${t('state')}</th><th>${t('actions')}</th></tr></thead><tbody>${rows.map(r=>`<tr><td class="ar"><a class="lnk" href="/#lesson-${r.x.id}" target="_blank"><b>${esc(r.x.n)}</b></a></td><td style="color:var(${r.s.c})">${sn(r.s)}</td><td class="num">${r.l?r.l.score+'%':'–'}</td><td class="num">${r.mp!==null?`${r.mp}% <span class="muted small">(${r.m.r}/${r.m.t})</span>`:'–'}</td><td><span class="chip ${r.st[1]}">${r.st[0]}</span></td><td><span class="row" style="gap:4px;flex-wrap:nowrap">${link('lesson-'+r.x.id,t('toLesson'))}${link('exam-'+r.x.id,t('toExam'))}</span></td></tr>`).join('')}</tbody></table></div></section>
+  <section class="card"><h2>${t('recent')}</h2>${E.length?`<div class="tbl"><table><thead><tr><th>${t('date')}</th><th>${t('type')}</th><th>${t('score')}</th><th>${t('right')}</th><th>${t('time')}</th><th></th></tr></thead><tbody>${E.slice(-12).reverse().map(x=>`<tr><td>${new Date(x.ts).toLocaleString(loc(),{dateStyle:'short',timeStyle:'short'})}</td><td>${t('types')[x.review?0:x.mode==='exam'?1:2]}</td><td class="num"><b>${x.score}%</b></td><td class="num">${x.right}/${x.n}</td><td class="num">${Math.floor((x.sec||0)/60)}:${String((x.sec||0)%60).padStart(2,'0')}</td><td>${x.d?link('result-'+x.ts,t('seeAns')):''}</td></tr>`).join('')}</tbody></table></div>`:`<p class="muted">${t('noEx')}</p>`}</section>
+  <section class="card"><h2>${STAR} ${t('rewards')}</h2><p class="muted small" style="margin:0 0 10px">${t('rwHint')}</p>
+   <div id="rwList">${RW.rewards.map((r,i)=>`<div class="rw"><input class="ar" data-rn="${i}" value="${esc(r.name)}" aria-label="${t('rwName')}"><input type="number" min="1" data-rc="${i}" value="${r.cost}" aria-label="${t('rwCost')}"><button data-rd="${i}">${t('del')}</button></div>`).join('')}</div>
+   <div class="rw"><input class="ar" id="nn" placeholder="${t('rwName')}"><input type="number" min="1" id="nc" placeholder="${t('rwCost')}"><button id="na">${t('add')}</button></div>
+   <div class="row" style="margin-top:8px"><button class="btn-p" id="rs">${t('save')}</button>${RW.rewards.length?'':`<button id="sg">${t('suggest')}</button>`}<span id="rsm" class="muted small"></span></div>
+   ${claims.length?`<h2 style="margin-top:16px">${t('claims')}</h2>${claims.slice().reverse().map(c=>`<div class="row between small" style="padding:4px 0;border-bottom:1px solid var(--line)"><span class="ar">${esc(c.name)} · ${c.cost}</span><span class="chip ${RW.given.includes(c.id)?'good':'warn'}">${RW.given.includes(c.id)?t('given'):t('pending')}</span></div>`).join('')}`:''}
+  </section>
+  <p class="muted small">${t('sumApi')} <span dir="ltr">/api/summary?code=…</span></p>`;
+  $('rf').onclick=load;$('lg').onclick=()=>setLang(LANG==='he'?'ar':'he');
+  const sync=()=>{document.querySelectorAll('[data-rn]').forEach(el=>RW.rewards[+el.dataset.rn].name=el.value.trim());document.querySelectorAll('[data-rc]').forEach(el=>RW.rewards[+el.dataset.rc].cost=Math.max(1,+el.value||1))};
+  const saveRW=async()=>{sync();try{const r=await fetch('/api/rewards',{method:'POST',headers:{...hdr(),'content-type':'application/json'},body:JSON.stringify(RW)});if(!r.ok)throw 0;$('rsm')&&($('rsm').textContent=t('saved'));return true}catch(e){$('rsm')&&($('rsm').textContent=t('fail'));return false}};
+  $('na').onclick=()=>{sync();const n=$('nn').value.trim(),c=+$('nc').value;if(!n||!c)return;RW.rewards.push({id:'r'+Date.now().toString(36),name:n,cost:c});draw()};
+  document.querySelectorAll('[data-rd]').forEach(b=>b.onclick=()=>{sync();RW.rewards.splice(+b.dataset.rd,1);draw()});
+  $('rs').onclick=saveRW;
+  if($('sg'))$('sg').onclick=()=>{RW.rewards=[{id:'r1',name:'اختيار وجبة العشاء',cost:150},{id:'r2',name:'ساعة لعب إضافية',cost:250},{id:'r3',name:'نزهة في نهاية الأسبوع',cost:500},{id:'r4',name:'هدية صغيرة يختارها يمان',cost:900}];draw()};
+  document.querySelectorAll('[data-give]').forEach(b=>b.onclick=async()=>{RW.given=[...RW.given,b.dataset.give];if(await saveRW())draw()});
 }
+document.documentElement.lang=LANG;document.title=t('title');
 load();
 </script>
 </body>
