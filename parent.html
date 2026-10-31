@@ -1,0 +1,128 @@
+<!doctype html>
+<html lang="he" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>מעקב הורים – יאמן</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Readex+Pro:wght@400;500;600;700&family=Noto+Sans+Hebrew:wght@400;600;700&display=swap">
+<style>
+:root{
+  --bg:#EDF1F0; --surface:#FFFFFF; --surface2:#F5F8F7; --ink:#15252B; --muted:#56676D; --line:#D3DDDB;
+  --accent:#1B6870; --accent-ink:#FFFFFF; --focus:#D99A00;
+  --good:#256F45; --good-bg:#E1F2E7; --warn:#8A5A00; --warn-bg:#FFF1D2; --bad:#A83636; --bad-bg:#FAE4E1;
+  --s-math:#2D66C4; --s-phys:#7347BF; --s-chem:#0B8282; --s-bio:#3A8538; --s-ar:#B86D00; --s-he:#B83A72; --s-en:#3B55A0;
+  --r-a:#2D66C4; --r-b:#C45F00; --r-c:#5E6E74; --r-d:#7347BF; --r-e:#26804D; --r-f:#B83A72;
+  --f-body:"Readex Pro","Noto Sans Hebrew",system-ui,"Segoe UI",Tahoma,sans-serif;
+  --f-display:"Reem Kufi","Readex Pro",system-ui,sans-serif;
+  --f-he:"Noto Sans Hebrew","Readex Pro",system-ui,sans-serif;
+  --radius:14px; --base:17px;
+}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
+  --bg:#0F171A; --surface:#162125; --surface2:#1B292E; --ink:#E3ECEC; --muted:#9AADB1; --line:#2A3A40;
+  --accent:#55B5BE; --accent-ink:#06211F; --focus:#F2C14E;
+  --good:#6FCF94; --good-bg:#183326; --warn:#F0C062; --warn-bg:#352A12; --bad:#F08A80; --bad-bg:#3A1C1A;
+  --s-math:#6E9CF0; --s-phys:#A688EA; --s-chem:#3CC1C1; --s-bio:#78C46F; --s-ar:#F0A546; --s-he:#EE7AAE; --s-en:#8397E0;
+  --r-a:#6E9CF0; --r-b:#F59A4B; --r-c:#A3B2B7; --r-d:#A688EA; --r-e:#6FCF94; --r-f:#EE7AAE;
+  color-scheme:dark}}
+:root[data-theme="dark"]{
+  --bg:#0F171A; --surface:#162125; --surface2:#1B292E; --ink:#E3ECEC; --muted:#9AADB1; --line:#2A3A40;
+  --accent:#55B5BE; --accent-ink:#06211F; --focus:#F2C14E;
+  --good:#6FCF94; --good-bg:#183326; --warn:#F0C062; --warn-bg:#352A12; --bad:#F08A80; --bad-bg:#3A1C1A;
+  --s-math:#6E9CF0; --s-phys:#A688EA; --s-chem:#3CC1C1; --s-bio:#78C46F; --s-ar:#F0A546; --s-he:#EE7AAE; --s-en:#8397E0;
+  --r-a:#6E9CF0; --r-b:#F59A4B; --r-c:#A3B2B7; --r-d:#A688EA; --r-e:#6FCF94; --r-f:#EE7AAE;
+  color-scheme:dark}
+
+html{direction:rtl}
+*{box-sizing:border-box}
+[hidden]{display:none!important}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:"Noto Sans Hebrew","Readex Pro",system-ui,sans-serif;font-size:16px;line-height:1.6}
+:root{padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+svg{direction:ltr}
+button,input{font:inherit;color:inherit}
+button{cursor:pointer;background:var(--surface);border:1.5px solid var(--line);border-radius:12px;padding:.45em 1em;min-height:42px}
+.btn-p{background:var(--accent);color:var(--accent-ink);border-color:var(--accent);font-weight:600}
+.wrap{max-width:1100px;margin:auto;padding-block:20px 40px;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));display:flex;flex-direction:column;gap:16px}
+.card{background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:18px;min-width:0}
+h1{font-size:1.5em;margin:0;color:var(--accent)} h2{font-size:1.1em;margin:0 0 10px}
+.muted{color:var(--muted)} .small{font-size:.85em}
+.row{display:flex;gap:10px;align-items:center;flex-wrap:wrap} .between{justify-content:space-between}
+.stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:12px}
+.stat{background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:14px;border-top:5px solid var(--sc,var(--accent))}
+.stat b{display:block;font-size:1.8em;font-variant-numeric:tabular-nums;color:var(--sc,var(--accent));line-height:1.2}
+.two{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:16px}
+@media(max-width:820px){.two{grid-template-columns:minmax(0,1fr)}}
+.chip{display:inline-block;padding:1px 10px;border-radius:20px;font-size:.82em;background:var(--surface2);border:1px solid var(--line);white-space:nowrap}
+.chip.good{background:var(--good-bg);color:var(--good);border-color:transparent}.chip.warn{background:var(--warn-bg);color:var(--warn);border-color:transparent}.chip.bad{background:var(--bad-bg);color:var(--bad);border-color:transparent}
+table{border-collapse:collapse;width:100%;font-size:.92em}th,td{text-align:start;padding:8px 6px;border-bottom:1px solid var(--line)}th{color:var(--muted);font-weight:500;font-size:.85em}
+.tbl{overflow-x:auto}.num{font-variant-numeric:tabular-nums}
+.ar{font-family:"Readex Pro",system-ui,sans-serif}
+.bar{height:9px;border-radius:9px;background:var(--surface2);border:1px solid var(--line);overflow:hidden}.bar>i{display:block;height:100%;background:var(--sc,var(--accent))}
+.login{max-width:420px;margin:12vh auto;display:flex;flex-direction:column;gap:12px;text-align:center}
+.login input{border:1.5px solid var(--line);border-radius:12px;padding:.55em;text-align:center;font-size:1.15em;background:var(--surface)}
+.notice{padding:10px 14px;border-radius:12px;background:var(--warn-bg)}
+:focus-visible{outline:3px solid var(--focus);outline-offset:2px}
+</style>
+</head>
+<body>
+<main class="wrap" id="app"></main>
+<script>
+const META={"topics":[{"id":"linear","s":"math","n":"المعادلة الخطية"},{"id":"linfunc","s":"math","n":"الدالة الخطية والميل"},{"id":"quadratic","s":"math","n":"المعادلة التربيعية"},{"id":"probability","s":"math","n":"الاحتمالات"},{"id":"motion","s":"phys","n":"الحركة المنتظمة والسرعة"},{"id":"newton","s":"phys","n":"قانون نيوتن الثاني"},{"id":"atom","s":"chem","n":"الذرّة ومكوّناتها"},{"id":"ph","s":"chem","n":"الحموض والقواعد (pH)"},{"id":"cell","s":"bio","n":"الخلية وعضيّاتها"},{"id":"sentence","s":"ar","n":"الجملة الاسمية والفعلية"},{"id":"kana","s":"ar","n":"كان وإنّ وأخواتهما"},{"id":"he_basic","s":"he","n":"משפט פשוט – جملة بسيطة"},{"id":"he_past","s":"he","n":"זמן עבר – الماضي بالعبرية"},{"id":"en_present","s":"en","n":"Present Simple – المضارع البسيط"},{"id":"en_past","s":"en","n":"Past Simple – الماضي البسيط"}],"subj":[{"id":"math","n":"מתמטיקה","c":"--s-math"},{"id":"phys","n":"פיזיקה","c":"--s-phys"},{"id":"chem","n":"כימיה","c":"--s-chem"},{"id":"bio","n":"ביולוגיה","c":"--s-bio"},{"id":"ar","n":"ערבית","c":"--s-ar"},{"id":"he","n":"עברית","c":"--s-he"},{"id":"en","n":"אנגלית","c":"--s-en"}]};
+const LS='yaman_parent_code';
+let CODE='';try{CODE=localStorage.getItem(LS)||''}catch(e){}
+const $=id=>document.getElementById(id);
+const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const fmtDay=d=>new Intl.DateTimeFormat('en-CA',{timeZone:'Asia/Jerusalem'}).format(d);
+const subj=id=>META.subj.find(s=>s.id===id);
+function login(err){
+  $('app').innerHTML=`<form class="card login" id="f"><h1>מעקב הורים</h1><p class="muted" style="margin:0">הכנס את קוד המשפחה של אפליקציית הלימוד של יאמן.</p><input id="c" aria-label="קוד משפחה" autocomplete="off">${err?`<div class="notice">${esc(err)}</div>`:''}<button class="btn-p">כניסה</button></form>`;
+  $('c').focus();$('f').onsubmit=e=>{e.preventDefault();CODE=$('c').value.trim();if(!CODE)return;try{localStorage.setItem(LS,CODE)}catch(_){}load()};
+}
+async function load(){
+  if(!CODE)return login();
+  $('app').innerHTML='<div class="card muted">טוען נתונים…</div>';
+  try{
+    const r=await fetch('/api/state',{headers:{'x-family-code':CODE},cache:'no-store'});
+    if(r.status===401){CODE='';try{localStorage.removeItem(LS)}catch(_){}return login('הקוד שגוי.')}
+    if(!r.ok)throw 0;const j=await r.json();draw(j.data);
+  }catch(e){$('app').innerHTML='<div class="card">לא הצלחתי לטעון את הנתונים. בדוק חיבור ונסה שוב. <button onclick="load()">נסה שוב</button></div>'}
+}
+function draw(data){
+  const S=data?.S||{},E=data?.E||[],now=Date.now(),today=fmtDay(new Date());
+  const mins=S.minutes||{},lessons=S.lessons||{},mast=S.mastery||{},rev=Object.values(S.review||{});
+  const days=[];for(let i=6;i>=0;i--){const d=new Date(now-i*864e5);days.push({k:fmtDay(d),l:new Intl.DateTimeFormat('he',{weekday:'short',timeZone:'Asia/Jerusalem'}).format(d),m:mins[fmtDay(d)]||0})}
+  const week=days.reduce((a,b)=>a+b.m,0),done=META.topics.filter(t=>lessons[t.id]?.done).length;
+  const weekEx=E.filter(x=>now-x.ts<7*864e5),avg=weekEx.length?Math.round(weekEx.reduce((a,b)=>a+b.score,0)/weekEx.length):null;
+  const due=rev.filter(r=>r.due<=now).length;
+  const last=data?.updated?new Intl.DateTimeFormat('he',{dateStyle:'medium',timeStyle:'short',timeZone:'Asia/Jerusalem'}).format(new Date(data.updated)):'עדיין אין פעילות';
+  const mx=Math.max(30,...days.map(d=>d.m));
+  const bars=`<svg viewBox="0 0 420 190" style="width:100%;height:auto" role="img" aria-label="דקות למידה ב-7 הימים האחרונים">${[0,mx/2,mx].map(g=>`<line x1="34" x2="410" y1="${150-g/mx*120}" y2="${150-g/mx*120}" style="stroke:var(--line)"/><text x="28" y="${154-g/mx*120}" font-size="11" text-anchor="end" style="fill:var(--muted)">${Math.round(g)}</text>`).join('')}${days.map((d,i)=>{const h=d.m/mx*120,x=48+i*52;return `<rect x="${x}" y="${150-h}" width="34" height="${h}" rx="5" style="fill:var(${d.k===today?'--accent':'--s-math'});opacity:${d.k===today?1:.75}"/>${d.m?`<text x="${x+17}" y="${144-h}" font-size="11" text-anchor="middle" style="fill:var(--ink)">${d.m}</text>`:''}<text x="${x+17}" y="170" font-size="12" text-anchor="middle" style="fill:var(--muted)">${d.l}</text>`}).join('')}</svg>`;
+  const ex=E.slice(-12);let chart='<p class="muted">עוד אין מבחנים.</p>';
+  if(ex.length){const W=420,H=190,X=i=>40+(ex.length===1?170:i*360/(ex.length-1)),Y=s=>150-s*1.2;const pts=ex.map((e,i)=>`${X(i)},${Y(e.score)}`).join(' ');
+    chart=`<svg viewBox="0 0 ${W} ${H}" style="width:100%;height:auto" role="img" aria-label="ציוני מבחנים">${[0,50,100].map(g=>`<line x1="34" x2="410" y1="${Y(g)}" y2="${Y(g)}" style="stroke:var(--line)"/><text x="28" y="${Y(g)+4}" font-size="11" text-anchor="end" style="fill:var(--muted)">${g}</text>`).join('')}<polyline points="${pts}" style="fill:none;stroke:var(--accent)" stroke-width="3"/>${ex.map((e,i)=>`<circle cx="${X(i)}" cy="${Y(e.score)}" r="${i===ex.length-1?6:4}" style="fill:var(${e.review?'--s-he':'--accent'})"/><text x="${X(i)}" y="${Y(e.score)-10}" font-size="11" text-anchor="middle" style="fill:var(--ink)">${e.score}</text><text x="${X(i)}" y="172" font-size="10" text-anchor="middle" style="fill:var(--muted)">${new Date(e.ts).toLocaleDateString('he',{day:'numeric',month:'numeric'})}</text>`).join('')}</svg>`}
+  const rows=META.topics.map(t=>{const l=lessons[t.id],m=mast[t.id],mp=m&&m.t?Math.round(100*m.r/m.t):null,s=subj(t.s);
+    const st=!l?['לא התחיל','']:mp===null?['למד את השיעור','']:mp>=80?['שולט','good']:mp>=60?['בדרך','warn']:['צריך חיזוק','bad'];
+    return {t,l,mp,m,s,st}});
+  const weak=rows.filter(r=>r.st[1]==='bad'||(r.l&&r.l.score<70));
+  $('app').innerHTML=`
+  <header class="row between"><div><h1>מעקב הורים – יאמן</h1><div class="muted small">פעילות אחרונה: ${esc(last)}</div></div><div class="row"><a class="small" href="/" style="color:var(--accent)">לאפליקציית הלימוד</a><button id="rf">רענון</button></div></header>
+  <section class="stats">
+   <div class="stat" style="--sc:var(--accent)"><b>${mins[today]||0}</b>דקות למידה היום</div>
+   <div class="stat" style="--sc:var(--s-math)"><b>${week}</b>דקות השבוע</div>
+   <div class="stat" style="--sc:var(--s-bio)"><b>${done} / ${META.topics.length}</b>שיעורים שהושלמו</div>
+   <div class="stat" style="--sc:var(--s-ar)"><b>${avg!==null?avg+'%':'–'}</b>ממוצע מבחנים השבוע (${weekEx.length})</div>
+   <div class="stat" style="--sc:var(--s-he)"><b>${due}</b>שאלות לחזרה היום (מתוך ${rev.length})</div>
+  </section>
+  ${weak.length?`<section class="card" style="border-inline-start:5px solid var(--bad)"><h2>נושאים שכדאי לחזק</h2><div class="row">${weak.map(r=>`<span class="chip bad ar">${esc(r.t.n)}</span>`).join('')}</div></section>`:''}
+  <section class="two"><div class="card"><h2>דקות למידה ב־7 הימים האחרונים</h2>${bars}</div><div class="card"><h2>ציוני המבחנים האחרונים</h2>${chart}<div class="muted small">נקודה ורודה = מבחן חזרה</div></div></section>
+  <section class="card"><h2>לפי מקצוע</h2><div style="display:grid;gap:10px">${META.subj.map(s=>{const ts=rows.filter(r=>r.t.s===s.id),d=ts.filter(r=>r.l).length;const ms=ts.map(r=>r.mp).filter(x=>x!==null);const m=ms.length?Math.round(ms.reduce((a,b)=>a+b,0)/ms.length):null;return `<div style="--sc:var(${s.c})"><div class="row between small"><b style="color:var(${s.c})">${s.n}</b><span>${d}/${ts.length} שיעורים${m!==null?' · דיוק במבחנים '+m+'%':''}</span></div><div class="bar"><i style="width:${Math.round(100*d/ts.length)}%"></i></div></div>`}).join('')}</div></section>
+  <section class="card"><h2>כל הנושאים</h2><div class="tbl"><table><thead><tr><th>נושא</th><th>מקצוע</th><th>ציון שיעור</th><th>דיוק במבחנים</th><th>מצב</th></tr></thead><tbody>${rows.map(r=>`<tr><td class="ar"><b>${esc(r.t.n)}</b></td><td style="color:var(${r.s.c})">${r.s.n}</td><td class="num">${r.l?r.l.score+'%':'–'}</td><td class="num">${r.mp!==null?`${r.mp}% <span class="muted small">(${r.m.r}/${r.m.t})</span>`:'–'}</td><td><span class="chip ${r.st[1]}">${r.st[0]}</span></td></tr>`).join('')}</tbody></table></div></section>
+  <section class="card"><h2>מבחנים אחרונים</h2>${E.length?`<div class="tbl"><table><thead><tr><th>תאריך</th><th>סוג</th><th>ציון</th><th>נכונות</th><th>זמן</th></tr></thead><tbody>${E.slice(-10).reverse().map(x=>`<tr><td>${new Date(x.ts).toLocaleString('he',{dateStyle:'short',timeStyle:'short'})}</td><td>${x.review?'חזרה':x.mode==='exam'?'מבחן':'תרגול'}</td><td class="num"><b>${x.score}%</b></td><td class="num">${x.right}/${x.n}</td><td class="num">${Math.floor((x.sec||0)/60)}:${String((x.sec||0)%60).padStart(2,'0')}</td></tr>`).join('')}</tbody></table></div>`:'<p class="muted">עוד אין מבחנים.</p>'}</section>
+  <p class="muted small">כתובת לסיכום יומי עבור אפליקציות אחרות (למשל Hero Family): <span dir="ltr">/api/summary?code=…</span></p>`;
+  $('rf').onclick=load;
+}
+load();
+</script>
+</body>
+</html>
