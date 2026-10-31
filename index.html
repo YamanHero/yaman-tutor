@@ -608,8 +608,8 @@ function hl(text,t){
   else if(sid==='ar'){const keys=Object.keys(TERMS).sort((a,b)=>b.length-a.length).map(k=>k.replace(/[.*+?^${}()|[\]\\]/g,'\\$&'));re=new RegExp('(?<![\\u0621-\\u064A])('+keys.join('|')+')(?![\\u0621-\\u064A])','g')}
   else re=/([A-Za-z]{1,4}[0-9]*)/g;
   let out='',last=0,m;
-  while((m=re.exec(text))){out+=esc(text.slice(last,m.index));const w=m[0];
-    if(t.auto)out+=`<span class="ltr" dir="ltr" style="white-space:nowrap">${paint(w,{auto:1})}</span>`;
+  while((m=re.exec(text))){out+=esc(text.slice(last,m.index));let w=m[0];
+    if(t.auto){let tr='';while(/[.,،]$/.test(w)&&w.length>1){tr=w.slice(-1)+tr;w=w.slice(0,-1)}out+=`<span class="ltr" dir="ltr" style="white-space:nowrap">${paint(w,{auto:1})}</span>${esc(tr)}`;last=m.index+m[0].length;continue}
     else if(sid==='he')out+=`<span class="fw he">${esc(w)}</span>`;
     else if(sid==='en')out+=`<span class="fw ltr">${esc(w)}</span>`;
     else if(sid==='ar')out+=`<span class="term r-${TERMS[w]}">${esc(w)}</span>`;
@@ -727,10 +727,119 @@ function routeFromHash(){
   if(r==='exam'){examSetup=null;if(topic(arg))examSetup={sub:topic(arg).s,ids:new Set([arg]),n:Math.min(10,poolFor(arg).length),mode:'exam',timer:S.settings.timer||'none'};go('exam');return true}
   if(r==='result'){const x=EXAMS.find(e=>String(e.ts)===arg);if(x&&x.d){lastReview=fromRecord(x);go('examres')}else go('progress');return true}
   if(r==='review'){const due=dueReviews();if(due.length)startExam({pool:due.slice(0,12).map(r=>r.q),n:Math.min(12,due.length),mode:'practice',timer:'none',review:true,ids:[]});else go('home');return true}
+  if(r==='test'){go('testnew');return true}
+  if(r==='open'&&topic(arg)){startOpen(arg);return true}
   if(r==='addtopic'){ADD=null;if(subj(arg))CUR.sub=arg;go('addtopic');return true}
   if(['home','progress','settings','achieve'].includes(r)){go(r);return true}
   return false}
 window.addEventListener('hashchange',()=>{routeFromHash()});
+
+/* ============ SCHOOL, TESTS, OPEN QUESTIONS ============ */
+const daysUntil=d=>Math.round((new Date(d+'T00:00:00')-new Date(today()+'T00:00:00'))/864e5);
+const upcomingTests=()=>(S.tests||[]).filter(x=>daysUntil(x.date)>=0).sort((a,b)=>a.date.localeCompare(b.date));
+function testTasks(x){const dl=daysUntil(x.date);if(dl<=1)return [{type:'mock'}];const since=x.created||0,items=[];
+  x.ids.forEach(id=>{const l=S.lessons[id];if(!l||!l.done||l.score<70)items.push({type:'lesson',tid:id})});
+  x.ids.forEach(id=>{if(!EXAMS.some(e=>e.ts>=since&&e.topics&&e.topics[id]&&e.topics[id][0]/e.topics[id][1]>=.7))items.push({type:'practice',tid:id})});
+  const per=Math.max(1,Math.ceil(items.length/Math.max(1,dl-1)));
+  return items.length?items.slice(0,per):[{type:'practice',tid:x.ids[(Math.floor(Date.now()/864e5))%x.ids.length]}]}
+const taskLabel=k=>k.type==='mock'?'امتحان تجريبي شامل (15 سؤالًا، مثل الامتحان الحقيقي)':k.type==='lesson'?`ادرس «${esc(topic(k.tid)?.n||'')}»`:`امتحان تدريبي: ${esc(topic(k.tid)?.n||'')}`;
+function runTask(x,k){if(k.type==='lesson')startLesson(k.tid);else if(k.type==='practice')startExam({ids:[k.tid],n:Math.min(8,poolFor(k.tid).length),mode:'practice',timer:'none'});else startExam({ids:x.ids.filter(id=>topic(id)),n:15,mode:'exam',timer:'down'})}
+function homeExtras(){
+  const tests=upcomingTests().slice(0,2),sch=((S.school||{})[today()]||[]).filter(id=>topic(id));
+  return `${tests.map(x=>{const dl=daysUntil(x.date),s=subj(x.sub)||SUBJ[0];return `<section class="card" style="--sc:var(${s.c});border-inline-start:6px solid var(${s.c})"><div class="row between"><h3>${esc(x.title||'امتحان '+s.n)}</h3><span class="chip ${dl<=2?'warn':''}">${dl===0?'اليوم':dl===1?'غدًا':'بعد '+dl+' أيام'}</span></div><p class="muted small" style="margin:4px 0 10px">${x.ids.map(id=>topic(id)?.n).filter(Boolean).map(esc).join('، ')}</p><b class="small">مهمة اليوم للاستعداد:</b><div class="grid" style="gap:6px;margin-top:6px">${testTasks(x).map((k,i)=>`<button class="topic-btn" data-task="${x.id}|${i}"><span>${taskLabel(k)}</span><span class="chip">ابدأ</span></button>`).join('')}</div></section>`}).join('')}
+  <section class="card"><div class="row between"><h3>ماذا تعلّمتم اليوم في المدرسة؟</h3><button class="btn-ghost small" data-go="testnew" style="min-height:34px">عندي امتحان في المدرسة</button></div>
+   ${sch.length?`<div class="row" style="margin-top:8px">${sch.map(id=>`<button class="chip" data-start="${id}" style="cursor:pointer;min-height:34px">ادرس: ${esc(topic(id).n)}</button>`).join('')}</div>`:'<p class="muted small" style="margin:4px 0 0">اختر الموضوع، ونبدأ الجلسة به.</p>'}
+   <div class="row" style="margin-top:10px"><select id="schSub" aria-label="المادة">${SUBJ.map(s=>`<option value="${s.id}">${s.n}</option>`).join('')}</select><select id="schTop" aria-label="الموضوع" style="max-width:100%"></select><button id="schAdd">أضف</button></div></section>`}
+function bindHomeExtras(v){
+  const ss=$('schSub'),st=$('schTop');if(!ss)return;const fill=()=>{st.innerHTML=T.filter(t=>t.s===ss.value).map(t=>`<option value="${t.id}">${esc(t.n)}</option>`).join('')+'<option value="__new">موضوع غير موجود: أضفه…</option>'};ss.onchange=fill;fill();
+  $('schAdd').onclick=()=>{if(st.value==='__new'){ADD={sub:ss.value,mode:'ai',name:'',notes:'تعلّمه يمان اليوم في المدرسة.',imgs:[],draft:null,busy:false,msg:''};go('addtopic');return}S.school=S.school||{};const d=today();S.school[d]=[...new Set([...(S.school[d]||[]),st.value])];persist(true);toast(`${STAR}<span>رائع! سنبدأ بـ«${esc(topic(st.value).n)}»</span>`);render()};
+  v.querySelectorAll('[data-task]').forEach(b=>b.onclick=()=>{const [id,i]=b.dataset.task.split('|');const x=(S.tests||[]).find(z=>z.id===id);if(x)runTask(x,testTasks(x)[+i])});
+}
+function vTestNew(v){
+  const sub=(ADD&&ADD.testSub)||CUR.sub;const ts=T.filter(t=>t.s===sub);
+  v.innerHTML=`<section class="card grid" style="gap:14px"><h2>عندي امتحان في المدرسة</h2><p class="muted" style="margin:0">أدخل المادة والمواضيع وتاريخ الامتحان. كل يوم ستظهر لك في الصفحة الرئيسية مهمة قصيرة للاستعداد، وقبل الامتحان بيوم امتحان تجريبي شامل.</p>
+   <div class="field"><b>المادة</b><select id="tSub">${SUBJ.map(s=>`<option value="${s.id}" ${s.id===sub?'selected':''}>${s.n}</option>`).join('')}</select></div>
+   <div class="field"><b>المواضيع في الامتحان</b>${ts.length?`<div class="check-list">${ts.map(t=>`<label><input type="checkbox" data-tt="${t.id}" checked><span>${esc(t.n)}</span></label>`).join('')}</div>`:'<p class="muted small" style="margin:0">لا توجد مواضيع في هذه المادة. أضف موضوعًا أولًا من صفحة الدروس.</p>'}</div>
+   <div class="field"><b>تاريخ الامتحان</b><input type="date" id="tDate" min="${today()}" style="border:1.5px solid var(--line);border-radius:12px;padding:.5em .8em;background:var(--surface);max-width:240px"></div>
+   <div class="field"><b>اسم الامتحان (اختياري)</b><input id="tTitle" placeholder="مثال: امتحان الرياضيات – الفصل الأول" style="border:1.5px solid var(--line);border-radius:12px;padding:.5em .8em;background:var(--surface)"></div>
+   <div id="tMsg"></div><div class="row"><button class="btn-p" id="tSave">احفظ الخطة</button><button class="btn-ghost" data-go="home">إلغاء</button></div></section>
+   ${(S.tests||[]).length?`<section class="card"><h3 style="margin-bottom:8px">امتحاناتي</h3>${(S.tests||[]).slice().sort((a,b)=>a.date.localeCompare(b.date)).map(x=>`<div class="row between" style="padding:6px 0;border-bottom:1px solid var(--line)"><span><b>${esc(x.title||'امتحان '+(subj(x.sub)?.n||''))}</b> <span class="muted small">${x.date}${daysUntil(x.date)<0?' · انتهى':''}</span></span><button class="btn-ghost small" data-tdel="${x.id}" style="min-height:34px">احذف</button></div>`).join('')}</section>`:''}`;
+  $('tSub').onchange=e=>{ADD={...(ADD||{}),testSub:e.target.value};render()};
+  v.querySelectorAll('[data-go]').forEach(b=>b.onclick=()=>go(b.dataset.go));
+  v.querySelectorAll('[data-tdel]').forEach(b=>b.onclick=()=>{S.tests=(S.tests||[]).filter(x=>x.id!==b.dataset.tdel);persist(true);render()});
+  $('tSave').onclick=()=>{const ids=[...v.querySelectorAll('[data-tt]:checked')].map(c=>c.dataset.tt),d=$('tDate').value;if(!ids.length||!d){$('tMsg').innerHTML='<div class="notice warn">اختر موضوعًا واحدًا على الأقل وتاريخ الامتحان.</div>';return}
+    S.tests=[...(S.tests||[]),{id:'t'+Date.now().toString(36),sub:$('tSub').value,ids,date:d,title:$('tTitle').value.trim(),created:Date.now()}];ADD=null;persist(true);toast(`${STAR}<span>حُفظت خطة الاستعداد. بالتوفيق يا يمان!</span>`);go('home')};
+}
+async function askJSON(content,max){const r=await api('ask',{method:'POST',body:JSON.stringify({messages:[{role:'user',content}],max})});const t=r.text||'';const m=t.match(/```(?:json)?\s*([\s\S]*?)```/);let b=m?m[1]:t;const i=Math.min(...['{','['].map(c=>{const k=b.indexOf(c);return k<0?1e9:k}));const j=Math.max(b.lastIndexOf('}'),b.lastIndexOf(']'));return JSON.parse(b.slice(i,j+1))}
+let OQ=null;
+async function startOpen(tid){
+  const t=topic(tid);OQ={tid,qs:null,i:0,ans:[],imgs:[],res:[],busy:true,msg:'الأستاذ سامر يكتب 3 أسئلة مفتوحة…',done:false};go('open');
+  const cached=((S.openq||{})[tid]||[]);
+  if(cached.length>=6){OQ.qs=shuffle(cached).slice(0,3);OQ.busy=false;OQ.msg='';render();return}
+  if(!SAMPLE){OQ.busy=false;OQ.msg='الأسئلة المفتوحة تحتاج المعلّم الذكي (مفتاح ANTHROPIC_API_KEY في Vercel).';render();return}
+  try{const arr=await askJSON(`اكتب 3 أسئلة مفتوحة بالعربية في موضوع «${t.n}» (مادة ${subj(t.s).n}) بأسلوب امتحان البجروت، لطالب في الصف العاشر أو الحادي عشر في مدرسة عربية في إسرائيل. الطالب على طيف التوحّد: اكتب السؤال بجمل قصيرة وواضحة وحرفية. السؤال الأول سهل، والثاني متوسط، والثالث أصعب قليلًا. تأكّد من صحة الحلول بدقة.
+أعد مصفوفة JSON فقط: [{"q":"نص السؤال","sol":"الحل النموذجي خطوة خطوة، يفصل بين الخطوات \\n","pts":["نقطة أساسية يجب أن تظهر في الإجابة"]}]`,3000);
+    const qs=(Array.isArray(arr)?arr:[]).filter(q=>q&&typeof q.q==='string'&&typeof q.sol==='string').slice(0,3).map(q=>({q:q.q.slice(0,600),sol:q.sol.slice(0,1500),pts:(Array.isArray(q.pts)?q.pts:[]).map(String).slice(0,6)}));
+    if(!qs.length)throw 0;S.openq=S.openq||{};S.openq[tid]=[...cached,...qs].slice(-15);persist();OQ.qs=qs;OQ.msg=''}
+  catch(e){OQ.msg='لم تنجح كتابة الأسئلة هذه المرة. جرّب مرة أخرى بعد قليل.'}
+  OQ.busy=false;render();
+}
+async function gradeOpen(){
+  const q=OQ.qs[OQ.i],txt=(OQ.ans[OQ.i]||'').trim(),imgs=OQ.imgs[OQ.i]||[];if(!txt&&!imgs.length){OQ.msg='اكتب إجابتك أو صوّرها أولًا.';render();return}
+  OQ.busy=true;OQ.msg='الأستاذ سامر يقرأ إجابتك…';render();
+  const prompt=`أنت مصحّح امتحانات عادل ودقيق لطالب اسمه يمان (الصف 10–11، على طيف التوحّد).
+السؤال: ${q.q}
+الحل النموذجي: ${q.sol}
+النقاط الأساسية: ${q.pts.join(' | ')}
+إجابة يمان المكتوبة: ${txt||'(لا يوجد نص، الإجابة في الصور المرفقة)'}
+${imgs.length?'مرفقة صور لإجابة يمان المكتوبة بخط يده.':''}
+صحّح كل خطوة. اقبل الطرق الصحيحة المختلفة عن الحل النموذجي. استعمل جملًا قصيرة وواضحة وحرفية.
+أعد كائن JSON فقط: {"score":0,"steps":[{"t":"وصف قصير لخطوة أو نقطة","ok":true,"note":"ملاحظة قصيرة"}],"praise":"جملة تشجيع صادقة ومحدّدة","tip":"نصيحة واحدة قصيرة للمرة القادمة"}
+score رقم من 0 إلى 100.`;
+  const content=imgs.length?[...imgs.map(d=>({type:'image',source:{type:'base64',media_type:'image/jpeg',data:d}})),{type:'text',text:prompt}]:prompt;
+  try{const r=await askJSON(content,2500);const score=Math.max(0,Math.min(100,Math.round(+r.score||0)));
+    OQ.res[OQ.i]={score,steps:(Array.isArray(r.steps)?r.steps:[]).slice(0,8).map(x=>({t:String(x.t||''),ok:!!x.ok,note:String(x.note||'')})),praise:String(r.praise||''),tip:String(r.tip||'')};OQ.msg='';
+    addStars(Math.round(score/20),`سؤال مفتوح: ${score}%`);
+  }catch(e){OQ.msg=e&&e.code==='rate_limited'?'طلبات كثيرة الآن. انتظر دقيقة ثم جرّب.':'لم ينجح التصحيح هذه المرة. جرّب مرة أخرى.'}
+  OQ.busy=false;render();
+}
+function finishOpen(){const rs=OQ.res.filter(Boolean),n=OQ.qs.length;const avg=rs.length?Math.round(rs.reduce((a,b)=>a+b.score,0)/n):0,right=rs.filter(r=>r.score>=70).length;
+  const m=S.mastery[OQ.tid]||{r:0,t:0};S.mastery[OQ.tid]={r:m.r+right,t:m.t+n};
+  saveExam({ts:Date.now(),score:avg,right,n,mode:'open',review:false,sec:0,topics:{[OQ.tid]:[right,n]}});OQ.done=true;markDay();checkBadges();checkGoal();render()}
+function vOpen(v){
+  if(!OQ){go('exam');return}const t=topic(OQ.tid),s=subj(t.s);
+  if(OQ.done){const rs=OQ.res.filter(Boolean),avg=rs.length?Math.round(rs.reduce((a,b)=>a+b.score,0)/OQ.qs.length):0;
+    v.innerHTML=`<section class="card"><h2>أنهيت الأسئلة المفتوحة</h2><div class="row" style="gap:18px;margin:12px 0"><div class="score">${avg}%</div><p class="muted" style="margin:0">معدّل العلامات في ${OQ.qs.length} أسئلة عن «${esc(t.n)}».</p></div><div class="row"><button class="btn-p" id="oAgain">أسئلة جديدة</button><button data-go="exam">الامتحانات</button><button class="btn-ghost" data-go="home">الرئيسية</button></div></section>`;
+    $('oAgain').onclick=()=>startOpen(OQ.tid);v.querySelectorAll('[data-go]').forEach(b=>b.onclick=()=>go(b.dataset.go));return}
+  if(!OQ.qs){v.innerHTML=`<section class="card"><h2>أسئلة مفتوحة: ${esc(t.n)}</h2><div class="notice ${OQ.busy?'':'warn'}" style="margin-top:10px">${esc(OQ.msg)}</div><div class="row" style="margin-top:10px">${OQ.busy?'':`<button class="btn-p" id="oRetry">جرّب مرة أخرى</button>`}<button class="btn-ghost" data-go="exam">رجوع</button></div></section>`;if($('oRetry'))$('oRetry').onclick=()=>startOpen(OQ.tid);v.querySelectorAll('[data-go]').forEach(b=>b.onclick=()=>go(b.dataset.go));return}
+  const q=OQ.qs[OQ.i],r=OQ.res[OQ.i],n=OQ.qs.length,imgs=OQ.imgs[OQ.i]||[];
+  v.innerHTML=`<section class="card lesson" style="--sc:var(${s.c})"><div class="lesson-head"><div class="row between"><span class="chip" style="background:var(--surface)">أسئلة مفتوحة مثل البجروت · ${esc(t.n)}</span><span class="chip" style="background:var(--surface)">السؤال ${OQ.i+1} من ${n} · بدون وقت</span></div><div class="stepper" style="margin-top:12px">${OQ.qs.map((_,i)=>`<i class="${OQ.res[i]?'done':i===OQ.i?'now':''}"></i>`).join('')}</div></div>
+   <div class="lesson-body"><p class="qtext" style="margin:0">${hl(q.q,t)}</p>
+   ${r?'':`<div class="field"><b>اكتب الحل خطوة خطوة</b><textarea id="oAns" rows="6" style="border:1.5px solid var(--line);border-radius:12px;padding:.6em .8em;background:var(--surface);font-size:1.05em" placeholder="الخطوة 1: …">${esc(OQ.ans[OQ.i]||'')}</textarea></div>
+   <div class="field"><b>أو صوّر الحل من الدفتر (اختياري)</b><input type="file" id="oImg" accept="image/*" capture="environment" multiple><span class="muted small">${imgs.length?`مرفقة ${imgs.length} صور.`:''}</span></div>`}
+   ${OQ.msg?`<div class="notice ${OQ.busy?'':'warn'}">${esc(OQ.msg)}</div>`:''}
+   ${r?`<div class="row" style="gap:16px">${ring(r.score/100)}<div><div class="score" style="font-size:2.4em">${r.score}%</div></div><p style="margin:0;flex:1;min-width:200px"><b>${esc(r.praise)}</b></p></div>
+     <ol class="bubbles">${r.steps.map((x,i)=>`<li style="${x.ok?'':'background:var(--bad-bg);border-color:color-mix(in srgb,var(--bad) 35%,transparent)'}"><b style="background:var(${x.ok?'--good':'--bad'})">${x.ok?'✓':'✗'}</b><span><b>${esc(x.t)}</b><br><span class="small">${esc(x.note)}</span></span></li>`).join('')}</ol>
+     ${r.tip?`<div class="notice"><b>نصيحة للمرة القادمة:</b> ${esc(r.tip)}</div>`:''}
+     <details><summary>اعرض الحل النموذجي</summary><ol class="bubbles" style="margin-top:8px">${q.sol.split('\n').filter(Boolean).map((l,i)=>`<li><b>${i+1}</b><span>${hl(l,t)}</span></li>`).join('')}</ol></details>`:''}
+   <div class="row between"><button class="btn-ghost" data-go="exam">خروج</button><div class="row">${r?'':`<button class="btn-p" id="oGrade" ${OQ.busy?'disabled':''}>${OQ.busy?'جارٍ التصحيح…':'صحّح إجابتي'}</button>`}${r?(OQ.i<n-1?`<button class="btn-p" id="oNext">السؤال التالي</button>`:`<button class="btn-p" id="oFin">أنهِ وشاهد العلامة</button>`):''}</div></div></div></section>`;
+  const ta=$('oAns');if(ta)ta.oninput=()=>{OQ.ans[OQ.i]=ta.value};
+  const im=$('oImg');if(im)im.onchange=async()=>{OQ.imgs[OQ.i]=OQ.imgs[OQ.i]||[];for(const f of [...im.files].slice(0,3)){try{OQ.imgs[OQ.i].push(await resizeImage(f))}catch(e){}}render()};
+  if($('oGrade'))$('oGrade').onclick=gradeOpen;if($('oNext'))$('oNext').onclick=()=>{OQ.i++;OQ.msg='';render()};if($('oFin'))$('oFin').onclick=finishOpen;
+  v.querySelectorAll('[data-go]').forEach(b=>b.onclick=()=>go(b.dataset.go));
+}
+
+/* ============ NEW VERSION NOTICE + OFFLINE ============ */
+let BOOTV=null,updShown=false;
+async function checkVersion(){try{const j=await (await fetch('/api/version',{cache:'no-store'})).json();if(!BOOTV){BOOTV=j.v;return}if(j.v!==BOOTV&&!updShown){if(VIEW==='examrun'||(VIEW==='open'&&OQ&&!OQ.done)||!$('overlay').hidden)return;showUpdate()}}catch(e){}}
+async function showUpdate(){updShown=true;let notes=[];try{const c=await (await fetch('/changelog.json',{cache:'no-store'})).json();notes=(c[0]&&c[0].items)||[]}catch(e){}
+  const o=$('overlay');o.hidden=false;o.innerHTML=`<div class="card" role="dialog" aria-modal="true" aria-labelledby="upT"><img src="/icons/logo.svg" width="76" height="76" alt=""><h2 id="upT">نسخة جديدة من «أتعلم بطريقتي»</h2><p class="muted" style="margin:0">التطبيق صار أفضل. نجومك وتقدّمك محفوظة ولن تضيع.</p>${notes.length?`<div style="text-align:start;width:100%"><b>ما الجديد؟</b><ul style="margin:6px 0 0;padding-inline-start:1.2em;line-height:1.8">${notes.map(n=>`<li>${esc(n)}</li>`).join('')}</ul></div>`:''}<div class="row" style="justify-content:center"><button class="btn-p" id="upNow">حدّث الآن</button><button id="upLater">لاحقًا</button></div></div>`;
+  $('upNow').focus();$('upNow').onclick=async()=>{$('upNow').disabled=true;$('upNow').textContent='جارٍ التحديث…';try{dirty=true;await flush()}catch(e){}location.reload()};
+  $('upLater').onclick=()=>{o.hidden=true;setTimeout(()=>{updShown=false},20*60000)}}
+setInterval(checkVersion,4*60000);document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='visible')checkVersion()});
+if('serviceWorker' in navigator&&location.protocol==='https:'){window.addEventListener('load',()=>{navigator.serviceWorker.register('/sw.js').catch(()=>{})})}
+window.addEventListener('online',()=>{chip('عاد الاتصال');if(!ONLINE)connect();else{dirty=true;flush()}});
+window.addEventListener('offline',()=>chip('بدون إنترنت – التعلّم مستمر'));
 
 /* ============ ROUTER ============ */
 let VIEW='home', CUR={sub:'math',tid:'linear'}, L=null, E=null, LAB=null, examSetup=null, lastReview=null;
@@ -739,12 +848,12 @@ document.querySelectorAll('[data-nav]').forEach(b=>b.onclick=()=>{if(E&&!E.done&
 function render(){
   document.querySelectorAll('[data-nav]').forEach(b=>b.setAttribute('aria-current',(b.dataset.nav===VIEW||(VIEW==='lesson'&&b.dataset.nav==='learn')||(VIEW.startsWith('exam')&&b.dataset.nav==='exam'))?'page':'false'));
   const v=$('view');
-  ({home:vHome,learn:vLearn,lesson:vLesson,exam:vExamSetup,examrun:vExamRun,examres:vExamRes,progress:vProgress,settings:vSettings,achieve:vAchieve,addtopic:vAddTopic}[VIEW]||vHome)(v);
+  ({home:vHome,learn:vLearn,lesson:vLesson,exam:vExamSetup,examrun:vExamRun,examres:vExamRes,progress:vProgress,settings:vSettings,achieve:vAchieve,addtopic:vAddTopic,testnew:vTestNew,open:vOpen}[VIEW]||vHome)(v);
   updateTeacherMode();updateStarChip();
 }
 
 /* ============ HOME ============ */
-function nextTopic(){return T.find(t=>!S.lessons[t.id]?.done)||T[0]}
+function nextTopic(){const sch=((S.school||{})[today()]||[]).map(topic).filter(t=>t&&!(S.lessons[t.id]?.done&&dayOf(S.lessons[t.id].ts)===today()));if(sch.length)return sch[0];for(const x of upcomingTests()){const k=testTasks(x).find(k=>k.type==='lesson');if(k&&topic(k.tid))return topic(k.tid)}return T.find(t=>!S.lessons[t.id]?.done)||T[0]}
 function weakTopic(){let w=null,wv=101;for(const t of T){const m=mast(t.id);if(m!==null&&m<wv){wv=m;w=t}}return w&&wv<80?w:null}
 function vHome(v){
   const nt=nextTopic(),wt=weakTopic(),last=EXAMS.at(-1),due=dueReviews();
@@ -754,6 +863,7 @@ function vHome(v){
   <div class="row"><button class="star-chip" data-go="achieve">${STAR} ${totalStars()} نجمة</button><span class="chip">${doneN} من ${T.length} دروس</span>${last?`<span class="chip">آخر امتحان: ${last.score}%</span>`:''}</div></div></section>
   <section class="card quote">${(()=>{const q=quoteToday();return `<span class="muted small">قول اليوم</span><blockquote style="margin-top:4px">${esc(q[0])}</blockquote><div class="muted small" style="margin-top:2px">${esc(q[1])}</div><div class="row between" style="margin-top:8px"><span><b>المعنى:</b> ${esc(q[2])}</span><button class="btn-ghost" data-sayq style="min-height:36px">اسمع</button></div>`})()}</section>
   <section class="card"><div class="row between" style="margin-bottom:10px"><h3>هدف اليوم</h3><span class="muted small">عند إكماله تحصل على 15 نجمة</span></div><div class="goal">${goalState().map(g=>`<div class="g ${g.ok?'ok':''}">${ring(g.p)}<div><b>${g.n}</b><div class="muted small">${g.sub}</div></div></div>`).join('')}</div></section>
+  ${homeExtras()}
   <section class="grid plan" aria-label="خطة الجلسة">
    <div class="card" style="--sc:var(${subj(nt.s).c});--pc:var(${subj(nt.s).c})"><div class="pic">${PICS.book}</div><span class="step-n">الخطوة 1 · درس</span><h3>${esc(nt.n)}</h3><p class="muted small" style="margin:0">${esc(subj(nt.s).n)} · ${nt.steps.length} خطوات قصيرة مع مختبر تفاعلي</p><div style="margin-top:auto"><button class="btn-p" data-start="${nt.id}">ابدأ الدرس</button></div></div>
    <div class="card" style="--pc:var(--s-chem)"><div class="pic">${PICS.breath}</div><span class="step-n">الخطوة 2 · استراحة قصيرة</span><h3>دقيقتان للتنفّس</h3><p class="muted small" style="margin:0">دائرة تكبر وتصغر. نتنفّس معها ببطء.</p><div style="margin-top:auto"><button data-break>ابدأ الاستراحة</button></div></div>
@@ -767,6 +877,7 @@ function vHome(v){
   const qk=v.querySelector('[data-quick]');if(qk)qk.onclick=e=>{const id=e.currentTarget.dataset.quick;const ids=id?[id]:T.filter(t=>S.lessons[t.id]?.done).map(t=>t.id);startExam({ids:ids.length?ids:[nextTopic().id],n:5,mode:'practice',timer:'none'})};
   v.querySelectorAll('[data-sub]').forEach(b=>b.onclick=()=>{CUR.sub=b.dataset.sub;go('learn')});
   v.querySelectorAll('[data-go]').forEach(b=>b.onclick=()=>go(b.dataset.go));
+  bindHomeExtras(v);
   const sq=v.querySelector('[data-sayq]');if(sq)sq.onclick=()=>{const q=quoteToday();speak(q[0]+'. المعنى: '+q[2])};
 }
 
@@ -1118,8 +1229,9 @@ function vExamSetup(v){
    <div class="field"><b>عدد الأسئلة</b><div class="seg">${[5,10,15,20].map(n=>`<button data-n="${n}" aria-pressed="${X.n===n}">${n}</button>`).join('')}</div><span class="muted small">متوفّر في المواضيع المختارة: ${avail} سؤال</span></div>
    <div class="field"><b>طريقة الامتحان</b><div class="seg"><button data-mode="exam" aria-pressed="${X.mode==='exam'}">امتحان حقيقي: النتيجة في النهاية</button><button data-mode="practice" aria-pressed="${X.mode==='practice'}">تدريب: ملاحظة بعد كل سؤال</button></div></div>
    <div class="field"><b>الوقت</b><div class="seg"><button data-timer="none" aria-pressed="${X.timer==='none'}">بدون ساعة</button><button data-timer="up" aria-pressed="${X.timer==='up'}">أظهر الوقت الذي مرّ</button><button data-timer="down" aria-pressed="${X.timer==='down'}">وقت محدد (دقيقة ونصف لكل سؤال)</button></div><span class="muted small">في الوقت المحدد لا يُغلق الامتحان عند انتهاء الوقت؛ تظهر ملاحظة هادئة فقط.</span></div>
+   <div class="row" style="padding:12px;border-radius:12px;background:var(--surface2)"><b style="flex:1;min-width:200px">أسئلة مفتوحة مثل البجروت: تكتب الحل أو تصوّره، والأستاذ سامر يصحّح كل خطوة.</b><button id="xOpen" ${X.ids.size===1?'':'disabled'}>ابدأ أسئلة مفتوحة</button><button class="btn-ghost" id="xTest">عندي امتحان في المدرسة</button></div>
    <div class="row"><button class="btn-p" id="xStart" ${X.ids.size?'':'disabled'}>ابدأ الامتحان</button><button id="xGen" ${X.ids.size===1?'':'disabled'}>أنشئ 5 أسئلة جديدة بالذكاء الاصطناعي</button></div>
-   <div id="genMsg" class="muted small">${X.ids.size===1?'':'لإنشاء أسئلة جديدة اختر موضوعًا واحدًا فقط.'}</div>
+   <div id="genMsg" class="muted small">${X.ids.size===1?'':'لإنشاء أسئلة جديدة أو للأسئلة المفتوحة اختر موضوعًا واحدًا فقط.'}</div>
   </section>`;
   v.querySelectorAll('[data-sub]').forEach(b=>b.onclick=()=>{X.sub=b.dataset.sub;render()});
   v.querySelectorAll('[data-tid]').forEach(c=>c.onchange=()=>{c.checked?X.ids.add(c.dataset.tid):X.ids.delete(c.dataset.tid);render()});
@@ -1129,6 +1241,7 @@ function vExamSetup(v){
   v.querySelectorAll('[data-timer]').forEach(b=>b.onclick=()=>{X.timer=b.dataset.timer;S.settings.timer=X.timer;persist();render()});
   $('xStart').onclick=()=>startExam({ids:[...X.ids],n:X.n,mode:X.mode,timer:X.timer});
   $('xGen').onclick=()=>genQuestions([...X.ids][0]);
+  $('xOpen').onclick=()=>startOpen([...X.ids][0]);$('xTest').onclick=()=>go('testnew');
 }
 async function genQuestions(id){
   const m=$('genMsg'),t=topic(id);
@@ -1220,7 +1333,7 @@ function vProgress(v){
    chart=`<div class="tbl"><svg viewBox="0 0 ${W} ${H}" style="width:100%;min-width:320px;height:auto" role="img" aria-label="علامات آخر الامتحانات">${grid}<polygon points="${X(0)},${Y(0)} ${pts} ${X(ex.length-1)},${Y(0)}" style="fill:color-mix(in srgb,var(--accent) 12%,transparent)"/><polyline points="${pts}" style="fill:none;stroke:var(--accent)" stroke-width="3"/>${ex.map((e,i)=>`<circle cx="${X(i)}" cy="${Y(e.score)}" r="${i===ex.length-1?6:4}" style="fill:var(--accent)"/><text x="${X(i)}" y="${Y(e.score)-10}" font-size="12" text-anchor="middle" class="svgtxt">${e.score}</text><text x="${X(i)}" y="${H-12}" font-size="11" text-anchor="middle" class="svgmuted">${new Date(e.ts).toLocaleDateString('ar',{day:'numeric',month:'numeric'})}</text>`).join('')}</svg></div>`}
   v.innerHTML=`<section class="card"><h2>تقدّمي</h2><div class="grid stats" style="margin-top:12px">
    <div class="stat"><b>${doneN} / ${T.length}</b>دروس مكتملة</div><div class="stat"><b>${EXAMS.length}</b>امتحانات</div><div class="stat"><b>${avg!==null?avg+'%':'–'}</b>معدّل الامتحانات</div><div class="stat"><b>${streak}</b>${streak===1?'يوم تعلّم متتالٍ':'أيام تعلّم متتالية'}</div><div class="stat"><b>${Object.keys(S.review).length}</b>أسئلة في المراجعة (${dueReviews().length} اليوم)</div><div class="stat"><b>${S.minutes[today()]||0}</b>دقائق تعلّم اليوم</div></div></section>
-  <section class="card"><h3 style="margin-bottom:8px">علامات آخر الامتحانات</h3>${chart}${EXAMS.length?`<div class="tbl" style="margin-top:10px"><table><thead><tr><th>التاريخ</th><th>النوع</th><th>العلامة</th><th></th></tr></thead><tbody>${EXAMS.slice(-8).reverse().map(x=>`<tr><td>${new Date(x.ts).toLocaleDateString('ar',{day:'numeric',month:'long'})}</td><td>${x.review?'مراجعة':x.mode==='exam'?'امتحان':'تدريب'}</td><td class="num"><b>${x.score}%</b> <span class="muted small">(${x.right}/${x.n})</span></td><td>${x.d?`<button class="btn-ghost small" data-res="${x.ts}" style="min-height:34px">راجع الإجابات</button>`:''}</td></tr>`).join('')}</tbody></table></div>`:''}</section>
+  <section class="card"><h3 style="margin-bottom:8px">علامات آخر الامتحانات</h3>${chart}${EXAMS.length?`<div class="tbl" style="margin-top:10px"><table><thead><tr><th>التاريخ</th><th>النوع</th><th>العلامة</th><th></th></tr></thead><tbody>${EXAMS.slice(-8).reverse().map(x=>`<tr><td>${new Date(x.ts).toLocaleDateString('ar',{day:'numeric',month:'long'})}</td><td>${x.review?'مراجعة':x.mode==='open'?'أسئلة مفتوحة':x.mode==='exam'?'امتحان':'تدريب'}</td><td class="num"><b>${x.score}%</b> <span class="muted small">(${x.right}/${x.n})</span></td><td>${x.d?`<button class="btn-ghost small" data-res="${x.ts}" style="min-height:34px">راجع الإجابات</button>`:''}</td></tr>`).join('')}</tbody></table></div>`:''}</section>
   <section class="card"><h3 style="margin-bottom:8px">المواد</h3><div class="grid">${SUBJ.map(s=>{const p=subjProgress(s.id);const ms=T.filter(t=>t.s===s.id).map(t=>mast(t.id)).filter(x=>x!==null);const m=ms.length?Math.round(ms.reduce((a,b)=>a+b,0)/ms.length):null;return `<div style="--sc:var(${s.c})"><div class="row between small"><b style="color:var(${s.c})">${s.n}</b><span>${p.done}/${p.total} دروس${m!==null?' · امتحانات '+m+'%':''}</span></div><div class="bar"><i style="width:${p.pct}%"></i></div></div>`}).join('')}</div></section>
   <section class="card"><h3 style="margin-bottom:8px">كل المواضيع</h3><div class="tbl"><table><thead><tr><th>الموضوع</th><th>المادة</th><th>علامة الدرس</th><th>دقّة الامتحانات</th><th>الحالة</th><th></th></tr></thead><tbody>
    ${T.map(t=>{const l=lessonPct(t.id),m=mast(t.id),mt=S.mastery[t.id];const st=l===null?['لم يبدأ','']:m===null?['تعلّم الدرس','']:m>=80?['متمكّن','good']:m>=60?['في الطريق','warn']:['يحتاج مراجعة','bad'];
@@ -1267,7 +1380,8 @@ function updateTeacherMode(){const m=$('tMode');if(!m)return;m.textContent=VIEW=
 function context(){
   if(VIEW==='lesson'&&L&&!L.finished){const t=topic(L.tid),st=t.steps[L.step];return `يمان الآن في درس "${t.n}" (مادة ${subj(t.s).n})، الخطوة ${L.step+1}: "${st.t}".\nالشرح في الخطوة: ${st.x}\nسؤال التمرين: ${st.q}\nالخيارات: ${st.o.join(' / ')}\nللمعلّم فقط: الإجابة الصحيحة "${st.o[st.c]}". لا تكشفها مباشرة؛ أعطِ تلميحًا أولًا. اكشفها فقط إذا طلب يمان الحل صراحة بعد أن حاول.`}
   if(VIEW==='examrun'&&E){const q=E.qs[E.i],t=topic(q.tid);return E.mode==='exam'?`يمان الآن في امتحان تجريبي في موضوع "${t.n}". ممنوع أن تعطي الإجابة أو تلميحًا يكشفها. يمكنك فقط تهدئته وشرح المفهوم العام بكلمات عامة.`:`يمان يتدرّب على سؤال في موضوع "${t.n}": ${q.q} (الخيارات: ${q.o.join(' / ')}). للمعلّم فقط: الصحيحة "${q.o[q.c]}". أعطِ تلميحًا أولًا ولا تكشف الحل إلا إذا طلبه بعد محاولة.`}
-  return 'يمان في الصفحة الرئيسية للتطبيق. المواد: '+SUBJ.map(s=>s.n).join('، ')+'.';
+  const ut=upcomingTests().map(x=>`امتحان ${subj(x.sub)?.n||''} في ${x.date} (المواضيع: ${x.ids.map(id=>topic(id)?.n).filter(Boolean).join('، ')})`).join('؛ ');const sc=((S.school||{})[today()]||[]).map(id=>topic(id)?.n).filter(Boolean).join('، ');
+  return 'يمان في الصفحة الرئيسية للتطبيق. المواد: '+SUBJ.map(s=>s.n).join('، ')+'.'+(sc?' تعلّم اليوم في المدرسة: '+sc+'.':'')+(ut?' امتحانات قادمة: '+ut+'.':'');
 }
 const SYS=`أنت "الأستاذ سامر"، معلّم صبور وهادئ لطالب اسمه يمان، في الصف العاشر أو الحادي عشر في مدرسة عربية في إسرائيل. يمان على طيف التوحّد.
 قواعد الكتابة:
@@ -1310,7 +1424,7 @@ document.documentElement.setAttribute('dir','rtl');document.documentElement.setA
 applySettings();
 teacherSay('أهلًا يمان. أنا الأستاذ سامر. اختر درسًا، ونمشي معًا خطوة خطوة. إذا احتجت شيئًا اضغط على أحد الأزرار تحت.');
 if(!routeFromHash())render();
-connect();
+connect();checkVersion();
 </script>
 </body>
 </html>

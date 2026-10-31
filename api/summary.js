@@ -19,6 +19,8 @@ export default async function handler(req, res) {
       lessonsToday,
       examsToday,
       reviewDue,
+      starsTotal: S.stars || 0,
+      upcomingTests: (S.tests || []).filter(x => x.date >= today).map(x => ({ date: x.date, subject: x.sub, title: x.title || '' })),
       reviewDoneToday: E.some(x => x.review && day(x.ts) === today),
       lastActivity: data?.updated || null,
     });
