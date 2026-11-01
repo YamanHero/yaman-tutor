@@ -1940,7 +1940,7 @@ function vSettings(v){
    <div class="field"><b>حجم الخط</b>${seg('size',[['m','عادي'],['l','كبير'],['xl','كبير جدًا']])}</div>
    <div class="field"><b>ألوان هادئة</b>${seg('calm',[['off','عادية'],['on','هادئة']])}<span class="muted small">ألوان أخف، بدون حركة وبدون أصوات المكافأة.</span></div>
    <div class="field"><b>وضع التركيز</b>${seg('focus',[['off','لا'],['on','نعم']])}<span class="muted small">يخفي كل شيء ما عدا الخطوة الحالية.</span></div>
-   <div class="field"><b>الحركة على الشاشة</b>${seg('motion',[['on','عادية'],['off','بدون حركة']])}<span class="muted small">"بدون حركة" يوقف كل الرسوم المتحركة.</span></div>
+   <p class="muted small" style="margin:0">رقم النسخة: <bdi dir="ltr">${esc(BOOTV||'…')}</bdi></p><div class="field"><b>الحركة على الشاشة</b>${seg('motion',[['on','عادية'],['off','بدون حركة']])}<span class="muted small">"بدون حركة" يوقف كل الرسوم المتحركة.</span></div>
    <div class="field"><b>الصوت</b><p class="muted small" style="margin:0">${TTS?'الصوت الطبيعي مفعّل.':'الصوت الطبيعي غير مفعّل بعد، فيُستعمل صوت الجهاز.'}</p>${seg('rate',[[0.6,'بطيء'],[0.8,'متوسط'],[1,'عادي']])}<button style="align-self:start" id="sTest">جرّب الصوت</button></div>
    <div class="field"><b>أسلوب الصوت</b>${seg('voiceStyle',[['cartoon','راوي كرتون (مثل الدبلجة)'],['teacher','معلّم هادئ']])}<span class="muted small">يعمل مع الصوت الطبيعي فقط.</span></div>
    <div class="field"><b>اقرأ أجوبة الأستاذ سامر بصوت تلقائيًا</b>${seg('autoread',[['off','لا'],['on','نعم']])}</div>

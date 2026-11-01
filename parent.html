@@ -244,6 +244,7 @@ function draw(){
   if($('sg'))$('sg').onclick=()=>{RW.rewards=[{id:'r1',name:'اختيار وجبة العشاء',cost:150},{id:'r2',name:'ساعة لعب إضافية',cost:250},{id:'r3',name:'نزهة في نهاية الأسبوع',cost:500},{id:'r4',name:'هدية صغيرة يختارها يمان',cost:900}];draw()};
   document.querySelectorAll('[data-give]').forEach(b=>b.onclick=async()=>{RW.given=[...RW.given,b.dataset.give];if(await saveRW())draw()});
 }
+fetch('/api/version').then(r=>r.json()).then(x=>{const d=document.createElement('div');d.className='muted small';d.style.cssText='text-align:center;padding:14px';d.textContent='v '+x.v;document.body.appendChild(d)}).catch(()=>{});
 document.documentElement.lang=LANG;document.title=t('title');
 if(J)new MutationObserver(()=>{document.querySelectorAll('a[href="/"],a[href^="/#"]').forEach(a=>{a.setAttribute('href','/judy'+a.getAttribute('href').slice(1))})}).observe(document.getElementById('app'),{childList:true});
 load();
