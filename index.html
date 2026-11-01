@@ -715,7 +715,8 @@ T.push(
  {q:'كيف تقول إنك لا توافق بلطف؟',o:['«أنت مخطئ»','«فكرتك جيدة، وعندي فكرة أخرى»','أصرخ','أسكت وأغضب'],c:1,w:'نبدأ بالاحترام ثم نضيف رأينا.'},
  {q:'لماذا ينجح فريق الأبطال في الكرتون؟',o:['لأن واحدًا يعمل وحده','لأن لكل واحد دورًا ويتعاونون','لأنهم لا يتكلّمون','بالصدفة'],c:1,w:'الأدوار والتعاون.'}]});
 for(let i=T.length-1;i>=0;i--)if(T[i].s==='phys')T.splice(i,1); /* Yaman does not study physics */
-const PROFILE=(()=>{let u='';try{u=new URLSearchParams(location.search).get('u')||'';if(u)localStorage.setItem('yt_profile',u);else u=localStorage.getItem('yt_profile')||''}catch(e){}return u==='judy'?'judy':''})();
+const PROFILE=(()=>{let u='';try{u=new URLSearchParams(location.search).get('u')||''}catch(e){}return (u==='judy'||/^\/judy\/?$/.test(location.pathname))?'judy':''})();
+if(PROFILE){try{const m=document.querySelector('link[rel=manifest]');if(m)m.href='/manifest-judy.json'}catch(e){}}
 /* ============ JUDY PROFILE (grade 3) ============ */
 const KID=PROFILE==='judy'?'جودي':'يمان';
 if(PROFILE==='judy'){

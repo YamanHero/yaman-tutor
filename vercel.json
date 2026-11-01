@@ -22,7 +22,7 @@
   "rewrites": [
     {
       "source": "/judy",
-      "destination": "/index.html?u=judy"
+      "destination": "/"
     }
   ]
 }
