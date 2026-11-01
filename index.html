@@ -719,6 +719,8 @@ const PROFILE=(()=>{let u='';try{u=new URLSearchParams(location.search).get('u')
 if(PROFILE){try{const m=document.querySelector('link[rel=manifest]');if(m)m.href='/manifest-judy.json'}catch(e){}}
 /* ============ JUDY PROFILE (grade 3) ============ */
 const KID=PROFILE==='judy'?'جودي':'يمان';
+const FEM=[['اختر','اختاري'],['احتجت','احتجتِ'],['أحسنت','أحسنتِ'],['ممتاز','ممتازة'],['رائع','رائعة'],['أنهيت','أنهيتِ'],['أكملت','أكملتِ'],['حاولت','حاولتِ'],['جرّب','جرّبي'],['تعلّمت','تعلّمتِ'],['اضغط','اضغطي'],['ابدأ','ابدئي'],['تابع','تابعي'],['أجبت','أجبتِ'],['نجحت','نجحتِ'],['فهمت','فهمتِ'],['أخطأت','أخطأتِ'],['قرأت','قرأتِ'],['وصلت','وصلتِ'],['كتبت','كتبتِ']];
+const fy=s=>{if(!PROFILE||typeof s!=='string')return s;let o=s.replace(/يمان/g,KID);for(const [a,b] of FEM)o=o.replace(new RegExp('(?<![\\u0600-\\u06FF])'+a+'(?![\\u0600-\\u06FF])','g'),b);return o};
 if(PROFILE==='judy'){
 const J=(id,s,n,steps,bank)=>({id,s,n,lab:'concepts',leg:{},steps:steps.map(([t,x,q,o,c,h,k])=>({t,x,q,o,c,h,w:h,p:{k:k||[]}})),bank:bank.map(([q,o,c,w])=>({q,o,c,w}))});
 const JT=[
@@ -941,7 +943,7 @@ async function ttsUrl(text,lang){const vs=S.settings.voiceStyle||'cartoon';const
   const pr=fetch('/api/tts',{method:'POST',headers:{'content-type':'application/json','x-family-code':CODE},body:JSON.stringify({text,lang,style:vs})}).then(r=>{if(!r.ok)throw 0;return r.blob()}).then(b=>URL.createObjectURL(b));
   audioCache.set(k,pr);pr.catch(()=>audioCache.delete(k));return pr}
 function bestVoice(lang){const vs=speechSynthesis.getVoices().filter(v=>v.lang.toLowerCase().startsWith(lang));const score=v=>(/natural|neural|online|premium|enhanced|siri/i.test(v.name)?10:0)+(/google/i.test(v.name)?5:0)+(v.localService?0:2);return vs.sort((a,b)=>score(b)-score(a))[0]}
-async function speak(text,lang='ar'){
+async function speak(text,lang='ar'){text=fy(text);
   stopSpeak();const my=++speakToken;const l=lang.startsWith('he')?'he':lang.startsWith('en')?'en':'ar';const t=speechText(text,l);if(!t)return;
   if(TTS&&ONLINE){
     try{const cs=chunks(t);let next=ttsUrl(cs[0],l);
@@ -1516,7 +1518,7 @@ function finishLesson(t){
 function vLessonDone(v,t,s){
   const r=L.finished;
   v.innerHTML=`${nextCard()}<section class="card" style="--sc:var(${s.c})"><span class="chip">${s.n} · ${esc(t.n)}</span>
-   <h2 style="margin-top:10px">أنهيت الدرس. أحسنت يا يمان.</h2>
+   <h2 style="margin-top:10px">${fy('أنهيت الدرس. أحسنت يا يمان.')}</h2>
    <div class="row" style="margin:14px 0;gap:18px"><div class="score">${r.score}%</div><p class="muted" style="max-width:40ch;margin:0">علامة الدرس: 100 لكل إجابة من المحاولة الأولى، 70 من المحاولة الثانية، 40 بعد ذلك.</p></div>
    <div class="notice ${r.missed.length?'warn':'good'}">${r.missed.length?'راجع هذه الخطوات مرة أخرى: '+r.missed.map(i=>esc(t.steps[i].t)).join('، '):'كل إجاباتك صحيحة من المحاولة الأولى.'}</div>
    <h3 style="margin-top:16px">ملخّص الأفكار</h3>
@@ -1944,7 +1946,7 @@ function vSettings(v){
    <div class="field"><b>الصوت</b><p class="muted small" style="margin:0">${TTS?'الصوت الطبيعي مفعّل.':'الصوت الطبيعي غير مفعّل بعد، فيُستعمل صوت الجهاز.'}</p>${seg('rate',[[0.6,'بطيء'],[0.8,'متوسط'],[1,'عادي']])}<button style="align-self:start" id="sTest">جرّب الصوت</button></div>
    <div class="field"><b>أسلوب الصوت</b>${seg('voiceStyle',[['cartoon','راوي كرتون (مثل الدبلجة)'],['teacher','معلّم هادئ']])}<span class="muted small">يعمل مع الصوت الطبيعي فقط.</span></div>
    <div class="field"><b>اقرأ أجوبة الأستاذ سامر بصوت تلقائيًا</b>${seg('autoread',[['off','لا'],['on','نعم']])}</div>
-   <div class="field"><b>ماذا يحب يمان؟ (للأمثلة)</b><div class="row">${INTERESTS.map(x=>`<button class="chip" data-intset="${esc(x)}" aria-pressed="${(st.interests||[]).includes(x)}" style="min-height:36px;cursor:pointer;${(st.interests||[]).includes(x)?'background:var(--good-bg);color:var(--good)':''}">${esc(x)}</button>`).join('')}</div></div>
+   <div class="field"><b>ماذا ${PROFILE?'تحبين':'يحب يمان'}؟ (للأمثلة)</b><div class="row">${INTERESTS.map(x=>`<button class="chip" data-intset="${esc(x)}" aria-pressed="${(st.interests||[]).includes(x)}" style="min-height:36px;cursor:pointer;${(st.interests||[]).includes(x)?'background:var(--good-bg);color:var(--good)':''}">${esc(x)}</button>`).join('')}</div></div>
    <div class="field"><b>شرح صوتي مع الصور المتحركة</b>${seg('narrate',[['on','نعم'],['off','لا']])}</div>
    <div class="field"><b>«توقّع أولًا» قبل الصور المتحركة</b>${seg('predict',[['on','نعم'],['off','لا']])}<span class="muted small">قبل أن يتحرّك الشكل، يسألك الأستاذ سامر ماذا تتوقّع. التوقّع الصحيح = نجمتان.</span></div>
    <div class="field"><b>صوت خفيف عند الحصول على نجوم</b>${seg('chime',[['on','نعم'],['off','لا']])}</div>
@@ -2293,10 +2295,11 @@ function fmtMsg(t,mi){const vx=vzExtract(t);vx.specs.forEach((sp,j)=>{VZS[mi+'_'
   return out.map(b=>{const body=b.l.join('\n').trim().split('\n').map(x=>{const m=x.match(/^\s*(\d+)[.)-]\s*(.*)$/);return m?`<div class="tstep"><span>${m[1]}</span><div>${inl(m[2])}</div></div>`:x.trim()?`<div>${inl(x)}</div>`:''}).join('');
     return b.k?`<div class="tb tb-${b.k}"><b class="tbh">${b.h}</b>${body}</div>`:body}).join('').replace(/(?:<div>)?\uE000([\uE100-\uE1FF])\uE000(?:<\/div>)?/g,(m,c)=>`<div class="viz" data-vk="${mi}_${c.charCodeAt(0)-0xE100}"></div>`)}
 function drawChat(){const c=$('chat');c.innerHTML=CHAT.map((m,i)=>`<div class="msg ${m.role==='user'?'u':'t'}">${m.img?`<img class="timg" src="${m.img}" alt="صورة التمرين">`:''}${m.role==='user'?fmtMsg(m.text,'u'+i).replace(/<div class="viz"[^>]*><\/div>/g,''):fmtMsg(m.text,i)}</div>`).join('');mountViz(c);c.scrollTop=c.scrollHeight}
-function teacherSay(t){lastT=t;addMsg('assistant',t)}
+function teacherSay(t){t=fy(t);lastT=t;addMsg('assistant',t)}
 function toastT(t){teacherSay(t)}
 function updateTeacherMode(){const m=$('tMode');if(!m)return;if(typeof RP!=='undefined'&&RP){m.textContent='مشهد تدريب: سامر يؤدّي الدور ويعطيك نصائح';return}m.textContent=VIEW==='examrun'&&E&&E.mode==='exam'?'أثناء الامتحان: أشرح المفاهيم فقط ولا أعطي إجابات':SAMPLE?'معلّم ذكي: اسألني أي سؤال':'إجابات جاهزة من الدرس (المعلّم الذكي غير مفعّل)'}
-function context(){
+function context(){return fy(context0())}
+function context0(){
   if(VIEW==='lesson'&&L&&!L.finished){const t=topic(L.tid),st=t.steps[L.step];return `يمان الآن في درس "${t.n}" (مادة ${subj(t.s).n})، الخطوة ${L.step+1}: "${st.t}".\nالشرح في الخطوة: ${st.x}${st.w?'\nمثال من الدرس: '+st.w:''}${st.h?'\nتلميح من الدرس: '+st.h:''}\nسؤال التمرين: ${st.q}\nالخيارات: ${st.o.join(' / ')}\nللمعلّم فقط: الإجابة الصحيحة "${st.o[st.c]}". لا تكشفها مباشرة؛ أعطِ تلميحًا أولًا. اكشفها فقط إذا طلب يمان الحل صراحة بعد أن حاول.`}
   if(VIEW==='examrun'&&E){const q=E.qs[E.i],t=topic(q.tid);return E.mode==='exam'?`يمان الآن في امتحان تجريبي في موضوع "${t.n}". ممنوع أن تعطي الإجابة أو تلميحًا يكشفها. يمكنك فقط تهدئته وشرح المفهوم العام بكلمات عامة.`:`يمان يتدرّب على سؤال في موضوع "${t.n}": ${q.q} (الخيارات: ${q.o.join(' / ')}). للمعلّم فقط: الصحيحة "${q.o[q.c]}". أعطِ تلميحًا أولًا ولا تكشف الحل إلا إذا طلبه بعد محاولة.`}
   const ut=upcomingTests().map(x=>`امتحان ${subj(x.sub)?.n||''} في ${x.date} (المواضيع: ${x.ids.map(id=>topic(id)?.n).filter(Boolean).join('، ')})`).join('؛ ');const sc=((S.school||{})[today()]||[]).map(id=>topic(id)?.n).filter(Boolean).join('، ');
