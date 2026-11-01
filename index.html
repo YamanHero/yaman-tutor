@@ -298,6 +298,15 @@ html[data-focus="on"] .top,html[data-focus="on"] aside#teacher,html[data-focus="
 html[data-focus="on"] .wrap{grid-template-columns:minmax(0,1fr);max-width:780px;padding-block:58px 30px}
 html[data-calm="on"] main,html[data-calm="on"] .top,html[data-calm="on"] .tabbar,html[data-calm="on"] .overlay .card{filter:saturate(.45) contrast(.95)}
 html[data-calm="on"] .hero-next{background:var(--surface)}
+.tt{display:grid;gap:8px}
+.tt-day{border:1.5px solid var(--line);border-radius:14px;padding:8px 10px;background:var(--surface)}
+.tt-day.today{border-color:var(--accent);background:color-mix(in srgb,var(--accent) 6%,var(--surface))}
+.tt-h{display:flex;align-items:center;gap:8px;width:100%;background:none;border:0;padding:4px 0;min-height:36px;text-align:start}
+.tt-h b{min-width:70px}.tt-h .muted{margin-inline-start:auto}
+.tt-list{display:flex;flex-wrap:wrap;gap:6px}
+.tt-p{display:inline-flex;align-items:center;gap:6px;padding:3px 10px;border-radius:20px;border:1.5px solid var(--sc);color:var(--sc);background:color-mix(in srgb,var(--sc) 8%,var(--surface));font-size:.9em;font-weight:600}
+.tt-p i{font-style:normal;width:18px;height:18px;border-radius:50%;display:grid;place-items:center;background:var(--sc);color:var(--surface);font-size:.75em}
+.tt-x{min-height:22px;padding:0 4px;border:0;background:none;color:var(--muted)}
 .hero-link{display:flex;align-items:center;gap:12px;text-decoration:none;color:inherit;border:1.5px solid color-mix(in srgb,#E2552E 40%,var(--line));background:color-mix(in srgb,#E2552E 7%,var(--surface))}
 .hero-link:hover{border-color:#E2552E}
 .hero-ic{width:44px;height:44px;border-radius:12px;background:#E2552E;color:#fff;display:grid;place-items:center;font-weight:800;flex:none}
@@ -608,10 +617,11 @@ const ORG={
 
 /* ============ STATE & STORAGE ============ */
 const LS='yaman_tutor_v4';
-const blank=()=>({lessons:{},mastery:{},days:[],gen:{},review:{},minutes:{},stars:0,starLog:[],badges:{},claims:[],goalDone:{},settings:{size:'m',motion:'on',rate:0.8,timer:'none',chime:'on',autoread:'off',narrate:'on',predict:'on',interests:[],calm:'off',focus:'off'}});
+const blank=()=>({lessons:{},mastery:{},days:[],gen:{},review:{},minutes:{},stars:0,starLog:[],badges:{},claims:[],goalDone:{},settings:{size:'m',motion:'on',rate:0.8,timer:'none',chime:'on',autoread:'off',narrate:'on',predict:'on',voiceStyle:'cartoon',interests:['كرتون سبيس تون المدبلج'],intAsked:1,stMig:1,calm:'off',focus:'off'}});
 const today=()=>new Intl.DateTimeFormat('en-CA',{timeZone:'Asia/Jerusalem'}).format(new Date());
 let S=blank(), EXAMS=[];
-function adopt(o){if(!o||!o.S)return;S={...blank(),...o.S,settings:{...blank().settings,...(o.S.settings||{})}};EXAMS=Array.isArray(o.E)?o.E:[]}
+function adopt(o){if(!o||!o.S)return;S={...blank(),...o.S,settings:{...blank().settings,...(o.S.settings||{})}};EXAMS=Array.isArray(o.E)?o.E:[];migrate()}
+function migrate(){const st=S.settings;if(!st.stMig){st.stMig=1;const l=new Set(st.interests||[]);l.add('كرتون سبيس تون المدبلج');st.interests=[...l];st.intAsked=1}}
 try{adopt(JSON.parse(localStorage.getItem(LS)||'null'))}catch(e){}
 let CODE='';try{CODE=localStorage.getItem(LS+'_code')||''}catch(e){}
 let ONLINE=false, SAMPLE=null, saving=false, dirty=false, saveTimer=null;
@@ -724,8 +734,8 @@ function speechText(t,lang){let x=String(t);
    .replace(/[←→]/g,'، ').replace(/²/g,' تربيع ').replace(/Δ/g,' دلتا ').replace(/≤/g,' أصغر من أو يساوي ').replace(/(\d)\/(\d)/g,'$1 على $2').replace(/\*\*/g,'')}
   return x.replace(/\s+/g,' ').trim()}
 function chunks(t){const parts=t.split(/(?<=[.!؟?\n،:])\s+/);const out=[];let cur='';for(const p of parts){if((cur+' '+p).length>380&&cur){out.push(cur);cur=p}else cur=cur?cur+' '+p:p}if(cur)out.push(cur);return out}
-async function ttsUrl(text,lang){const k=lang+'|'+text;if(audioCache.has(k))return audioCache.get(k);
-  const pr=fetch('/api/tts',{method:'POST',headers:{'content-type':'application/json','x-family-code':CODE},body:JSON.stringify({text,lang})}).then(r=>{if(!r.ok)throw 0;return r.blob()}).then(b=>URL.createObjectURL(b));
+async function ttsUrl(text,lang){const vs=S.settings.voiceStyle||'cartoon';const k=lang+'|'+vs+'|'+text;if(audioCache.has(k))return audioCache.get(k);
+  const pr=fetch('/api/tts',{method:'POST',headers:{'content-type':'application/json','x-family-code':CODE},body:JSON.stringify({text,lang,style:vs})}).then(r=>{if(!r.ok)throw 0;return r.blob()}).then(b=>URL.createObjectURL(b));
   audioCache.set(k,pr);pr.catch(()=>audioCache.delete(k));return pr}
 function bestVoice(lang){const vs=speechSynthesis.getVoices().filter(v=>v.lang.toLowerCase().startsWith(lang));const score=v=>(/natural|neural|online|premium|enhanced|siri/i.test(v.name)?10:0)+(/google/i.test(v.name)?5:0)+(v.localService?0:2);return vs.sort((a,b)=>score(b)-score(a))[0]}
 async function speak(text,lang='ar'){
@@ -767,7 +777,8 @@ const QUOTES=[
  ['لا تقل: لا أستطيع. قل: سأحاول.','الأستاذ سامر','المحاولة هي أول خطوة في كل نجاح.'],
  ['العقل السليم في الجسم السليم.','مثل','النوم الجيد والحركة يساعدان الدماغ على التركيز.'],
  ['كل سؤال تجيب عنه يجعلك أقوى.','الأستاذ سامر','كل إجابة، صحيحة أو خاطئة، تعلّمك شيئًا جديدًا.'],
- ['الصبر مفتاح الفرج.','مثل عربي','عندما نصبر ونستمر، تأتي النتيجة الجيدة.']];
+ ['الصبر مفتاح الفرج.','مثل عربي','عندما نصبر ونستمر، تأتي النتيجة الجيدة.'],
+ ['كل بطل في الرسوم المتحركة تدرّب كثيرًا قبل أن ينتصر.','الأستاذ سامر','التدريب كل يوم هو الذي يجعلنا أقوى، مثل أبطال الكرتون.']];
 const quoteToday=()=>{const n=Math.floor(Date.now()/864e5);return QUOTES[n%QUOTES.length]};
 const BADGES=[
  {id:'first_lesson',n:'أول درس',d:'أنهِ أول درس.',ic:'1',t:()=>doneCount()>=1},
@@ -823,6 +834,7 @@ function routeFromHash(){
   if(r==='result'){const x=EXAMS.find(e=>String(e.ts)===arg);if(x&&x.d){lastReview=fromRecord(x);go('examres')}else go('progress');return true}
   if(r==='review'){const due=dueReviews();if(due.length)startExam({pool:due.slice(0,12).map(r=>r.q),n:Math.min(12,due.length),mode:'practice',timer:'none',review:true,ids:[]});else go('home');return true}
   if(r==='test'){go('testnew');return true}
+  if(r==='timetable'){go('timetable');return true}
   if(r==='open'&&topic(arg)){startOpen(arg);return true}
   if(r==='addtopic'){ADD=null;if(subj(arg))CUR.sub=arg;go('addtopic');return true}
   if(['home','progress','settings','achieve'].includes(r)){go(r);return true}
@@ -847,7 +859,7 @@ function homeExtras(){
    <div class="row" style="margin-top:10px"><select id="schSub" aria-label="المادة">${SUBJ.map(s=>`<option value="${s.id}">${s.n}</option>`).join('')}</select><select id="schTop" aria-label="الموضوع" style="max-width:100%"></select><button id="schAdd">أضف</button></div>
    <button class="btn-ghost small" data-go="testnew" style="min-height:34px;margin-top:8px">عندي امتحان في المدرسة ←</button></details>`}
 function bindHomeExtras(v){
-  const ss=$('schSub'),st=$('schTop');if(!ss)return;const fill=()=>{st.innerHTML=T.filter(t=>t.s===ss.value).map(t=>`<option value="${t.id}">${esc(t.n)}</option>`).join('')+'<option value="__new">موضوع غير موجود: أضفه…</option>'};ss.onchange=fill;fill();
+  const ss=$('schSub'),st=$('schTop');if(!ss)return;const td0=todaySubs()[0];if(td0&&!ss.dataset.init){ss.value=td0;ss.dataset.init=1}const fill=()=>{st.innerHTML=T.filter(t=>t.s===ss.value).map(t=>`<option value="${t.id}">${esc(t.n)}</option>`).join('')+'<option value="__new">موضوع غير موجود: أضفه…</option>'};ss.onchange=fill;fill();
   $('schAdd').onclick=()=>{if(st.value==='__new'){ADD={sub:ss.value,mode:'ai',name:'',notes:'تعلّمه يمان اليوم في المدرسة.',imgs:[],draft:null,busy:false,msg:''};go('addtopic');return}S.school=S.school||{};const d=today();S.school[d]=[...new Set([...(S.school[d]||[]),st.value])];persist(true);toast(`${STAR}<span>رائع! سنبدأ بـ«${esc(topic(st.value).n)}»</span>`);render()};
   v.querySelectorAll('[data-task]').forEach(b=>b.onclick=()=>{const [id,i]=b.dataset.task.split('|');const x=(S.tests||[]).find(z=>z.id===id);if(x)runTask(x,testTasks(x)[+i])});
 }
@@ -938,8 +950,9 @@ window.addEventListener('online',()=>{chip('عاد الاتصال');if(!ONLINE)c
 window.addEventListener('offline',()=>chip('بدون إنترنت – التعلّم مستمر'));
 
 /* ============ SUPPORT FOR ASD: SESSION SCHEDULE, MOOD, HELP, INTERESTS ============ */
-const INTERESTS=['كرة القدم','السيارات','ألعاب الفيديو','الحيوانات','الفضاء','الحاسوب والبرمجة','القطارات','الطبخ','الرسم','الطبيعة','الهواتف والتكنولوجيا','الخرائط والبلدان'];
-const interestLine=()=>{const l=(S.settings.interests||[]).filter(Boolean);return l.length?`اهتمامات يمان: ${l.join('، ')}. استعمل أمثلة من هذه الاهتمامات عندما يكون ذلك مناسبًا وطبيعيًا.`:''};
+const SPACETOON='كرتون سبيس تون المدبلج';
+const INTERESTS=[SPACETOON,'كرة القدم','السيارات','ألعاب الفيديو','الحيوانات','الفضاء','الحاسوب والبرمجة','القطارات','الطبخ','الرسم','الطبيعة','الهواتف والتكنولوجيا','الخرائط والبلدان'];
+const interestLine=()=>{const l=(S.settings.interests||[]).filter(Boolean);return (l.length?`اهتمامات يمان: ${l.join('، ')}. استعمل أمثلة من هذه الاهتمامات عندما يكون ذلك مناسبًا وطبيعيًا.`:'')+(l.includes(SPACETOON)?' يمان يحب الرسوم المتحركة المدبلجة على قناة سبيس تون، ولغتها فصحى. يمكنك أن تصوغ الأمثلة كمشهد من مغامرة كرتونية (فريق أبطال، مهمة، سباق، مباراة، رحلة فضاء) بفصحى واضحة مثل الدبلجة. لا تذكر تفاصيل محدّدة عن مسلسلات بعينها قد تكون غير دقيقة، ولا تجعل القصة تطغى على الفكرة العلمية.':'')};
 const ST_ICON={lesson:'📖',practice:'✎',review:'↻',break:'◯',done:'★'};
 const sessionActive=()=>S.session&&S.session.date===today()&&!S.session.ended;
 const curStep=()=>sessionActive()?S.session.steps[S.session.i]:null;
@@ -997,6 +1010,46 @@ function bindInterests(v){const box=v.querySelector('#intChips');if(!box)return;
   $('intSave').onclick=()=>{const l=[...box.querySelectorAll('[aria-pressed="true"]')].map(b=>b.dataset.int);const o=$('intOther').value.trim();if(o)l.push(o);S.settings.interests=l;S.settings.intAsked=1;persist(true);toast(`${STAR}<span>شكرًا! سأستعمل ما تحبّه في الأمثلة.</span>`);render()};
   $('intLater').onclick=()=>{S.settings.intAsked=1;persist();render()}}
 
+/* ============ WEEKLY TIMETABLE + EXAMS ============ */
+const DAYS=['الأحد','الاثنين','الثلاثاء','الأربعاء','الخميس','الجمعة','السبت'];
+const dowJ=d=>new Date(d+'T12:00:00').getDay();
+const todaySubs=()=>((S.timetable||{})[dowJ(today())]||[]).filter(id=>subj(id));
+const tomorrowSubs=()=>{const d=new Date(today()+'T12:00:00');d.setDate(d.getDate()+1);return ((S.timetable||{})[d.getDay()]||[]).filter(id=>subj(id))};
+let TT={day:null,busy:false,msg:'',img:null};
+function ttCard(){const has=S.timetable&&Object.values(S.timetable).some(a=>a&&a.length);const td=todaySubs(),tm=tomorrowSubs(),ut=upcomingTests().slice(0,2);
+  if(!has&&!ut.length)return `<section class="card"><div class="row between"><div><h3>برنامجي الأسبوعي</h3><span class="muted small">أضف برنامج الدروس في المدرسة، فنعرف ماذا نراجع كل يوم.</span></div><button data-go="timetable">أضف البرنامج</button></div></section>`;
+  const chips=a=>a.map(id=>{const x=subj(id);return `<button class="chip" data-sub="${id}" style="cursor:pointer;min-height:34px;color:var(${x.c});border-color:var(${x.c})">${x.n}</button>`}).join('');
+  return `<section class="card"><div class="row between" style="margin-bottom:6px"><h3>برنامجي</h3><button class="btn-ghost small" data-go="timetable" style="min-height:34px">البرنامج كاملًا ←</button></div>
+   ${td.length?`<div class="small muted">اليوم في المدرسة:</div><div class="row" style="margin:4px 0 8px">${chips([...new Set(td)])}</div>`:''}
+   ${tm.length?`<div class="small muted">غدًا:</div><div class="row" style="margin-top:4px">${chips([...new Set(tm)])}</div>`:''}
+   ${ut.length?`<div class="small muted" style="margin-top:8px">امتحانات قادمة:</div>${ut.map(x=>`<div class="row between small" style="padding:4px 0"><b style="color:var(${subj(x.sub)?.c||'--ink'})">${esc(x.title||'امتحان '+(subj(x.sub)?.n||''))}</b><span class="chip ${daysUntil(x.date)<=2?'warn':''}">${daysUntil(x.date)===0?'اليوم':daysUntil(x.date)===1?'غدًا':'بعد '+daysUntil(x.date)+' أيام'}</span></div>`).join('')}`:''}</section>`}
+function vTimetable(v){
+  S.timetable=S.timetable||{};const tt=S.timetable,dw=dowJ(today());
+  const tests=(S.tests||[]).filter(x=>daysUntil(x.date)>=0).sort((a,b)=>a.date.localeCompare(b.date));
+  v.innerHTML=`<section class="card"><h2>برنامجي الأسبوعي والامتحانات</h2><p class="muted" style="margin:.3em 0 0">اضغط على يوم لتضيف حصصه بالترتيب. أو صوّر البرنامج، والأستاذ سامر يملؤه.</p>
+   <div class="row" style="margin-top:10px"><label class="chip" style="cursor:pointer;min-height:38px">📷 صوّر البرنامج<input type="file" id="ttImg" accept="image/*" capture="environment" hidden></label>${TT.busy?'<span class="muted small">الأستاذ سامر يقرأ الصورة…</span>':''}</div>${TT.msg?`<div class="notice warn" style="margin-top:8px">${esc(TT.msg)}</div>`:''}</section>
+  <section class="card"><div class="tt">${DAYS.map((d,i)=>{const a=(tt[i]||[]).filter(id=>subj(id));return `<div class="tt-day ${i===dw?'today':''} ${TT.day===i?'open':''}"><button class="tt-h" data-day="${i}"><b>${d}</b>${i===dw?'<span class="chip good" style="font-size:.7em">اليوم</span>':''}<span class="muted small">${a.length?a.length+' حصص':'لا حصص'}</span></button>
+    <div class="tt-list">${a.map((id,k)=>{const x=subj(id);return `<span class="tt-p" style="--sc:var(${x.c})"><i>${k+1}</i>${x.n}${TT.day===i?`<button class="tt-x" data-rm="${i}|${k}" aria-label="احذف">✕</button>`:''}</span>`}).join('')||'<span class="muted small">—</span>'}</div>
+    ${TT.day===i?`<div class="row" style="margin-top:8px">${SUBJ.map(x=>`<button class="chip" data-add="${i}|${x.id}" style="cursor:pointer;min-height:34px">＋ ${x.n}</button>`).join('')}</div><div class="row" style="margin-top:6px"><button class="btn-ghost small" data-clear="${i}" style="min-height:32px">امسح اليوم</button><button class="btn-p small" data-done style="min-height:34px">تمّ</button></div>`:''}</div>`}).join('')}</div></section>
+  <section class="card"><div class="row between" style="margin-bottom:8px"><h3>امتحانات المدرسة</h3><button class="btn-p" data-go="testnew">＋ أضف امتحانًا</button></div>
+   ${tests.length?tests.map(x=>{const n=daysUntil(x.date),sx=subj(x.sub);return `<div class="row between" style="padding:8px 0;border-bottom:1px solid var(--line)"><span><b style="color:var(${sx?.c||'--ink'})">${esc(x.title||'امتحان '+(sx?.n||''))}</b><br><span class="muted small">${x.date} · ${x.ids.map(id=>topic(id)?.n).filter(Boolean).map(esc).join('، ')}</span></span><span class="chip ${n<=2?'warn':''}">${n===0?'اليوم':n===1?'غدًا':'بعد '+n+' أيام'}</span></div>`}).join(''):'<p class="muted" style="margin:0">لا توجد امتحانات قادمة.</p>'}</section>`;
+  v.querySelectorAll('[data-day]').forEach(b=>b.onclick=()=>{TT.day=TT.day===+b.dataset.day?null:+b.dataset.day;render()});
+  v.querySelectorAll('[data-add]').forEach(b=>b.onclick=()=>{const [d,id]=b.dataset.add.split('|');tt[d]=[...(tt[d]||[]),id].slice(0,10);persist();render()});
+  v.querySelectorAll('[data-rm]').forEach(b=>b.onclick=()=>{const [d,k]=b.dataset.rm.split('|').map(Number);tt[d].splice(k,1);persist();render()});
+  v.querySelectorAll('[data-clear]').forEach(b=>b.onclick=()=>{tt[b.dataset.clear]=[];persist();render()});
+  v.querySelectorAll('[data-done]').forEach(b=>b.onclick=()=>{TT.day=null;persist(true);render()});
+  v.querySelectorAll('[data-go]').forEach(b=>b.onclick=()=>go(b.dataset.go));
+  const im=$('ttImg');if(im)im.onchange=async()=>{const f=im.files[0];if(!f)return;if(!SAMPLE){TT.msg='قراءة الصورة تحتاج المعلّم الذكي (مفتاح ANTHROPIC_API_KEY). يمكنك إدخال البرنامج يدويًا.';render();return}
+    TT.busy=true;TT.msg='';render();
+    try{const data=await resizeImage(f);const map=SUBJ.map(x=>`${x.id}=${x.n}`).join('، ');
+      const r=await askJSON([{type:'image',source:{type:'base64',media_type:'image/jpeg',data}},{type:'text',text:`هذه صورة برنامج الحصص الأسبوعي لطالب في مدرسة (قد يكون بالعربية أو العبرية). استخرج الحصص لكل يوم بالترتيب.
+المواد المسموحة (المعرّف=الاسم): ${map}. حوّل كل حصة إلى أقرب معرّف من القائمة (مثلًا: מתמטיקה أو رياضيات = math، אנגלית = en، עברית = he، פיזיקה = phys، כימיה = chem، ביולוגיה = bio، היסטוריה = hist، אזרחות = civ، دين/تربية إسلامية = rel، جغرافيا = geo، حاسوب = cs). تجاهل الحصص التي لا تناسب أي معرّف (مثل الرياضة أو التربية).
+أعد كائن JSON فقط بالمفاتيح من 0 (الأحد) إلى 6 (السبت): {"0":["math","ar"],"1":[...]}`}],1500);
+      const ok={};for(let i=0;i<7;i++){const a=Array.isArray(r[i]||r[String(i)])?(r[i]||r[String(i)]):[];ok[i]=a.map(String).filter(id=>subj(id)).slice(0,10)}
+      S.timetable=ok;persist(true);TT.msg='';toast(`${STAR}<span>تمّت قراءة البرنامج. راجعه وعدّل إذا لزم.</span>`)}
+    catch(e){TT.msg='لم أستطع قراءة الصورة. جرّب صورة أوضح، أو أدخل البرنامج يدويًا.'}
+    TT.busy=false;render()}}
+
 /* ============ ROUTER ============ */
 let VIEW='home', CUR={sub:'math',tid:'linear'}, L=null, E=null, LAB=null, examSetup=null, lastReview=null;
 function go(v){VIEW=v;stopSpeak();if(typeof animTok!=='undefined')animTok++;if(v!=='lesson')LAB=null;setHash(v==='lesson'&&L?'lesson-'+L.tid:v==='examres'&&lastReview?'result-'+lastReview.rec.ts:v==='examrun'?'exam':v==='learn'?'learn-'+CUR.sub:v);render();window.scrollTo({top:0,behavior:reduceMotion()?'auto':'smooth'})}
@@ -1004,7 +1057,7 @@ document.querySelectorAll('[data-nav]').forEach(b=>b.onclick=()=>{if(E&&!E.done&
 function render(){
   document.querySelectorAll('[data-nav]').forEach(b=>b.setAttribute('aria-current',(b.dataset.nav===VIEW||(VIEW==='lesson'&&b.dataset.nav==='learn')||(VIEW.startsWith('exam')&&b.dataset.nav==='exam'))?'page':'false'));
   const v=$('view');
-  ({home:vHome,learn:vLearn,lesson:vLesson,exam:vExamSetup,examrun:vExamRun,examres:vExamRes,progress:vProgress,settings:vSettings,achieve:vAchieve,addtopic:vAddTopic,testnew:vTestNew,open:vOpen,sessiondone:vSessionDone}[VIEW]||vHome)(v);
+  ({home:vHome,learn:vLearn,lesson:vLesson,exam:vExamSetup,examrun:vExamRun,examres:vExamRes,progress:vProgress,settings:vSettings,achieve:vAchieve,addtopic:vAddTopic,testnew:vTestNew,open:vOpen,sessiondone:vSessionDone,timetable:vTimetable}[VIEW]||vHome)(v);
   if(['home','lesson','examrun','examres','open','learn'].includes(VIEW)&&sessionActive()){v.insertAdjacentHTML('afterbegin',sessionStrip())}
   bindSession(v);bindInterests(v);v.querySelectorAll('[data-focusbtn]').forEach(b=>b.onclick=()=>setFocus(true));
   updateTeacherMode();updateStarChip();
@@ -1031,6 +1084,7 @@ function vHome(v){
    <button class="btn-p big-start" data-startsess>${sessionActive()?'▶ تابع الجلسة: '+esc(stepLabel(curStep())):S.session&&S.session.date===today()?'▶ ابدأ جلسة أخرى':'▶ ابدأ جلسة اليوم'}</button>
   </section>
   ${interestsCard()}
+  ${ttCard()}
   ${homeExtras()}
   <section class="card"><div class="row between" style="margin-bottom:8px"><h3>خطة الجلسة</h3><span class="muted small">بالترتيب، بدون وقت محدد</span></div>
    <div class="plan-list">${plan.map((x,i)=>`<button class="plan-row ${i===nowI?'now':''}" ${x.act} style="--pc:var(${x.pc})"><span class="pnum">${i+1}</span><span class="pic" style="--pc:var(${x.pc})">${x.ic}</span><span style="flex:1;min-width:0"><span class="muted small">${x.k}</span><br><b>${x.t}</b><br><span class="muted small">${x.d}</span>${i===nowI?'<br><span class="now-cta">ابدأ الآن</span>':''}</span><span class="go-arrow" aria-hidden="true">←</span></button>`).join('')}</div></section>
@@ -1604,6 +1658,7 @@ function vSettings(v){
    <div class="field"><b>وضع التركيز</b>${seg('focus',[['off','لا'],['on','نعم']])}<span class="muted small">يخفي كل شيء ما عدا الخطوة الحالية.</span></div>
    <div class="field"><b>الحركة على الشاشة</b>${seg('motion',[['on','عادية'],['off','بدون حركة']])}<span class="muted small">"بدون حركة" يوقف كل الرسوم المتحركة.</span></div>
    <div class="field"><b>الصوت</b><p class="muted small" style="margin:0">${TTS?'الصوت الطبيعي مفعّل.':'الصوت الطبيعي غير مفعّل بعد، فيُستعمل صوت الجهاز.'}</p>${seg('rate',[[0.6,'بطيء'],[0.8,'متوسط'],[1,'عادي']])}<button style="align-self:start" id="sTest">جرّب الصوت</button></div>
+   <div class="field"><b>أسلوب الصوت</b>${seg('voiceStyle',[['cartoon','راوي كرتون (مثل الدبلجة)'],['teacher','معلّم هادئ']])}<span class="muted small">يعمل مع الصوت الطبيعي فقط.</span></div>
    <div class="field"><b>اقرأ أجوبة الأستاذ سامر بصوت تلقائيًا</b>${seg('autoread',[['off','لا'],['on','نعم']])}</div>
    <div class="field"><b>ماذا يحب يمان؟ (للأمثلة)</b><div class="row">${INTERESTS.map(x=>`<button class="chip" data-intset="${esc(x)}" aria-pressed="${(st.interests||[]).includes(x)}" style="min-height:36px;cursor:pointer;${(st.interests||[]).includes(x)?'background:var(--good-bg);color:var(--good)':''}">${esc(x)}</button>`).join('')}</div></div>
    <div class="field"><b>شرح صوتي مع الصور المتحركة</b>${seg('narrate',[['on','نعم'],['off','لا']])}</div>
@@ -1645,7 +1700,7 @@ function context(){
   if(VIEW==='lesson'&&L&&!L.finished){const t=topic(L.tid),st=t.steps[L.step];return `يمان الآن في درس "${t.n}" (مادة ${subj(t.s).n})، الخطوة ${L.step+1}: "${st.t}".\nالشرح في الخطوة: ${st.x}\nسؤال التمرين: ${st.q}\nالخيارات: ${st.o.join(' / ')}\nللمعلّم فقط: الإجابة الصحيحة "${st.o[st.c]}". لا تكشفها مباشرة؛ أعطِ تلميحًا أولًا. اكشفها فقط إذا طلب يمان الحل صراحة بعد أن حاول.`}
   if(VIEW==='examrun'&&E){const q=E.qs[E.i],t=topic(q.tid);return E.mode==='exam'?`يمان الآن في امتحان تجريبي في موضوع "${t.n}". ممنوع أن تعطي الإجابة أو تلميحًا يكشفها. يمكنك فقط تهدئته وشرح المفهوم العام بكلمات عامة.`:`يمان يتدرّب على سؤال في موضوع "${t.n}": ${q.q} (الخيارات: ${q.o.join(' / ')}). للمعلّم فقط: الصحيحة "${q.o[q.c]}". أعطِ تلميحًا أولًا ولا تكشف الحل إلا إذا طلبه بعد محاولة.`}
   const ut=upcomingTests().map(x=>`امتحان ${subj(x.sub)?.n||''} في ${x.date} (المواضيع: ${x.ids.map(id=>topic(id)?.n).filter(Boolean).join('، ')})`).join('؛ ');const sc=((S.school||{})[today()]||[]).map(id=>topic(id)?.n).filter(Boolean).join('، ');
-  return 'يمان في الصفحة الرئيسية للتطبيق. المواد: '+SUBJ.map(s=>s.n).join('، ')+'.'+(sc?' تعلّم اليوم في المدرسة: '+sc+'.':'')+(ut?' امتحانات قادمة: '+ut+'.':'');
+  return 'يمان في الصفحة الرئيسية للتطبيق. المواد: '+SUBJ.map(s=>s.n).join('، ')+'.'+(todaySubs().length?' حصص اليوم في المدرسة: '+todaySubs().map(id=>subj(id).n).join('، ')+'.':'')+(tomorrowSubs().length?' حصص الغد: '+tomorrowSubs().map(id=>subj(id).n).join('، ')+'.':'')+(sc?' تعلّم اليوم في المدرسة: '+sc+'.':'')+(ut?' امتحانات قادمة: '+ut+'.':'');
 }
 const SYS=`أنت "الأستاذ سامر"، معلّم صبور وهادئ لطالب اسمه يمان، في الصف العاشر أو الحادي عشر في مدرسة عربية في إسرائيل. يمان على طيف التوحّد.
 قواعد الكتابة:
