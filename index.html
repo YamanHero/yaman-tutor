@@ -1103,12 +1103,15 @@ const SYSJ=`أنت "الأستاذ سامر"، معلّم لطيف وصبور ل
 function vHomeJ(v){
   const st=totalStars(),li=levelOf(st),nx=LEVELS[li+1],nt=nextTopic(),s0=subj(nt.s)||SUBJ[0],due=dueReviews();
   const pct=nx?Math.round(100*(st-LEVELS[li][0])/(nx[0]-LEVELS[li][0])):100;
+  const md=(S.moods||{})[today()];
   v.innerHTML=`<section class="card hero-next" style="text-align:center"><h2 style="font-size:1.5em">${greeting()} 🌟</h2>
+   ${md?'':`<div style="margin:8px 0"><b>كيف تشعرين اليوم؟</b><div class="row" style="justify-content:center;gap:10px;margin-top:6px">${[['good','😊'],['ok','😐'],['tired','😫']].map(([k,e])=>`<button class="btn-ghost" data-jm="${k}" style="font-size:2em;min-height:60px;min-width:70px" aria-label="${k}">${e}</button>`).join('')}</div></div>`}
    <div class="lvlbar"><span class="small">مستواك: <b>${LEVELS[li][1]}</b></span><div class="bar" style="--sc:var(--gold);flex:1"><i style="width:${pct}%"></i></div><span class="small muted">${STAR} ${st}</span></div>
    <button class="btn-p big-start" data-start="${nt.id}" style="width:100%;margin-top:10px;font-size:1.15em">▶ هيا نتعلّم: ${esc(nt.n)}</button></section>
   ${due.length?`<button class="card link-row" data-review style="border-inline-start:6px solid var(--s-he)"><span style="font-size:1.6em">🔁</span><span style="flex:1"><b>تذكّري ما تعلّمتِ</b><br><span class="muted small">${due.length} أسئلة قصيرة</span></span><span class="muted">←</span></button>`:''}
   <section class="card"><h3>اختاري مادة</h3><div class="grid" style="grid-template-columns:repeat(2,1fr);gap:10px;margin-top:10px">${SUBJ.map(s=>{const ts=T.filter(t=>t.s===s.id),dn=ts.filter(t=>S.lessons[t.id]?.done).length;return `<button class="plan-row" data-sub="${s.id}" style="--pc:var(${s.c});flex-direction:column;text-align:center;min-height:96px;justify-content:center"><b style="font-size:1.1em">${s.n}</b><span class="muted small">${dn} من ${ts.length}</span></button>`}).join('')}</div></section>
   <button class="card link-row" data-go="calm" style="border-inline-start:6px solid var(--s-chem)"><span style="font-size:1.6em">🫶</span><span style="flex:1"><b>أنا أشعر…</b><br><span class="muted small">نهدأ معًا</span></span><span class="muted">←</span></button>`;
+  v.querySelectorAll('[data-jm]').forEach(b=>b.onclick=()=>{S.moods=S.moods||{};S.moods[today()]=b.dataset.jm;persist(true);render()});
   v.querySelectorAll('[data-start]').forEach(b=>b.onclick=()=>startLesson(b.dataset.start));
   v.querySelectorAll('[data-sub]').forEach(b=>b.onclick=()=>{CUR.sub=b.dataset.sub;go('learn')});
   v.querySelectorAll('[data-review]').forEach(b=>b.onclick=()=>{location.hash='review'});
