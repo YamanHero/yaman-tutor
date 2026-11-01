@@ -115,6 +115,7 @@ main{min-width:0;display:flex;flex-direction:column;gap:16px}
 .bubbles li{display:flex;gap:12px;align-items:flex-start;padding:12px 14px;border-radius:14px;background:color-mix(in srgb,var(--sc) 7%,var(--surface));border:1px solid color-mix(in srgb,var(--sc) 25%,var(--line));font-size:1.05em;line-height:1.85}
 .bubbles li>b{flex:none;width:32px;height:32px;border-radius:50%;background:var(--sc);color:var(--surface);display:grid;place-items:center;font-size:.9em;margin-top:2px}
 .bubbles li>span{min-width:0}
+.bubbles .r,.qtext .r{padding:0 3px;margin:0}
 .fw{font-weight:600;color:var(--sc);unicode-bidi:isolate}
 .fw.he{font-family:var(--f-he)}
 .term{font-weight:700;padding:0 5px;border-radius:6px}
@@ -290,6 +291,13 @@ details.field>summary::after{content:" ▾";color:var(--muted)}
 .help-opts button span{grid-row:span 2;font-size:1.6em;align-self:center;text-align:center}
 .help-opts small{color:var(--muted)}
 .done-badge{width:84px;height:84px;border-radius:50%;background:var(--good);color:#fff;display:grid;place-items:center;font-size:2.6em;font-weight:800}
+.vtimer{position:relative;width:140px;height:140px}.vtimer svg{width:100%;height:100%}.vtimer span{position:absolute;inset:0;display:grid;place-items:center;font-size:1.4em;font-weight:700}
+#focusExit{display:none;position:fixed;z-index:45;top:calc(10px + env(safe-area-inset-top,0px));left:calc(12px + env(safe-area-inset-left,0px));border-radius:24px;box-shadow:0 4px 14px rgba(0,0,0,.18)}
+html[data-focus="on"] #focusExit{display:block}
+html[data-focus="on"] .top,html[data-focus="on"] aside#teacher,html[data-focus="on"] .tabbar,html[data-focus="on"] .sched,html[data-focus="on"] .qnum,html[data-focus="on"] .legend,html[data-focus="on"] .focus-btn,html[data-focus="on"] [data-flag-wrap],html[data-focus="on"] #xFlag,html[data-focus="on"] #toasts{display:none!important}
+html[data-focus="on"] .wrap{grid-template-columns:minmax(0,1fr);max-width:780px;padding-block:58px 30px}
+html[data-calm="on"] main,html[data-calm="on"] .top,html[data-calm="on"] .tabbar,html[data-calm="on"] .overlay .card{filter:saturate(.45) contrast(.95)}
+html[data-calm="on"] .hero-next{background:var(--surface)}
 .hero-link{display:flex;align-items:center;gap:12px;text-decoration:none;color:inherit;border:1.5px solid color-mix(in srgb,#E2552E 40%,var(--line));background:color-mix(in srgb,#E2552E 7%,var(--surface))}
 .hero-link:hover{border-color:#E2552E}
 .hero-ic{width:44px;height:44px;border-radius:12px;background:#E2552E;color:#fff;display:grid;place-items:center;font-weight:800;flex:none}
@@ -370,6 +378,7 @@ html[data-motion="off"] *{animation:none!important;transition:none!important}
 </nav>
 <div id="overlay" class="overlay" hidden></div>
 <div id="toasts" aria-live="polite"></div>
+<button id="focusExit" class="btn-p">إنهاء التركيز</button>
 
 <script>
 /* ============ CONTENT ============ */
@@ -599,7 +608,7 @@ const ORG={
 
 /* ============ STATE & STORAGE ============ */
 const LS='yaman_tutor_v4';
-const blank=()=>({lessons:{},mastery:{},days:[],gen:{},review:{},minutes:{},stars:0,starLog:[],badges:{},claims:[],goalDone:{},settings:{size:'m',motion:'on',rate:0.8,timer:'none',chime:'on',autoread:'off',narrate:'on',predict:'on',interests:[]}});
+const blank=()=>({lessons:{},mastery:{},days:[],gen:{},review:{},minutes:{},stars:0,starLog:[],badges:{},claims:[],goalDone:{},settings:{size:'m',motion:'on',rate:0.8,timer:'none',chime:'on',autoread:'off',narrate:'on',predict:'on',interests:[],calm:'off',focus:'off'}});
 const today=()=>new Intl.DateTimeFormat('en-CA',{timeZone:'Asia/Jerusalem'}).format(new Date());
 let S=blank(), EXAMS=[];
 function adopt(o){if(!o||!o.S)return;S={...blank(),...o.S,settings:{...blank().settings,...(o.S.settings||{})}};EXAMS=Array.isArray(o.E)?o.E:[]}
@@ -668,7 +677,7 @@ const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&
 const topic=id=>T.find(t=>t.id===id);
 const subj=id=>SUBJ.find(s=>s.id===id);
 const AR=['أ','ب','ج','د'];
-const reduceMotion=()=>S.settings.motion==='off'||matchMedia('(prefers-reduced-motion: reduce)').matches;
+const reduceMotion=()=>S.settings.motion==='off'||S.settings.calm==='on'||matchMedia('(prefers-reduced-motion: reduce)').matches;
 function paint(v,t){
   if(!v)return'';
   if(v.includes('[')&&/\[[a-f]:/.test(v))return esc(v).replace(/\[([a-f]):([^\]]+)\]/g,(m,r,x)=>`<span class="r r-${r}">${x}</span>`);
@@ -687,14 +696,14 @@ const paras=x=>esc(x).split('\n').map(l=>`<p>${l}</p>`).join('');
 const TERMS={'مبتدأ':'a','فاعل':'a','الفاعل':'a','اسم كان':'a','اسم إنّ':'a','خبر':'e','الخبر':'e','خبر كان':'e','خبر إنّ':'e','مفعول به':'b','المفعول به':'b','فعل':'d','الضمّة':'a','الفتحة':'b','مرفوع':'a','مرفوعة':'a','منصوب':'b','ترفع':'a','تنصب':'b','للمذكّر':'a','للمؤنّث':'f','المذكّر':'a','المؤنّث':'f'};
 function hl(text,t){
   const sid=t.s;let re;
-  if(t.auto)re=/[A-Za-z0-9(][A-Za-z0-9.,/²₀-₉⁺⁻⁰()=+−×÷<>≤\-]*(?:\s+[A-Za-z0-9.,/²₀-₉⁺⁻⁰()=+−×÷<>≤\-]+)*/g;
+  if(t.auto)re=/(?:−(?=[0-9A-Za-z(])|[A-Za-z0-9(])[A-Za-z0-9.,/²₀-₉⁺⁻⁰()=+−×÷<>≤\-]*(?:\s+[A-Za-z0-9.,/²₀-₉⁺⁻⁰()=+−×÷<>≤\-]+)*/g;
   else if(sid==='he')re=/([\u0590-\u05FF]+(?:\s[\u0590-\u05FF]+)*)/g;
   else if(sid==='en')re=/([A-Za-z][A-Za-z'’]*(?:\s[A-Za-z][A-Za-z'’]*)*)/g;
   else if(sid==='ar'){const keys=Object.keys(TERMS).sort((a,b)=>b.length-a.length).map(k=>k.replace(/[.*+?^${}()|[\]\\]/g,'\\$&'));re=new RegExp('(?<![\\u0621-\\u064A])('+keys.join('|')+')(?![\\u0621-\\u064A])','g')}
   else re=/([A-Za-z]{1,4}[0-9]*)/g;
   let out='',last=0,m;
   while((m=re.exec(text))){out+=esc(text.slice(last,m.index));let w=m[0];
-    if(t.auto){let tr='';while(/[.,،]$/.test(w)&&w.length>1){tr=w.slice(-1)+tr;w=w.slice(0,-1)}out+=`<span class="ltr" dir="ltr" style="white-space:nowrap">${paint(w,{auto:1})}</span>${esc(tr)}`;last=m.index+m[0].length;continue}
+    if(t.auto){let tr='';while(/[.,،]$/.test(w)&&w.length>1){tr=w.slice(-1)+tr;w=w.slice(0,-1)}out+=`<span class="ltr" dir="ltr" style="white-space:${w.length>12?'normal':'nowrap'}">${paint(w,{auto:1})}</span>${esc(tr)}`;last=m.index+m[0].length;continue}
     else if(sid==='he')out+=`<span class="fw he">${esc(w)}</span>`;
     else if(sid==='en')out+=`<span class="fw ltr">${esc(w)}</span>`;
     else if(sid==='ar')out+=`<span class="term r-${TERMS[w]}">${esc(w)}</span>`;
@@ -775,7 +784,7 @@ const BADGES=[
  {id:'asker',n:'سؤال ذكي',d:'اسأل الأستاذ سامر 5 أسئلة.',ic:'؟',t:()=>(S.asked||0)>=5},
  {id:'explorer',n:'مستكشف',d:'جرّب الصور التفاعلية 30 مرة.',ic:'⚗',t:()=>(S.labActs||0)>=30}];
 let audioCtx=null;
-function chime(){if(S.settings.chime==='off')return;try{audioCtx=audioCtx||new (window.AudioContext||window.webkitAudioContext)();const t0=audioCtx.currentTime;[[880,0],[1318.5,.12]].forEach(([f,d])=>{const o=audioCtx.createOscillator(),g=audioCtx.createGain();o.type='sine';o.frequency.value=f;g.gain.setValueAtTime(0,t0+d);g.gain.linearRampToValueAtTime(.08,t0+d+.02);g.gain.exponentialRampToValueAtTime(.0001,t0+d+.45);o.connect(g).connect(audioCtx.destination);o.start(t0+d);o.stop(t0+d+.5)})}catch(e){}}
+function chime(){if(S.settings.chime==='off'||S.settings.calm==='on')return;try{audioCtx=audioCtx||new (window.AudioContext||window.webkitAudioContext)();const t0=audioCtx.currentTime;[[880,0],[1318.5,.12]].forEach(([f,d])=>{const o=audioCtx.createOscillator(),g=audioCtx.createGain();o.type='sine';o.frequency.value=f;g.gain.setValueAtTime(0,t0+d);g.gain.linearRampToValueAtTime(.08,t0+d+.02);g.gain.exponentialRampToValueAtTime(.0001,t0+d+.45);o.connect(g).connect(audioCtx.destination);o.start(t0+d);o.stop(t0+d+.5)})}catch(e){}}
 function toast(html,ms=2800){const box=$('toasts');if(!box)return;while(box.children.length>=2)box.firstElementChild.remove();const el=document.createElement('div');el.className='toast';el.innerHTML=html;box.appendChild(el);setTimeout(()=>el.remove(),ms)}
 function updateStarChip(){const c=$('starChip');if(c)c.innerHTML=`${STAR}<span>${totalStars()}</span>`}
 function addStars(n,why){if(!n)return;const before=levelOf(totalStars());S.stars=totalStars()+n;S.starLog=[...(S.starLog||[]),{t:Date.now(),n,w:why}].slice(-150);updateStarChip();toast(`${STAR}<b>+${n}</b><span>${esc(why)}</span>`);chime();const after=levelOf(S.stars);if(after>before)setTimeout(()=>levelUp(after),1100);persist()}
@@ -997,7 +1006,7 @@ function render(){
   const v=$('view');
   ({home:vHome,learn:vLearn,lesson:vLesson,exam:vExamSetup,examrun:vExamRun,examres:vExamRes,progress:vProgress,settings:vSettings,achieve:vAchieve,addtopic:vAddTopic,testnew:vTestNew,open:vOpen,sessiondone:vSessionDone}[VIEW]||vHome)(v);
   if(['home','lesson','examrun','examres','open','learn'].includes(VIEW)&&sessionActive()){v.insertAdjacentHTML('afterbegin',sessionStrip())}
-  bindSession(v);bindInterests(v);
+  bindSession(v);bindInterests(v);v.querySelectorAll('[data-focusbtn]').forEach(b=>b.onclick=()=>setFocus(true));
   updateTeacherMode();updateStarChip();
 }
 
@@ -1130,7 +1139,7 @@ function vLesson(v){
   if(L.finished)return vLessonDone(v,t,s);
   const st=t.steps[L.step],n=t.steps.length;
   v.innerHTML=`<section class="card lesson" style="--sc:var(${s.c})">
-   <div class="lesson-head"><div class="row between"><span class="chip" style="background:var(--surface)">${s.n} · ${esc(t.n)}</span><span class="row" style="gap:6px"><span class="chip" style="background:var(--surface)">الخطوة ${L.step+1} من ${n}</span><button class="help-btn" data-help="lesson">😣 صعب عليّ</button></span></div>
+   <div class="lesson-head"><div class="row between"><span class="chip" style="background:var(--surface)">${s.n} · ${esc(t.n)}</span><span class="row" style="gap:6px"><span class="chip" style="background:var(--surface)">الخطوة ${L.step+1} من ${n}</span><button class="help-btn" data-help="lesson">😣 صعب عليّ</button><button class="help-btn focus-btn" data-focusbtn>◎ تركيز</button></span></div>
    <div class="stepper" style="margin-top:12px">${t.steps.map((_,i)=>`<i class="${i<L.step?'done':i===L.step?'now':''}"></i>`).join('')}</div></div>
    <div class="lesson-body">
    <div class="lesson-title"><span class="ic">${s.ic}</span><h2>${esc(st.t)}</h2></div>
@@ -1512,7 +1521,7 @@ function vExamRun(v){
   if(!E){go('exam');return}
   const q=E.qs[E.i],n=E.qs.length,answered=E.ans.filter(a=>a!==null).length,practiceShown=E.mode==='practice'&&E.seen[E.i];
   const t=topic(q.tid);
-  v.innerHTML=`<section class="card"><div class="row between"><b>${E.mode==='exam'?'امتحان تجريبي':'تدريب'}</b><span class="row"><button class="help-btn" data-help="exam">😣 صعب عليّ</button><span class="chip">أجبت ${answered} من ${n}</span>${E.timer!=='none'?'<span class="chip num" id="clock"></span>':''}</span></div>
+  v.innerHTML=`<section class="card"><div class="row between"><b>${E.mode==='exam'?'امتحان تجريبي':'تدريب'}</b><span class="row"><button class="help-btn" data-help="exam">😣 صعب عليّ</button><button class="help-btn focus-btn" data-focusbtn>◎ تركيز</button><span class="chip">أجبت ${answered} من ${n}</span>${E.timer!=='none'?'<span class="chip num" id="clock"></span>':''}</span></div>
    <div class="qnum" style="margin-top:12px" aria-label="أرقام الأسئلة">${E.qs.map((_,i)=>`<button data-go="${i}" class="${i===E.i?'cur':E.ans[i]!==null?'ans':''} ${E.flag[i]?'flag':''}" aria-label="السؤال ${i+1}">${i+1}</button>`).join('')}</div></section>
   <section class="card" style="--sc:var(${subj(t.s).c})">
    <div class="row between"><span class="chip">السؤال ${E.i+1} من ${n} · ${esc(t.n)}</span><button class="btn-ghost" id="xFlag">${E.flag[E.i]?'أزل علامة المراجعة':'علّم للمراجعة لاحقًا'}</button></div>
@@ -1533,7 +1542,7 @@ function vExamRun(v){
   if($('xCheck'))$('xCheck').onclick=()=>{E.seen[E.i]=true;const ok=E.ans[E.i]===E.qs[E.i].c;E.wrongRun=ok?0:(E.wrongRun||0)+1;render();if(E.wrongRun>=3){E.wrongRun=0;setTimeout(()=>helpMenu('exam',true),700)}};
   $('xEnd').onclick=()=>{const un=E.ans.filter(a=>a===null).length,fl=E.flag.filter(Boolean).length;
     confirmBox(un||fl?`${un?`لم تجب على ${un} ${un===1?'سؤال':'أسئلة'}. `:''}${fl?`علّمت ${fl} للمراجعة. `:''}هل تريد التسليم الآن؟`:'أجبت على كل الأسئلة. هل تريد التسليم؟','نعم، سلّم','ارجع للأسئلة',finishExam)};
-  clearInterval(tick);if(E.timer!=='none'){const upd=()=>{const el=$('clock');if(!el||!E){clearInterval(tick);return}const sec=Math.floor((Date.now()-E.start)/1000);if(E.timer==='up')el.textContent='مرّ '+mmss(sec);else{const lim=Math.round(E.qs.length*90),left=lim-sec;el.textContent=left>=0?'بقي '+mmss(left):'انتهى الوقت المقترح';const tn=$('timeNote');if(left<0&&tn&&!tn.innerHTML)tn.innerHTML='<div class="notice" style="margin-top:12px">انتهى الوقت المقترح. لا بأس، أكمل بهدوء ثم سلّم.</div>'}};upd();tick=setInterval(upd,1000)}
+  clearInterval(tick);if(E.timer!=='none'){const upd=()=>{const el=$('clock');if(!el||!E){clearInterval(tick);return}const sec=Math.floor((Date.now()-E.start)/1000);if(E.timer==='up')el.textContent='مرّ '+mmss(sec);else{const lim=Math.round(E.qs.length*90),left=lim-sec;el.innerHTML=(left>=0?`<svg viewBox="0 0 20 20" width="16" height="16" style="vertical-align:-3px"><circle cx="10" cy="10" r="8" style="fill:none;stroke:var(--line)" stroke-width="3"/><circle cx="10" cy="10" r="8" style="fill:none;stroke:var(--accent)" stroke-width="3" stroke-dasharray="50.27" stroke-dashoffset="${(50.27*(1-left/lim)).toFixed(1)}" transform="rotate(-90 10 10)"/></svg> بقي `+mmss(left):'انتهى الوقت المقترح');const tn=$('timeNote');if(left<0&&tn&&!tn.innerHTML)tn.innerHTML='<div class="notice" style="margin-top:12px">انتهى الوقت المقترح. لا بأس، أكمل بهدوء ثم سلّم.</div>'}};upd();tick=setInterval(upd,1000)}
 }
 const mmss=s=>`${Math.floor(s/60)}:${String(s%60).padStart(2,'0')}`;
 function finishExam(){
@@ -1585,11 +1594,14 @@ function vProgress(v){
 }
 
 /* ============ SETTINGS ============ */
-function applySettings(){const st=S.settings;document.documentElement.dataset.size=st.size;document.documentElement.dataset.motion=st.motion}
+function applySettings(){const st=S.settings,d=document.documentElement;d.dataset.size=st.size;d.dataset.motion=st.calm==='on'?'off':st.motion;d.dataset.calm=st.calm||'off';d.dataset.focus=st.focus||'off'}
+function setFocus(on){S.settings.focus=on?'on':'off';applySettings();persist();render();if(on)toast('<span>وضع التركيز: الأشياء الإضافية مخفية. اضغط «إنهاء التركيز» للرجوع.</span>',3500)}
 function vSettings(v){
   const st=S.settings,seg=(k,arr)=>`<div class="seg">${arr.map(([val,l])=>`<button data-k="${k}" data-v="${val}" aria-pressed="${String(st[k])===String(val)}">${l}</button>`).join('')}</div>`;
   v.innerHTML=`<section class="card grid" style="gap:18px"><h2>الإعدادات</h2>
    <div class="field"><b>حجم الخط</b>${seg('size',[['m','عادي'],['l','كبير'],['xl','كبير جدًا']])}</div>
+   <div class="field"><b>ألوان هادئة</b>${seg('calm',[['off','عادية'],['on','هادئة']])}<span class="muted small">ألوان أخف، بدون حركة وبدون أصوات المكافأة.</span></div>
+   <div class="field"><b>وضع التركيز</b>${seg('focus',[['off','لا'],['on','نعم']])}<span class="muted small">يخفي كل شيء ما عدا الخطوة الحالية.</span></div>
    <div class="field"><b>الحركة على الشاشة</b>${seg('motion',[['on','عادية'],['off','بدون حركة']])}<span class="muted small">"بدون حركة" يوقف كل الرسوم المتحركة.</span></div>
    <div class="field"><b>الصوت</b><p class="muted small" style="margin:0">${TTS?'الصوت الطبيعي مفعّل.':'الصوت الطبيعي غير مفعّل بعد، فيُستعمل صوت الجهاز.'}</p>${seg('rate',[[0.6,'بطيء'],[0.8,'متوسط'],[1,'عادي']])}<button style="align-self:start" id="sTest">جرّب الصوت</button></div>
    <div class="field"><b>اقرأ أجوبة الأستاذ سامر بصوت تلقائيًا</b>${seg('autoread',[['off','لا'],['on','نعم']])}</div>
@@ -1603,15 +1615,21 @@ function vSettings(v){
   $('sCode').onclick=()=>{CODE='';ONLINE=false;try{localStorage.removeItem(LS+'_code')}catch(e){}askCode()};
   v.querySelectorAll('[data-intset]').forEach(b=>b.onclick=()=>{const x=b.dataset.intset;const l=new Set(st.interests||[]);l.has(x)?l.delete(x):l.add(x);st.interests=[...l];st.intAsked=1;persist();render()});
   $('sTest').onclick=()=>speak('مرحبًا يا يمان. هكذا أقرأ لك الشرح.');
-  $('sReset').onclick=()=>confirmBox('هل أنت متأكد؟ ستُمسح كل علامات الدروس والامتحانات.','نعم، امسح','لا، ارجع',async()=>{const keep=S.settings;S={...blank(),settings:keep};EXAMS=[];persist(true);go('home')});
+  $('sReset').onclick=()=>parentGate(()=>confirmBox('هل أنت متأكد؟ ستُمسح كل علامات الدروس والامتحانات.','نعم، امسح','لا، ارجع',async()=>{const keep=S.settings;S={...blank(),settings:keep};EXAMS=[];persist(true);go('home')}));
 }
+
+/* ============ PARENT GATE ============ */
+function parentGate(cb){if(!ONLINE){cb();return}const o=$('overlay');o.hidden=false;
+  o.innerHTML=`<form class="card" id="pgF" role="dialog" aria-modal="true"><h2>هذا للأهل فقط</h2><p class="muted" style="margin:0">اكتب رمز الوالد.</p><input id="pgIn" type="password" autocomplete="off" style="width:100%;font-size:1.1em;text-align:center;border:1.5px solid var(--line);border-radius:12px;padding:.5em;background:var(--surface)"><div id="pgM"></div><div class="row" style="justify-content:center"><button class="btn-p">متابعة</button><button type="button" id="pgC">إلغاء</button></div></form>`;
+  $('pgIn').focus();$('pgC').onclick=()=>{o.hidden=true};
+  $('pgF').onsubmit=async e=>{e.preventDefault();try{const r=await fetch('/api/parent',{headers:{'x-family-code':CODE,'x-parent-code':$('pgIn').value.trim()}});const j=await r.json();if(j.ok){o.hidden=true;cb()}else $('pgM').innerHTML='<div class="notice warn">الرمز غير صحيح.</div>'}catch(err){$('pgM').innerHTML='<div class="notice warn">لا يوجد اتصال الآن.</div>'}}}
 
 /* ============ OVERLAYS ============ */
 function confirmBox(text,yes,no,onYes){const o=$('overlay');o.hidden=false;o.innerHTML=`<div class="card" role="dialog" aria-modal="true"><p class="qtext" style="margin:0">${esc(text)}</p><div class="row" style="justify-content:center"><button class="btn-p" id="cYes">${esc(yes)}</button><button id="cNo">${esc(no)}</button></div></div>`;$('cNo').onclick=()=>{o.hidden=true};$('cYes').onclick=()=>{o.hidden=true;onYes()};$('cNo').focus()}
 let breakTimer=null;
 function openBreak(keep){const o=$('overlay');o.hidden=false;let sec=120;
-  o.innerHTML=`<div class="card" role="dialog" aria-modal="true"><h2>استراحة</h2><div class="breath" id="bc">تنفّس</div><p class="muted" id="bt" style="margin:0">عندما تكبر الدائرة: خذ نفسًا من الأنف. عندما تصغر: أخرج النفس ببطء.</p><div class="chip num" id="bs">2:00</div><button class="btn-p" id="bEnd">أنا جاهز، نرجع</button></div>`;
-  clearInterval(breakTimer);breakTimer=setInterval(()=>{sec--;const el=$('bs');if(!el){clearInterval(breakTimer);return}el.textContent=sec>0?mmss(sec):'انتهت الاستراحة';const bc=$('bc');if(bc)bc.textContent=(sec%8)>=4?'شهيق':'زفير';if(sec<=0)clearInterval(breakTimer)},1000);
+  o.innerHTML=`<div class="card" role="dialog" aria-modal="true"><h2>استراحة</h2><div class="breath" id="bc">تنفّس</div><p class="muted" id="bt" style="margin:0">عندما تكبر الدائرة: خذ نفسًا من الأنف. عندما تصغر: أخرج النفس ببطء.</p><div class="vtimer"><svg viewBox="0 0 120 120" aria-hidden="true"><circle cx="60" cy="60" r="50" style="fill:none;stroke:var(--line)" stroke-width="12"/><circle id="bring" cx="60" cy="60" r="50" style="fill:none;stroke:var(--accent);transition:stroke-dashoffset 1s linear" stroke-width="12" stroke-linecap="round" stroke-dasharray="314.16" stroke-dashoffset="0" transform="rotate(-90 60 60)"/></svg><span class="num" id="bs">2:00</span></div><span class="muted small">الدائرة تفرغ ببطء. عندما تفرغ تنتهي الاستراحة.</span><button class="btn-p" id="bEnd">أنا جاهز، نرجع</button></div>`;
+  clearInterval(breakTimer);breakTimer=setInterval(()=>{sec--;const el=$('bs');if(!el){clearInterval(breakTimer);return}el.textContent=sec>0?mmss(sec):'انتهت';const rg=$('bring');if(rg)rg.setAttribute('stroke-dashoffset',(314.16*(1-Math.max(0,sec)/120)).toFixed(1));if(sec===0){narr('انتهت الاستراحة. عندما تكون جاهزًا، اضغط «أنا جاهز».');chime()}const bc=$('bc');if(bc)bc.textContent=(sec%8)>=4?'شهيق':'زفير';if(sec<=0)clearInterval(breakTimer)},1000);
   $('bEnd').onclick=()=>{clearInterval(breakTimer);o.hidden=true;teacherSay('أهلًا بعودتك. نكمل من حيث توقفنا، بهدوء.');if(!keep&&advance('break')){render()}else if(keep)render()};$('bEnd').focus()}
 document.addEventListener('keydown',e=>{if(e.key==='Escape'&&!$('overlay').hidden){clearInterval(breakTimer);$('overlay').hidden=true}});
 
@@ -1665,6 +1683,7 @@ $('tSpeak').onclick=()=>speak(lastT||'مرحبًا يمان');$('tStop').onclick
 $('teacherFab').onclick=()=>{const t=$('teacher');t.classList.toggle('open');if(t.classList.contains('open'))$('tInput').focus()};$('tClose').onclick=()=>$('teacher').classList.remove('open');
 
 /* ============ BOOT ============ */
+$('focusExit').onclick=()=>setFocus(false);
 $('starChip').onclick=()=>go('achieve');
 document.documentElement.setAttribute('dir','rtl');document.documentElement.setAttribute('lang','ar');
 applySettings();

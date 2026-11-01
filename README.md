@@ -9,11 +9,12 @@
 - `/api/tts` – صوت طبيعي مع تخزين مؤقت
 - `/api/rewards` – المكافآت التي يحدّدها الوالدان
 - `/api/topics` – مواضيع أضافتها العائلة (يدويًا أو بالذكاء الاصطناعي من اسم أو صورة صفحة)
+- `/api/parent` – التحقق من رمز الوالد
 - `/api/summary?code=…` – ملخّص يومي لتطبيقات أخرى (Hero Family)
 
 ## متغيّرات البيئة في Vercel
 - `FAMILY_CODE` – رمز العائلة للدخول
 - `ANTHROPIC_API_KEY` – مفتاح Claude API للمعلّم الذكي
 - `ELEVENLABS_API_KEY` (مستحسن) أو `OPENAI_API_KEY` – صوت طبيعي. اختياري: `ELEVENLABS_VOICE_ID`، `OPENAI_TTS_VOICE`
-- `PARENT_CODE` (اختياري) – رمز منفصل لتعديل المكافآت من صفحة الوالدين
+- `PARENT_CODE` – رمز الوالد: تعديل المكافآت وتسليمها، ومسح التقدّم
 - `BLOB_READ_WRITE_TOKEN` – يُضاف تلقائيًا عند ربط مخزن Blob

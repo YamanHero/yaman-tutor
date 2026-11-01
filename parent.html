@@ -188,7 +188,7 @@ function draw(){
   <p class="muted small">${t('sumApi')} <span dir="ltr">/api/summary?code=…</span></p>`;
   $('rf').onclick=load;$('lg').onclick=()=>setLang(LANG==='he'?'ar':'he');
   const sync=()=>{document.querySelectorAll('[data-rn]').forEach(el=>RW.rewards[+el.dataset.rn].name=el.value.trim());document.querySelectorAll('[data-rc]').forEach(el=>RW.rewards[+el.dataset.rc].cost=Math.max(1,+el.value||1))};
-  const saveRW=async()=>{sync();try{const r=await fetch('/api/rewards',{method:'POST',headers:{...hdr(),'content-type':'application/json'},body:JSON.stringify(RW)});if(!r.ok)throw 0;$('rsm')&&($('rsm').textContent=t('saved'));return true}catch(e){$('rsm')&&($('rsm').textContent=t('fail'));return false}};
+  const saveRW=async()=>{sync();try{let pc='';try{pc=localStorage.getItem('yaman_parent_pcode')||''}catch(_){}if(!pc){pc=(window.prompt(LANG==='he'?'קוד הורה':'رمز الوالد')||'').trim();}let r=await fetch('/api/rewards',{method:'POST',headers:{...hdr(),'x-parent-code':pc,'content-type':'application/json'},body:JSON.stringify(RW)});if(r.status===403){try{localStorage.removeItem('yaman_parent_pcode')}catch(_){}$('rsm')&&($('rsm').textContent=LANG==='he'?'קוד הורה שגוי':'رمز الوالد غير صحيح');return false}if(!r.ok)throw 0;try{localStorage.setItem('yaman_parent_pcode',pc)}catch(_){}$('rsm')&&($('rsm').textContent=t('saved'));return true}catch(e){$('rsm')&&($('rsm').textContent=t('fail'));return false}};
   $('na').onclick=()=>{sync();const n=$('nn').value.trim(),c=+$('nc').value;if(!n||!c)return;RW.rewards.push({id:'r'+Date.now().toString(36),name:n,cost:c});draw()};
   document.querySelectorAll('[data-rd]').forEach(b=>b.onclick=()=>{sync();RW.rewards.splice(+b.dataset.rd,1);draw()});
   $('rs').onclick=saveRW;
