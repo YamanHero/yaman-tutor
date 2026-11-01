@@ -231,7 +231,15 @@ aside#teacher{position:sticky;top:calc(env(safe-area-inset-top,0px) + 76px);alig
 .msg.u{background:color-mix(in srgb,var(--accent) 12%,var(--surface));align-self:flex-end}
 .quick{display:flex;gap:6px;flex-wrap:wrap}
 .quick button{font-size:.85em;min-height:38px;padding:.3em .8em}
-.t-input{display:flex;gap:6px}
+.t-input{display:flex;gap:6px;align-items:stretch}
+.t-ic{flex:0 0 auto;display:grid;place-items:center;width:42px;border:1.5px solid var(--line);border-radius:12px;background:var(--surface);cursor:pointer;padding:0}
+.t-ic svg{width:22px;height:22px;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
+.t-ic.on{background:#e11d48;color:#fff;border-color:#e11d48;animation:micp 1.2s ease-in-out infinite}
+@keyframes micp{50%{box-shadow:0 0 0 6px color-mix(in srgb,#e11d48 25%,transparent)}}
+[data-calm=on] .t-ic.on{animation:none}
+.msg img.timg{display:block;max-width:100%;max-height:220px;border-radius:10px;margin-bottom:6px}
+.t-pend{display:flex;gap:8px;align-items:center;padding:6px;border:1.5px dashed var(--accent);border-radius:12px;margin-bottom:6px}
+.t-pend img{width:52px;height:52px;object-fit:cover;border-radius:8px}
 .t-input input{flex:1;min-width:0;border:1.5px solid var(--line);border-radius:12px;padding:.5em .8em;background:var(--surface)}
 #teacherFab{display:none}
 .icon-btn{width:42px;height:42px;min-height:42px;padding:0;border-radius:12px;display:grid;place-items:center;background:transparent;border-color:transparent}
@@ -399,7 +407,10 @@ html[data-motion="off"] *{animation:none!important;transition:none!important}
       <button data-q="example">مثال آخر</button>
       <button data-q="break">أحتاج استراحة</button>
     </div>
+    <div id="tPend" hidden></div>
     <form class="t-input" id="tForm">
+      <label class="t-ic" title="صوّر تمرينًا" aria-label="صوّر تمرينًا"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 8h3l2-3h6l2 3h3v11H4z"/><circle cx="12" cy="13" r="3.5"/></svg><input type="file" id="tImg" accept="image/*" capture="environment" hidden></label>
+      <button type="button" class="t-ic" id="tMic" title="اسأل بصوتك" aria-label="اسأل بصوتك" hidden><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="9" y="3" width="6" height="11" rx="3"/><path d="M5 11a7 7 0 0 0 14 0M12 18v3"/></svg></button>
       <input id="tInput" aria-label="اكتب سؤالك للأستاذ سامر" placeholder="اكتب سؤالك هنا…" autocomplete="off">
       <button class="btn-p" type="submit">أرسل</button>
     </form>
@@ -1732,7 +1743,7 @@ function vzParse(src){const s=String(src).replace(/−/g,'-').replace(/×|·/g,'
     if(k.t==='i'){if(FN[k.v]){eat('(');const a=ex();eat(')');return e=>FN[k.v](a(e))}if(k.v==='pi')return()=>Math.PI;if(k.v==='e'&&!(peek()&&peek().t==='('))return e=>('e' in e?e.e:Math.E);return e=>{if(!(k.v in e))throw new Error('var '+k.v);return e[k.v]}}throw new Error('tok')}
   const f=ex();if(p<out.length)throw new Error('trail');return f}
 const FN={sin:Math.sin,cos:Math.cos,tan:Math.tan,sqrt:Math.sqrt,abs:Math.abs,ln:Math.log,log:Math.log10,exp:Math.exp};
-function vzExtract(t){const specs=[];let txt=String(t).replace(/```\s*viz\s*([\s\S]*?)```/g,(m,j)=>{try{specs.push(JSON.parse(j.trim()))}catch(e){}return '\n\uE000'+String.fromCharCode(0xE100+specs.length-1)+'\uE000\n'});txt=txt.replace(/```\s*viz[\s\S]*$/,'');return {txt,specs}}
+function vzExtract(t){const specs=[];let txt=String(t).replace(/```\s*note[\s\S]*?```/g,'').replace(/```\s*note[\s\S]*$/,'').replace(/```\s*viz\s*([\s\S]*?)```/g,(m,j)=>{try{specs.push(JSON.parse(j.trim()))}catch(e){}return '\n\uE000'+String.fromCharCode(0xE100+specs.length-1)+'\uE000\n'});txt=txt.replace(/```\s*viz[\s\S]*$/,'');return {txt,specs}}
 function plainTeacher(t){return vzExtract(t).txt.replace(/\uE000[\uE100-\uE1FF]\uE000/g,'')}
 const SHAPES={
   rect:{n:'مستطيل',p:{a:['الطول',6],b:['العرض',4]},S:v=>v.a*v.b,f:v=>`S = a · b = ${vzN(v.a)} · ${vzN(v.b)} = ${vzN(v.a*v.b)}`},
@@ -1807,7 +1818,7 @@ function mountViz(root){root.querySelectorAll('.viz[data-vk]').forEach(el=>{cons
 
 /* ============ TEACHER ============ */
 const CHAT=[];let tAbort=null,lastT='';
-function addMsg(role,text){CHAT.push({role,text});drawChat()}
+function addMsg(role,text,img){CHAT.push({role,text,img});drawChat()}
 const TBLK=[['الفكرة','idea'],['صورة في الذهن','pic'],['مثال محلول','ex'],['انتبه','warn'],['سؤال لك','q']];
 const MRUN=/(?:−(?=[0-9A-Za-z(√])|[A-Za-z0-9(√])[A-Za-z0-9.,/²³√₀-₉⁺⁻⁰()=+−×÷·<>≤≥\-]*(?:\s+[A-Za-z0-9.,/²³√₀-₉⁺⁻⁰()=+−×÷·<>≤≥\-]+)*/g;
 function mathRuns(x){let o='',l=0,m;MRUN.lastIndex=0;while((m=MRUN.exec(x))){let w=m[0];const tr=w.match(/[.,]+$/);if(tr)w=w.slice(0,-tr[0].length);o+=esc(x.slice(l,m.index))+`<bdi dir="ltr" class="mrun">${esc(w)}</bdi>`;l=m.index+w.length}return o+esc(x.slice(l))}
@@ -1819,7 +1830,7 @@ function fmtMsg(t,mi){const vx=vzExtract(t);vx.specs.forEach((sp,j)=>{VZS[mi+'_'
     if(!cur){cur={k:'',l:[]};out.push(cur)}cur.l.push(ln)}
   return out.map(b=>{const body=b.l.join('\n').trim().split('\n').map(x=>{const m=x.match(/^\s*(\d+)[.)-]\s*(.*)$/);return m?`<div class="tstep"><span>${m[1]}</span><div>${inl(m[2])}</div></div>`:x.trim()?`<div>${inl(x)}</div>`:''}).join('');
     return b.k?`<div class="tb tb-${b.k}"><b class="tbh">${b.h}</b>${body}</div>`:body}).join('').replace(/(?:<div>)?\uE000([\uE100-\uE1FF])\uE000(?:<\/div>)?/g,(m,c)=>`<div class="viz" data-vk="${mi}_${c.charCodeAt(0)-0xE100}"></div>`)}
-function drawChat(){const c=$('chat');c.innerHTML=CHAT.map((m,i)=>`<div class="msg ${m.role==='user'?'u':'t'}">${m.role==='user'?fmtMsg(m.text,'u'+i).replace(/<div class="viz"[^>]*><\/div>/g,''):fmtMsg(m.text,i)}</div>`).join('');mountViz(c);c.scrollTop=c.scrollHeight}
+function drawChat(){const c=$('chat');c.innerHTML=CHAT.map((m,i)=>`<div class="msg ${m.role==='user'?'u':'t'}">${m.img?`<img class="timg" src="${m.img}" alt="صورة التمرين">`:''}${m.role==='user'?fmtMsg(m.text,'u'+i).replace(/<div class="viz"[^>]*><\/div>/g,''):fmtMsg(m.text,i)}</div>`).join('');mountViz(c);c.scrollTop=c.scrollHeight}
 function teacherSay(t){lastT=t;addMsg('assistant',t)}
 function toastT(t){teacherSay(t)}
 function updateTeacherMode(){const m=$('tMode');if(!m)return;m.textContent=VIEW==='examrun'&&E&&E.mode==='exam'?'أثناء الامتحان: أشرح المفاهيم فقط ولا أعطي إجابات':SAMPLE?'معلّم ذكي: اسألني أي سؤال':'إجابات جاهزة من الدرس (المعلّم الذكي غير مفعّل)'}
@@ -1829,6 +1840,30 @@ function context(){
   const ut=upcomingTests().map(x=>`امتحان ${subj(x.sub)?.n||''} في ${x.date} (المواضيع: ${x.ids.map(id=>topic(id)?.n).filter(Boolean).join('، ')})`).join('؛ ');const sc=((S.school||{})[today()]||[]).map(id=>topic(id)?.n).filter(Boolean).join('، ');
   return 'يمان في الصفحة الرئيسية للتطبيق. المواد: '+SUBJ.map(s=>s.n).join('، ')+'.'+(todaySubs().length?' حصص اليوم في المدرسة: '+todaySubs().map(id=>subj(id).n).join('، ')+'.':'')+(tomorrowSubs().length?' حصص الغد: '+tomorrowSubs().map(id=>subj(id).n).join('، ')+'.':'')+(sc?' تعلّم اليوم في المدرسة: '+sc+'.':'')+(ut?' امتحانات قادمة: '+ut+'.':'');
 }
+function learnerProfile(){const out=[];
+  const weak=Object.entries(S.mastery||{}).filter(([id,m])=>m.t>=3&&m.r/m.t<0.7&&topic(id)).sort((a,b)=>a[1].r/a[1].t-b[1].r/b[1].t).slice(0,5).map(([id,m])=>`${topic(id).n} (${Math.round(100*m.r/m.t)}%)`);
+  if(weak.length)out.push('مواضيع ضعيفة: '+weak.join('، ')+'.');
+  const strong=Object.entries(S.mastery||{}).filter(([id,m])=>m.t>=4&&m.r/m.t>=0.85&&topic(id)).slice(0,4).map(([id])=>topic(id).n);
+  if(strong.length)out.push('مواضيع قوية: '+strong.join('، ')+'.');
+  const wr=[];for(let i=EXAMS.length-1;i>=0&&wr.length<5;i--){const d=EXAMS[i].d;if(!d)continue;for(const q of d){if(q.a!==null&&q.a!==undefined&&q.a!==q.c&&wr.length<5)wr.push(`«${q.q}» اختار «${q.o[q.a]}» والصحيح «${q.o[q.c]}»`)}}
+  if(wr.length)out.push('أخطاء حديثة في الامتحانات: '+wr.join('؛ ')+'.');
+  const ut=upcomingTests();if(ut.length)out.push('أقرب امتحان: '+(subj(ut[0].sub)?.n||'')+' في '+ut[0].date+'.');
+  const mood=(S.moods||{})[today()];if(mood)out.push('مزاجه اليوم: '+mood+'.');
+  const fr=(S.frust||{})[today()]||0;if(fr>=2)out.push('طلب المساعدة أو توقّف '+fr+' مرات اليوم، فكن أهدأ وأقصر.');
+  if((S.tnotes||[]).length)out.push('ملاحظاتك السابقة عنه: '+S.tnotes.map(n=>n.t).join('؛ ')+'.');
+  return out.join('\n')||'لا توجد معلومات بعد.'}
+function takeNotes(t){const notes=[];const txt=String(t).replace(/```\s*note\s*([\s\S]*?)```/g,(m,n)=>{n.split('\n').map(x=>x.replace(/^[-•*\s]+/,'').trim()).filter(Boolean).forEach(x=>notes.push(x.slice(0,140)));return ''});
+  if(notes.length){S.tnotes=S.tnotes||[];for(const n of notes){if(!S.tnotes.some(o=>o.t===n))S.tnotes.push({t:n,d:today()})}S.tnotes=S.tnotes.slice(-12);persist()}return txt.trim()}
+let tPendImg=null;
+function drawPend(){const p=$('tPend');if(!tPendImg){p.hidden=true;p.innerHTML='';return}p.hidden=false;p.innerHTML=`<div class="t-pend"><img src="data:image/jpeg;base64,${tPendImg}" alt=""><div style="flex:1" class="small">الصورة جاهزة. اكتب سؤالك أو اضغط «أرسل» مباشرة.</div><button type="button" class="btn-ghost" id="tPendX" aria-label="احذف الصورة" style="min-height:36px">✕</button></div>`;$('tPendX').onclick=()=>{tPendImg=null;drawPend()}}
+$('tImg').onchange=async e=>{const f=e.target.files&&e.target.files[0];e.target.value='';if(!f)return;try{tPendImg=await resizeImage(f);drawPend();$('tInput').focus()}catch(err){teacherSay('لم أستطع فتح الصورة. جرّب مرة أخرى.')}};
+(function(){const SR=window.SpeechRecognition||window.webkitSpeechRecognition;const b=$('tMic');if(!SR)return;b.hidden=false;let rec=null,on=false,finalT='';
+  const stop=()=>{on=false;b.classList.remove('on');b.setAttribute('aria-label','اسأل بصوتك');$('tInput').placeholder='اكتب سؤالك هنا…'};
+  b.onclick=()=>{if(on){rec&&rec.stop();return}try{stopSpeak()}catch(e){}rec=new SR();rec.lang='ar-SA';rec.interimResults=true;rec.continuous=false;finalT='';
+    rec.onresult=ev=>{let it='';for(let i=ev.resultIndex;i<ev.results.length;i++){const r=ev.results[i];if(r.isFinal)finalT+=r[0].transcript;else it+=r[0].transcript}$('tInput').value=(finalT+it).trim()};
+    rec.onerror=ev=>{stop();if(ev.error==='not-allowed'||ev.error==='service-not-allowed')teacherSay('لم يُسمح باستعمال الميكروفون. يمكنك أن تكتب سؤالك، أو تستعمل زر الميكروفون في لوحة المفاتيح.')};
+    rec.onend=()=>{const v=$('tInput').value.trim();stop();if(v){$('tInput').value='';sendT(v)}};
+    try{rec.start();on=true;b.classList.add('on');b.setAttribute('aria-label','أوقف الاستماع');$('tInput').placeholder='أستمع إليك… تكلّم الآن'}catch(e){stop()}}})();
 const SYS=`أنت "الأستاذ سامر"، معلّم ماهر وصبور وهادئ لطالب اسمه يمان، في الصف العاشر أو الحادي عشر في مدرسة عربية في إسرائيل (منهاج وزارة التربية، ومستوى البجروت). يمان على طيف التوحّد: يفهم جيدًا عندما يكون الشرح حرفيًا ومنظّمًا ومتوقّعًا، ويتعب من النص الطويل والكلام العام.
 
 هدفك: أن يفهم يمان الفكرة فعلًا، لا أن تقرأ له الشرح مرة أخرى.
@@ -1866,6 +1901,13 @@ const SYS=`أنت "الأستاذ سامر"، معلّم ماهر وصبور و�
 c هو رقم الخيار الصحيح ابتداءً من 0. لا تكشف الحل في النص قبل الكتلة.
 اكتب قبل الرسم جملة واحدة تقول ليمان ماذا يحرّك وماذا يلاحظ، مثلًا: «حرّك القطر الأول، ولاحظ أن المساحة تكبر».
 
+ذاكرتك عن يمان:
+ستصلك مع كل رسالة معلومات عن مواضيعه الضعيفة وأخطائه الأخيرة وملاحظاتك السابقة. استعملها بلطف: إذا كان الخطأ الحالي يشبه خطأً سابقًا، قل ذلك بوضوح، مثلًا: «في الامتحان الأخير اخترت كذا. انتبه هنا لنفس النقطة». لا تذكر النسب المئوية ليمان، ولا تقل له إنه ضعيف.
+إذا لاحظت شيئًا ثابتًا ومفيدًا عن طريقة تعلّم يمان (خطأ يتكرّر، طريقة شرح نجحت معه، كلمة لا يفهمها)، أضف في آخر جوابك كتلة مخفية، سطرًا واحدًا قصيرًا، ولا تضفها في كل مرة، فقط عندما تتعلّم شيئًا جديدًا:
+\`\`\`note
+يخلط بين إشارة السالب عند فتح الأقواس
+\`\`\`
+
 قواعد مهمّة:
 - اشرح الموضوع نفسه بدقّة. لا تكتب كلامًا عامًا مثل «هذا موضوع مهم» أو «ركّز جيدًا».
 - استعمل المصطلحات التي تُستعمل في الكتب المدرسية العربية في إسرائيل، واكتب المصطلح بالإنجليزية أو العبرية بين قوسين عند الحاجة.
@@ -1887,20 +1929,22 @@ function offline(kind){
   if(kind==='example')return st?'انظر إلى المختبر تحت الشرح وجرّب بيدك. ثم اقرأ المثال: '+(st.w||st.h):'اختر درسًا أولًا.';
   return 'أنا هنا. يمكنك أن تطلب: اشرح ببساطة، تلميح صغير، أو مثال آخر.';
 }
-async function ask(text,kind){
-  addMsg('user',text);S.asked=(S.asked||0)+1;if(S.asked===5)checkBadges();
+async function ask(text,kind,img){
+  addMsg('user',text,img?'data:image/jpeg;base64,'+img:null);S.asked=(S.asked||0)+1;if(S.asked===5)checkBadges();
   if(!SAMPLE){teacherSay(offline(kind));return}
   if(tAbort)tAbort.abort();tAbort=new AbortController();
   CHAT.push({role:'assistant',text:'…'});drawChat();const idx=CHAT.length-1;
   const hist=CHAT.slice(0,idx-1).filter(m=>m.text&&m.text!=='…').slice(-8).map(m=>({...m,text:m.text.replace(/```\s*viz[\s\S]*?```/g,'[رسم تفاعلي]')}));
   const turns=[];for(const m of hist){const r=m.role==='user'?'user':'assistant';if(!turns.length&&r==='assistant')continue;if(turns.length&&turns.at(-1).role===r)turns.at(-1).content+='\n'+m.text;else turns.push({role:r,content:m.text})}
-  const final='السياق الآن (للمعلّم، لا تكرّره ليمان):\n'+context()+'\n\nرسالة يمان: '+text;
+  const final='السياق الآن (للمعلّم، لا تكرّره ليمان):\n'+context()+'\n\nما تعرفه عن يمان (استعمله لتكييف الشرح، لا تقرأه له):\n'+learnerProfile()+(img?'\n\nأرفق يمان صورة تمرين. ابدأ بسطر «في الصورة:» تكتب فيه نص التمرين كما فهمته (حتى يتأكّد أنك قرأته صحيحًا). ثم اشرح الحل خطوة خطوة، ويفضَّل مع رسم steps أو shape أو graph. إذا كانت الصورة غير واضحة، قل ذلك واطلب صورة أوضح.':'')+'\n\nرسالة يمان: '+text;
   if(turns.length&&turns.at(-1).role==='user')turns.at(-1).content+='\n\n'+final;else turns.push({role:'user',content:final});
-  try{const r=await SAMPLE(turns,{signal:tAbort.signal,cache:false,role:'teacher',max:1400,system:SYS+'\n'+interestLine(),onText:({text})=>{CHAT[idx].text=text||'…';drawChat()}});CHAT[idx].text=r.text;lastT=plainTeacher(r.text);drawChat();if(S.settings.autoread==='on')speak(lastT)}
+  if(img){const last=turns.at(-1);last.content=[{type:'image',source:{type:'base64',media_type:'image/jpeg',data:img}},{type:'text',text:last.content}]}
+  try{const r=await SAMPLE(turns,{signal:tAbort.signal,cache:false,role:'teacher',max:1400,system:SYS+'\n'+interestLine(),onText:({text})=>{CHAT[idx].text=text||'…';drawChat()}});CHAT[idx].text=takeNotes(r.text);lastT=plainTeacher(CHAT[idx].text);drawChat();if(S.settings.autoread==='on')speak(lastT)}
   catch(e){if(e&&(e.code==='aborted'||e.name==='AbortError'))return;CHAT[idx].text=e&&e.code==='rate_limited'?'أسئلة كثيرة الآن. انتظر قليلًا ثم اسأل مرة أخرى.':e&&e.code==='not_granted'?'لم يُسمح لي بالإجابة الذكية هنا. هذا جواب من الدرس:\n'+offline(kind):'لم أستطع الإجابة الآن. هذا جواب من الدرس:\n'+offline(kind);drawChat()}
 }
 document.querySelectorAll('[data-q]').forEach(b=>b.onclick=()=>{const k=b.dataset.q;if(k==='break'){openBreak();return}ask({simple:'اشرح لي هذه الخطوة ببساطة أكثر.',hint:'أعطني تلميحًا صغيرًا بدون الحل.',example:'أعطني مثالًا آخر مشابهًا.'}[k],k)});
-$('tForm').onsubmit=e=>{e.preventDefault();const v=$('tInput').value.trim();if(!v)return;$('tInput').value='';const k=/تلميح|مساعدة|مش فاهم|صعب/.test(v)?'hint':/مثال/.test(v)?'example':'simple';if(/استراحة|تعبت|تعبان/.test(v)&&!SAMPLE){openBreak();return}ask(v,k)};
+function sendT(v){const img=tPendImg;if(!v&&!img)return;if(!v)v='اشرح لي هذا التمرين خطوة خطوة.';if(img&&!SAMPLE){teacherSay('لأقرأ الصور أحتاج المعلّم الذكي، وهو غير مفعّل الآن.');return}tPendImg=null;drawPend();const k=/تلميح|مساعدة|مش فاهم|صعب/.test(v)?'hint':/مثال/.test(v)?'example':'simple';if(!img&&/استراحة|تعبت|تعبان/.test(v)&&!SAMPLE){openBreak();return}ask(v,k,img)}
+$('tForm').onsubmit=e=>{e.preventDefault();const v=$('tInput').value.trim();$('tInput').value='';sendT(v)};
 $('tSpeak').onclick=()=>speak(lastT||'مرحبًا يمان');$('tStop').onclick=stopSpeak;
 $('teacherFab').onclick=()=>{const t=$('teacher');t.classList.toggle('open');if(t.classList.contains('open'))$('tInput').focus()};$('tClose').onclick=()=>$('teacher').classList.remove('open');
 
