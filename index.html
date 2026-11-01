@@ -266,6 +266,9 @@ aside#teacher{position:sticky;top:calc(env(safe-area-inset-top,0px) + 76px);alig
 details.field>summary{cursor:pointer;list-style:none}details.field>summary::-webkit-details-marker{display:none}
 details.field>summary::after{content:" ▾";color:var(--muted)}
 summary::-webkit-details-marker{display:none}summary::marker{content:''}
+.chall{border:2px solid color-mix(in srgb,var(--s-soc) 55%,var(--line));background:linear-gradient(135deg,color-mix(in srgb,var(--s-soc) 7%,var(--surface)),var(--surface))}.chall.done{border-color:#16a34a}
+.story-page{text-align:center}.story-ic{font-size:4.2em;line-height:1.2;margin:10px 0}.story-txt{font-size:1.25em;line-height:1.9;margin:0 auto;max-width:34em;min-height:5.5em}
+.story-dots{display:flex;gap:6px;justify-content:center;margin-top:12px}.story-dots i{width:10px;height:10px;border-radius:50%;background:var(--line)}.story-dots i.past{background:color-mix(in srgb,var(--s-soc) 45%,var(--line))}.story-dots i.on{background:var(--s-soc);transform:scale(1.25)}
 .rp-bar{display:flex;gap:8px;align-items:center;padding:8px 10px;border-radius:12px;background:color-mix(in srgb,var(--s-soc) 12%,var(--surface));border:1.5px solid var(--s-soc);margin-bottom:6px}
 .tb-role{border-color:var(--s-soc);background:color-mix(in srgb,var(--s-soc) 8%,var(--surface))}.tb-role .tbh{color:var(--s-soc)}
 .tb-tip{border-color:#f59e0b}.tb-tip .tbh{color:#d97706}
@@ -899,6 +902,7 @@ const BADGES=[
  {id:'asker',n:'سؤال ذكي',d:'اسأل الأستاذ سامر 5 أسئلة.',ic:'؟',t:()=>(S.asked||0)>=5},
  {id:'studio',n:'نجم الاستوديو',d:'أكمل 3 مشاهد في استوديو المهارات الاجتماعية.',ic:'🎬',t:()=>(S.rpDone||0)>=3},
  {id:'friend',n:'صديق رائع',d:'أنهِ كل دروس المهارات الاجتماعية.',ic:'🤝',t:()=>subjProgress('soc').pct===100},
+ {id:'challenger',n:'بطل التحدّيات',d:'أنجز 3 تحدّيات أسبوعية.',ic:'🎯',t:()=>Object.values(S.chall||{}).filter(c=>c.done).length>=3},
  {id:'explorer',n:'مستكشف',d:'جرّب الصور التفاعلية 30 مرة.',ic:'⚗',t:()=>(S.labActs||0)>=30}];
 let audioCtx=null;
 function chime(){if(S.settings.chime==='off'||S.settings.calm==='on')return;try{audioCtx=audioCtx||new (window.AudioContext||window.webkitAudioContext)();const t0=audioCtx.currentTime;[[880,0],[1318.5,.12]].forEach(([f,d])=>{const o=audioCtx.createOscillator(),g=audioCtx.createGain();o.type='sine';o.frequency.value=f;g.gain.setValueAtTime(0,t0+d);g.gain.linearRampToValueAtTime(.08,t0+d+.02);g.gain.exponentialRampToValueAtTime(.0001,t0+d+.45);o.connect(g).connect(audioCtx.destination);o.start(t0+d);o.stop(t0+d+.5)})}catch(e){}}
@@ -941,6 +945,7 @@ function routeFromHash(){
   if(r==='review'){const due=dueReviews();if(due.length)startExam({pool:due.slice(0,12).map(r=>r.q),n:Math.min(12,due.length),mode:'practice',timer:'none',review:true,ids:[]});else go('home');return true}
   if(r==='test'){go('testnew');return true}
   if(r==='social'){go('social');return true}
+  if(r==='story'){STY=null;go('story');return true}
   if(r==='rp'&&SCEN.find(x=>x.id===arg)){go('social');setTimeout(()=>{if(SAMPLE)startRP(arg)},800);return true}
   if(r==='timetable'){go('timetable');return true}
   if(r==='open'&&topic(arg)){startOpen(arg);return true}
@@ -1166,7 +1171,7 @@ document.querySelectorAll('[data-nav]').forEach(b=>b.onclick=()=>{if(E&&!E.done&
 function render(){
   document.querySelectorAll('[data-nav]').forEach(b=>b.setAttribute('aria-current',(b.dataset.nav===VIEW||(VIEW==='lesson'&&b.dataset.nav==='learn')||(VIEW.startsWith('exam')&&b.dataset.nav==='exam'))?'page':'false'));
   const v=$('view');
-  ({home:vHome,learn:vLearn,lesson:vLesson,exam:vExamSetup,examrun:vExamRun,examres:vExamRes,progress:vProgress,settings:vSettings,achieve:vAchieve,addtopic:vAddTopic,testnew:vTestNew,open:vOpen,sessiondone:vSessionDone,timetable:vTimetable,social:vSocial}[VIEW]||vHome)(v);
+  ({home:vHome,learn:vLearn,lesson:vLesson,exam:vExamSetup,examrun:vExamRun,examres:vExamRes,progress:vProgress,settings:vSettings,achieve:vAchieve,addtopic:vAddTopic,testnew:vTestNew,open:vOpen,sessiondone:vSessionDone,timetable:vTimetable,social:vSocial,story:vStory}[VIEW]||vHome)(v);
   if(['home','lesson','examrun','examres','open','learn'].includes(VIEW)&&sessionActive()){v.insertAdjacentHTML('afterbegin',sessionStrip())}
   bindSession(v);bindInterests(v);v.querySelectorAll('[data-focusbtn]').forEach(b=>b.onclick=()=>setFocus(true));
   updateTeacherMode();updateStarChip();
@@ -1195,6 +1200,7 @@ function vHome(v){
   </section>
   ${homeExtras()}
   <button class="card link-row" data-go="social" style="border-inline-start:6px solid var(--s-soc)"><span style="font-size:1.6em">🎬</span><span style="flex:1"><b>استوديو المهارات الاجتماعية</b><br><span class="muted small">تدرّب على محادثة حقيقية مع الأستاذ سامر. 5 نجوم لكل مشهد.</span></span><span class="go-arrow" aria-hidden="true">←</span></button>
+  ${challCard()}
   ${ttCard()}
   ${interestsCard()}
   <details class="card"><summary class="row between" style="cursor:pointer;list-style:none"><h3>خطة الجلسة</h3><span class="muted small">${plan.length} خطوات ▾</span></summary>
@@ -1208,7 +1214,7 @@ function vHome(v){
   const qk=v.querySelector('[data-quick]');if(qk)qk.onclick=e=>{const id=e.currentTarget.dataset.quick;const ids=id?[id]:T.filter(t=>S.lessons[t.id]?.done).map(t=>t.id);startExam({ids:ids.length?ids:[nextTopic().id],n:5,mode:'practice',timer:'none'})};
   v.querySelectorAll('[data-sub]').forEach(b=>b.onclick=()=>{CUR.sub=b.dataset.sub;go('learn')});
   v.querySelectorAll('[data-go]').forEach(b=>b.onclick=()=>go(b.dataset.go));
-  bindHomeExtras(v);
+  bindHomeExtras(v);bindChall(v);
   const sq=v.querySelector('[data-sayq]');if(sq)sq.onclick=()=>{speak(q[0]+'. المعنى: '+q[2])};
 }
 
@@ -1935,10 +1941,80 @@ function vzReplies(el,sp,st){const o=(sp.o||[]).slice(0,4).map(String);el.classL
 function vSocial(v){const n=S.rpDone||0,ts=T.filter(t=>t.s==='soc');
   v.innerHTML=`<section class="card" style="--sc:var(--s-soc)"><h2>🎬 استوديو المهارات الاجتماعية</h2><p class="muted" style="margin:.3em 0 0">هنا نتدرّب على المحادثة مثل المدبلجين في الاستوديو: كل مشهد له هدف صغير. إذا أخطأنا، نعيد اللقطة. لا أحد يرى المشهد غيرك.</p>
    <div class="row" style="margin-top:8px"><span class="chip">${STAR} 5 نجوم لكل مشهد</span><span class="chip">${n} مشاهد أكملتها</span></div></section>
+  ${challCard()}
+  <button class="card link-row" data-go="story"><span style="font-size:1.6em">📖</span><span style="flex:1"><b>قصص لما سيحدث</b><br><span class="muted small">رحلة، معلّم بديل، مناسبة… سامر يكتب قصة تطمئنك قبل الحدث.</span></span><span class="go-arrow" aria-hidden="true">←</span></button>
   <section class="card"><h3>اختر مشهدًا</h3><div class="plan-list" style="margin-top:10px">${SCEN.map(s=>`<button class="plan-row" data-rp="${s.id}" style="--pc:var(--s-soc)"><span class="pic" style="--pc:var(--s-soc);font-size:1.4em">${s.ic}</span><span style="flex:1;min-width:0"><b>${esc(s.t)}</b><br><span class="muted small">${esc(s.goal)}</span></span><span class="go-arrow" aria-hidden="true">←</span></button>`).join('')}</div></section>
   <section class="card"><h3>دروس قصيرة قبل التدريب</h3><div class="topic-list" style="margin-top:8px">${ts.map(t=>`<button class="topic-btn" data-t="${t.id}"><span><b>${esc(t.n)}</b><br><span class="muted small">${t.steps.length} خطوات · بطاقات</span></span><span class="chip ${S.lessons[t.id]?.done?'good':''}">${S.lessons[t.id]?.done?'أنهيته ✓':'ابدأ'}</span></button>`).join('')}</div></section>`;
   v.querySelectorAll('[data-rp]').forEach(b=>b.onclick=()=>{if(!SAMPLE){toastT('التدريب على المشاهد يحتاج المعلّم الذكي. جرّب الدروس القصيرة الآن.');return}startRP(b.dataset.rp)});
-  v.querySelectorAll('[data-t]').forEach(b=>b.onclick=()=>startLesson(b.dataset.t))}
+  v.querySelectorAll('[data-t]').forEach(b=>b.onclick=()=>startLesson(b.dataset.t));bindChall(v);v.querySelectorAll('[data-go]').forEach(b=>b.onclick=()=>{STY=null;go(b.dataset.go)});v.querySelectorAll('[data-start]').forEach(b=>b.onclick=()=>startLesson(b.dataset.start))}
+
+/* ============ WEEKLY REAL-LIFE CHALLENGE ============ */
+const CHALL=[
+ {id:'q_open',ic:'❓',t:'اسأل زميلًا سؤالًا مفتوحًا في الاستراحة',h:'مثلًا: «ماذا فعلت في العطلة؟» ثم اسمع جوابه.',tid:'soc_start'},
+ {id:'greet3',ic:'👋',t:'سلّم على 3 أشخاص بالاسم هذا الأسبوع',h:'«صباح الخير يا …» مع ابتسامة صغيرة.',tid:'soc_start'},
+ {id:'three',ic:'3️⃣',t:'تكلّم عن الكرتون الذي تحبّه 3 جمل، ثم اسأل: «وأنت؟»',h:'قاعدة الجمل الثلاث، مثل تبادل الأدوار في المشهد.',tid:'soc_turns'},
+ {id:'follow',ic:'🔁',t:'اسأل سؤال متابعة عن شيء قاله صديقك',h:'«قلتَ إنك … ماذا حدث بعد ذلك؟»',tid:'soc_turns'},
+ {id:'feel',ic:'🎭',t:'لاحظ شعور شخص في البيت من وجهه وصوته، واسأله',h:'«تبدو متعبًا اليوم، هل أنت بخير؟»',tid:'soc_feel'},
+ {id:'thanks',ic:'🙏',t:'اشكر المعلّم أو المعلّمة بعد الحصة على شيء محدّد',h:'«شكرًا، فهمت التمرين اليوم.»',tid:'soc_end'},
+ {id:'bye',ic:'🚪',t:'أنهِ محادثة بلطف: جملة إشارة ثم وداع',h:'«حسنًا، يجب أن أذهب. أراك غدًا!»',tid:'soc_end'},
+ {id:'help',ic:'✋',t:'اطلب مساعدة من المعلّم في شيء لم تفهمه',h:'«لو سمحت، لم أفهم هذا الجزء. هل يمكنك أن تشرحه مرة أخرى؟»',tid:'soc_team'},
+ {id:'idea',ic:'💡',t:'في عمل جماعي، اقترح فكرة واحدة بهدوء',h:'«عندي فكرة، ما رأيكم؟»',tid:'soc_team'},
+ {id:'invite',ic:'🎮',t:'ادعُ صديقًا لنشاط مشترك',h:'«هل تريد أن نلعب معًا يوم الجمعة؟» واقبل الجواب بلطف.',tid:'soc_team'}];
+const weekKey=()=>{const d=new Date();d.setHours(12,0,0,0);d.setDate(d.getDate()-d.getDay());return d.toISOString().slice(0,10)};
+function curChall(){S.chall=S.chall||{};const k=weekKey();if(!S.chall[k]){const used=new Set(Object.values(S.chall).map(c=>c.id));const pool=CHALL.filter(c=>!used.has(c.id));const n=Math.floor(Date.now()/(7*864e5));const pick=(pool.length?pool:CHALL)[n%(pool.length||CHALL.length)];S.chall[k]={id:pick.id,t:pick.t};persist()}return {...S.chall[k],k,c:CHALL.find(x=>x.id===S.chall[k].id)||CHALL[0]}}
+function challCard(){const x=curChall();if(!x.c)return '';
+  return `<section class="card chall ${x.done?'done':''}"><div class="row between"><h3>🎯 تحدّي الأسبوع</h3>${x.done?'<span class="chip good">أنجزته ✓</span>':`<span class="chip">${STAR} 10</span>`}</div>
+   <p class="qtext" style="margin:8px 0 4px">${x.c.ic} ${esc(x.c.t)}</p><p class="muted small" style="margin:0 0 10px">${esc(x.c.h)}</p>
+   ${x.done?`<p class="small" style="margin:0">${{good:'😊 كان جيدًا',ok:'😐 كان عاديًا',hard:'😟 كان صعبًا'}[x.how]||''}${x.note?' · '+esc(x.note):''}</p>`:`<div class="row"><button class="btn-p" data-chdone>فعلتها! 🎉</button><button class="btn-ghost" data-chswap>تحدٍّ آخر</button><button class="btn-ghost" data-start="${x.c.tid}">ذكّرني كيف</button></div>`}</section>`}
+function bindChall(v){const d=v.querySelector('[data-chdone]');if(d)d.onclick=openChallDone;const sw=v.querySelector('[data-chswap]');if(sw)sw.onclick=()=>{const x=curChall();const others=CHALL.filter(c=>c.id!==x.id);const pk=others[Math.floor(Math.random()*others.length)];S.chall[x.k]={id:pk.id,t:pk.t};persist();render()}}
+function openChallDone(){const x=curChall();const o=$('overlay');o.hidden=false;let how=null;
+  o.innerHTML=`<div class="card" role="dialog" aria-modal="true" style="max-width:420px"><h2>أحسنت! 🎉</h2><p style="margin:0">«${esc(x.c.t)}»</p><b>كيف كان؟</b><div class="row" style="justify-content:center">${[['good','😊 جيد'],['ok','😐 عادي'],['hard','😟 صعب']].map(([k,l])=>`<button data-how="${k}" aria-pressed="false">${l}</button>`).join('')}</div>
+   <label class="field" style="width:100%"><span class="small muted">ماذا حدث؟ (اختياري، جملة واحدة)</span><input id="chNote" maxlength="200" style="width:100%;border:1.5px solid var(--line);border-radius:12px;padding:.5em;background:var(--surface)"></label>
+   <div class="row" style="justify-content:center"><button class="btn-p" id="chOk" disabled>احفظ</button><button class="btn-ghost" id="chNo">ليس الآن</button></div></div>`;
+  o.querySelectorAll('[data-how]').forEach(b=>b.onclick=()=>{how=b.dataset.how;o.querySelectorAll('[data-how]').forEach(z=>z.setAttribute('aria-pressed',String(z===b)));$('chOk').disabled=false});
+  $('chNo').onclick=()=>{o.hidden=true};
+  $('chOk').onclick=()=>{const note=$('chNote').value.trim().slice(0,200);S.chall[x.k]={...S.chall[x.k],done:1,how,note,ts:Date.now()};o.hidden=true;addStars(10,'تحدّي الأسبوع');checkBadges();persist(true);render();
+    const msg=`أنجزت تحدّي الأسبوع: «${x.c.t}». كان ${({good:'جيدًا',ok:'عاديًا',hard:'صعبًا'})[how]}.${note?' ماذا حدث: '+note:''}`;
+    if(SAMPLE){$('teacher').classList.add('open');ask(msg+'\n(أعطني ردًّا قصيرًا مشجّعًا: ماذا فعلت جيدًا بالضبط، ونصيحة واحدة صغيرة للمرة القادمة إن كان صعبًا. بدون شكل الشرح الكامل.)','simple')}
+    else teacherSay(how==='hard'?'أحسنت لأنك حاولت! الشيء الصعب يصبح أسهل مع التدريب، مثل إعادة اللقطة في الاستوديو.':'رائع يا يمان! هذا تقدّم حقيقي خارج التطبيق. أنا فخور بك.')}}
+
+/* ============ SOCIAL STORIES ============ */
+const STORY_PRESETS=['رحلة مدرسية','معلّم بديل في الحصة','امتحان مهم','زيارة طبيب الأسنان','عرس أو مناسبة عائلية كبيرة','أول يوم في مكان جديد','تغيير في البرنامج اليومي','حفلة عيد ميلاد صديق'];
+let STY=null;
+function vStory(v){S.stories=S.stories||[];
+  if(STY&&STY.view!=null){const st=S.stories[STY.view];if(!st){STY=null;return vStory(v)}const i=STY.page||0,pg=st.pages[i],last=i===st.pages.length-1;
+    v.innerHTML=`<section class="card story-page" style="--sc:var(--s-soc)"><div class="row between"><span class="chip">${esc(st.title)}</span><span class="muted small">${i+1} من ${st.pages.length}</span></div>
+     <div class="story-ic" aria-hidden="true">${esc(pg.ic||'📖')}</div><p class="story-txt">${esc(pg.t)}</p>
+     <div class="story-dots">${st.pages.map((_,k)=>`<i class="${k===i?'on':k<i?'past':''}"></i>`).join('')}</div>
+     <div class="row between" style="margin-top:10px"><button id="sPrev" ${i===0?'disabled':''}>السابق</button><button id="sSay" class="btn-ghost">🔊 اسمع</button><button id="sNext" class="btn-p">${last?'انتهت القصة ✓':'التالي ←'}</button></div></section>
+     ${last&&(st.phrases||[]).length?`<section class="card"><h3>💬 جمل أستطيع أن أقولها</h3><ul>${st.phrases.map(x=>`<li>${esc(x)}</li>`).join('')}</ul></section>`:''}
+     ${last&&(st.calm||[]).length?`<section class="card"><h3>🌿 إذا شعرت بالتوتّر</h3><ul>${st.calm.map(x=>`<li>${esc(x)}</li>`).join('')}</ul></section>`:''}
+     <div class="row"><button class="btn-ghost" id="sBack">كل القصص</button></div>`;
+    $('sPrev').onclick=()=>{STY.page=i-1;render()};$('sNext').onclick=()=>{if(last){STY=null;if(!st.read){st.read=1;addStars(3,'قرأت قصة: '+st.title);persist()}render()}else{STY.page=i+1;render()}};
+    $('sSay').onclick=()=>speak(pg.t);$('sBack').onclick=()=>{STY=null;render()};if(S.settings.narrate!=='off')speak(pg.t);return}
+  const busy=STY&&STY.busy;
+  v.innerHTML=`<section class="card" style="--sc:var(--s-soc)"><h2>📖 قصص لما سيحدث</h2><p class="muted" style="margin:.3em 0 0">عندما يأتي شيء جديد (رحلة، معلّم بديل، مناسبة)، الأستاذ سامر يكتب قصة قصيرة: ماذا سيحدث، ماذا قد أشعر، وماذا أستطيع أن أفعل.</p></section>
+   <section class="card"><h3>ماذا سيحدث؟</h3><div class="row" style="margin:8px 0">${STORY_PRESETS.map(x=>`<button class="chip" data-pre="${esc(x)}" style="cursor:pointer;min-height:38px">${esc(x)}</button>`).join('')}</div>
+    <input id="stIn" placeholder="أو اكتب: مثلًا «غدًا رحلة إلى حيفا بالباص»" value="${esc(STY&&STY.q||'')}" style="width:100%;border:1.5px solid var(--line);border-radius:12px;padding:.6em;background:var(--surface)">
+    <input id="stWhen" placeholder="متى؟ (اختياري) مثلًا: غدًا الساعة 8" value="${esc(STY&&STY.when||'')}" style="width:100%;margin-top:8px;border:1.5px solid var(--line);border-radius:12px;padding:.6em;background:var(--surface)">
+    <div class="row" style="margin-top:10px"><button class="btn-p" id="stGo" ${busy?'disabled':''}>${busy?'الأستاذ سامر يكتب القصة…':'اكتب لي القصة'}</button></div>${STY&&STY.msg?`<div class="notice warn" style="margin-top:8px">${esc(STY.msg)}</div>`:''}</section>
+   ${S.stories.length?`<section class="card"><h3>قصصي</h3><div class="topic-list" style="margin-top:8px">${S.stories.map((st,i)=>`<div style="display:flex;gap:6px"><button class="topic-btn" data-sv="${i}" style="flex:1"><span><b>${esc(st.title)}</b><br><span class="muted small">${esc(st.when||st.d||'')} · ${st.pages.length} صفحات</span></span><span class="chip ${st.read?'good':''}">${st.read?'قرأتها':'اقرأ'}</span></button><button class="btn-ghost" data-sd="${i}" aria-label="احذف">✕</button></div>`).reverse().join('')}</div></section>`:''}`;
+  v.querySelectorAll('[data-pre]').forEach(b=>b.onclick=()=>{$('stIn').value=b.dataset.pre;$('stWhen').focus()});
+  v.querySelectorAll('[data-sv]').forEach(b=>b.onclick=()=>{STY={view:+b.dataset.sv,page:0};render();window.scrollTo(0,0)});
+  v.querySelectorAll('[data-sd]').forEach(b=>b.onclick=()=>confirmBox('هل تريد حذف هذه القصة؟','نعم، احذف','لا',()=>{S.stories.splice(+b.dataset.sd,1);persist();render()}));
+  $('stGo').onclick=async()=>{const q=$('stIn').value.trim(),when=$('stWhen').value.trim();if(!q){$('stIn').focus();return}
+    if(!SAMPLE){STY={q,when,msg:'كتابة القصص تحتاج المعلّم الذكي، وهو غير متصل الآن.'};render();return}
+    STY={q,when,busy:true};render();
+    try{const j=await askJSON(`اكتب «قصة اجتماعية» (Social Story بأسلوب Carol Gray) بالعربية الفصحى البسيطة ليمان، طالب في الصف العاشر أو الحادي عشر على طيف التوحّد، عن حدث قادم: «${q}»${when?' — الموعد: '+when:''}.
+القواعد: جمل قصيرة وحرفية، بضمير المتكلّم «أنا». معظم الجمل وصفية (ماذا سيحدث، أين، مع من، كم يستغرق)، وبعضها عن مشاعر الناس، وجمل قليلة توجيهية مرنة مثل «أستطيع أن…» أو «سأحاول أن…» (ليس «يجب»). اذكر أن بعض الأشياء قد تتغيّر وهذا طبيعي. نبرة هادئة ومطمئنة وإيجابية، بدون مبالغة. لا تخترع تفاصيل محدّدة غير مذكورة (أسماء، أماكن)، واستعمل عبارات عامة بدلًا منها.
+${interestLine()}
+أعد JSON فقط بهذا الشكل:
+{"title":"عنوان قصير","pages":[{"ic":"إيموجي واحد","t":"جملتان أو ثلاث"}],"phrases":["جمل قصيرة يستطيع قولها في الموقف"],"calm":["3 طرق للهدوء إذا توتّر"]}
+عدد الصفحات بين 6 و 9.`,2500);
+      if(!j||!Array.isArray(j.pages)||!j.pages.length)throw {code:'invalid_json'};
+      const st={title:String(j.title||q).slice(0,80),when,d:today(),q,pages:j.pages.slice(0,10).map(p=>({ic:String(p.ic||'📖').slice(0,4),t:String(p.t||'').slice(0,400)})).filter(p=>p.t),phrases:(j.phrases||[]).slice(0,6).map(x=>String(x).slice(0,160)),calm:(j.calm||[]).slice(0,4).map(x=>String(x).slice(0,160))};
+      S.stories.push(st);S.stories=S.stories.slice(-20);persist(true);STY={view:S.stories.length-1,page:0};render();window.scrollTo(0,0)}
+    catch(e){STY={q,when,msg:e&&e.code==='daily_limit'?'الأستاذ سامر أنهى عمله لهذا اليوم. نكتب القصة غدًا.':'لم أستطع كتابة القصة الآن. جرّب مرة أخرى بعد قليل.'};render()}}}
 
 /* ============ TEACHER ============ */
 const CHAT=[];let tAbort=null,lastT='';
@@ -2068,7 +2144,7 @@ async function ask(text,kind,img){
   if(turns.length&&turns.at(-1).role==='user')turns.at(-1).content+='\n\n'+final;else turns.push({role:'user',content:final});
   if(img){const last=turns.at(-1);last.content=[{type:'image',source:{type:'base64',media_type:'image/jpeg',data:img}},{type:'text',text:last.content}]}
   try{const r=await SAMPLE(turns,{signal:tAbort.signal,cache:false,role:'teacher',max:1400,system:sysP,onText:({text})=>{CHAT[idx].text=text||'…';drawChat()}});CHAT[idx].text=takeNotes(r.text);lastT=plainTeacher(CHAT[idx].text);drawChat();if(S.settings.autoread==='on')speak(lastT)}
-  catch(e){if(e&&(e.code==='aborted'||e.name==='AbortError'))return;CHAT[idx].text=e&&e.code==='rate_limited'?'أسئلة كثيرة الآن. انتظر قليلًا ثم اسأل مرة أخرى.':e&&e.code==='not_granted'?'لم يُسمح لي بالإجابة الذكية هنا. هذا جواب من الدرس:\n'+offline(kind):'لم أستطع الإجابة الآن. هذا جواب من الدرس:\n'+offline(kind);drawChat()}
+  catch(e){if(e&&(e.code==='aborted'||e.name==='AbortError'))return;CHAT[idx].text=e&&e.code==='daily_limit'?'الأستاذ سامر أنهى عمله لهذا اليوم 🌙 نكمل غدًا! الآن يمكنك أن تراجع الدروس وتحلّ الامتحانات.':e&&e.code==='rate_limited'?'أسئلة كثيرة الآن. انتظر قليلًا ثم اسأل مرة أخرى.':e&&e.code==='not_granted'?'لم يُسمح لي بالإجابة الذكية هنا. هذا جواب من الدرس:\n'+offline(kind):'لم أستطع الإجابة الآن. هذا جواب من الدرس:\n'+offline(kind);drawChat()}
 }
 document.querySelectorAll('[data-q]').forEach(b=>b.onclick=()=>{const k=b.dataset.q;if(k==='break'){openBreak();return}ask({simple:'اشرح لي هذه الخطوة ببساطة أكثر.',hint:'أعطني تلميحًا صغيرًا بدون الحل.',example:'أعطني مثالًا آخر مشابهًا.'}[k],k)});
 function sendT(v){const img=tPendImg;if(!v&&!img)return;if(!v)v='اشرح لي هذا التمرين خطوة خطوة.';if(img&&!SAMPLE){teacherSay('لأقرأ الصور أحتاج المعلّم الذكي، وهو غير مفعّل الآن.');return}tPendImg=null;drawPend();const k=/تلميح|مساعدة|مش فاهم|صعب/.test(v)?'hint':/مثال/.test(v)?'example':'simple';if(!img&&/استراحة|تعبت|تعبان/.test(v)&&!SAMPLE){openBreak();return}ask(v,k,img)}

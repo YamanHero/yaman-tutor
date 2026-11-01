@@ -1,4 +1,4 @@
-import { authorized, deny } from './_lib.js';
+import { authorized, deny, readUsage, bumpUsage, dailyLimit } from './_lib.js';
 
 const clean_ = v => String(v || '').trim().replace(/^["'`]+|["'`]+$/g, '').trim().toLowerCase();
 const MODEL = clean_(process.env.ANTHROPIC_MODEL) || 'claude-sonnet-5-5';
@@ -8,7 +8,7 @@ const FALLBACKS = ['claude-sonnet-5-5', 'claude-opus-5-5', 'claude-haiku-5-5'];
 export default async function handler(req, res) {
   if (!authorized(req)) return deny(res);
   const key = process.env.ANTHROPIC_API_KEY;
-  if (req.method === 'GET') return res.status(200).json({ ai: Boolean(key) });
+  if (req.method === 'GET') { const u = await readUsage(); return res.status(200).json({ ai: Boolean(key), used: u.n || 0, limit: dailyLimit() }); }
   if (req.method !== 'POST') return res.status(405).json({ code: 'method' });
   if (!key) return res.status(503).json({ code: 'not_granted', message: 'ANTHROPIC_API_KEY is not set' });
 
@@ -29,6 +29,9 @@ export default async function handler(req, res) {
   const system = typeof body.system === 'string' ? body.system.slice(0, 20000) : undefined;
   const model = body.role === 'teacher' ? TEACHER_MODEL : MODEL;
 
+  const usage = await readUsage();
+  if ((usage.n || 0) >= dailyLimit()) return res.status(429).json({ code: 'daily_limit', message: 'daily limit reached' });
+  bumpUsage(usage);
   const chain = [...new Set([model, ...FALLBACKS])];
   try {
     let r, j, used;
