@@ -76,6 +76,7 @@ a.stat{text-decoration:none;color:inherit;display:block} a.stat:hover{border-col
 </style>
 </head>
 <body>
+<nav class="wrap" id="kt" style="padding-bottom:0"></nav>
 <main class="wrap" id="app"></main>
 <script>
 const META={"topics": [{"id": "linear", "s": "math", "n": "المعادلة الخطية"}, {"id": "linfunc", "s": "math", "n": "الدالة الخطية والميل"}, {"id": "quadratic", "s": "math", "n": "المعادلة التربيعية"}, {"id": "probability", "s": "math", "n": "الاحتمالات"}, {"id": "atom", "s": "chem", "n": "الذرّة ومكوّناتها"}, {"id": "ph", "s": "chem", "n": "الحموض والقواعد (pH)"}, {"id": "cell", "s": "bio", "n": "الخلية وعضيّاتها"}, {"id": "sentence", "s": "ar", "n": "الجملة الاسمية والفعلية"}, {"id": "kana", "s": "ar", "n": "كان وإنّ وأخواتهما"}, {"id": "he_basic", "s": "he", "n": "משפט פשוט – جملة بسيطة"}, {"id": "he_past", "s": "he", "n": "זמן עבר – الماضي بالعبرية"}, {"id": "en_present", "s": "en", "n": "Present Simple – المضارع البسيط"}, {"id": "en_past", "s": "en", "n": "Past Simple – الماضي البسيط"}, {"id": "soc_start", "s": "soc", "n": "كيف أبدأ محادثة"}, {"id": "soc_turns", "s": "soc", "n": "الاستماع وموضوعي المفضّل"}, {"id": "soc_feel", "s": "soc", "n": "المشاعر ونبرة الصوت"}, {"id": "soc_end", "s": "soc", "n": "إنهاء المحادثة والاعتذار"}, {"id": "soc_team", "s": "soc", "n": "الصداقة والعمل في فريق"}], "subj": [{"id": "math", "c": "--s-math", "he": "מתמטיקה", "ar": "الرياضيات"}, {"id": "chem", "c": "--s-chem", "he": "כימיה", "ar": "الكيمياء"}, {"id": "bio", "c": "--s-bio", "he": "ביולוגיה", "ar": "الأحياء"}, {"id": "ar", "c": "--s-ar", "he": "ערבית", "ar": "العربية"}, {"id": "he", "c": "--s-he", "he": "עברית", "ar": "العبرية"}, {"id": "en", "c": "--s-en", "he": "אנגלית", "ar": "الإنجليزية"}]};
@@ -84,7 +85,7 @@ const BUILTIN=META.topics.slice();
 const STAR='<svg viewBox="0 0 24 24" style="width:1.1em;height:1.1em;fill:#D49400;vertical-align:-.18em" aria-hidden="true"><path d="M12 2.6l2.85 5.95 6.55.88-4.78 4.55 1.2 6.5L12 17.33l-5.82 3.15 1.2-6.5L2.6 9.43l6.55-.88z"/></svg>';
 const LEVELS_AR=['مبتدئ','مستكشف','مثابر','باحث','متمكّن','خبير','بطل التعلّم','نجم الصف','نجم المدرسة','أستاذ المستقبل'],LV=[0,60,160,320,540,820,1160,1560,2020,2540];
 const I={he:{
- title:location.search.includes('u=judy')?'מעקב הורים – ג׳ודי':'מעקב הורים – יאמן',login:'הכנס את קוד המשפחה של אפליקציית הלימוד של יאמן.',code:'קוד משפחה',enter:'כניסה',bad:'הקוד שגוי.',loading:'טוען נתונים…',fail:'לא הצלחתי לטעון את הנתונים. בדוק חיבור ונסה שוב.',retry:'נסה שוב',
+ title:location.search.includes('u=judy')?'מעקב הורים – ג׳ודי':location.search.includes('u=yaman')?'מעקב הורים – ימאן':'מעקב הורים',login:'הכנס את קוד המשפחה של אפליקציית הלימוד של יאמן.',code:'קוד משפחה',enter:'כניסה',bad:'הקוד שגוי.',loading:'טוען נתונים…',fail:'לא הצלחתי לטעון את הנתונים. בדוק חיבור ונסה שוב.',retry:'נסה שוב',
  last:'פעילות אחרונה',none:'עדיין אין פעילות',open:'פתח את אפליקציית הלימוד',refresh:'רענון',
  minToday:'דקות למידה היום',minWeek:'דקות השבוע',lessons:'שיעורים שהושלמו',avgWeek:'ממוצע מבחנים השבוע',review:'שאלות לחזרה היום',of:'מתוך',stars:'כוכבים',level:'רמה',badges:'אותות',
  weak:'נושאים שכדאי לחזק',weakHint:'לחיצה פותחת מבחן תרגול בנושא',week:'דקות למידה ב־7 הימים האחרונים',scores:'ציוני המבחנים האחרונים',pink:'נקודה ורודה = מבחן חזרה',noEx:'עוד אין מבחנים.',
@@ -95,7 +96,7 @@ const I={he:{
  claims:'בקשות של יאמן',noClaims:'אין בקשות כרגע.',give:'סמן שניתן',given:'ניתן',pending:'ממתין',
  sumApi:'כתובת לסיכום יומי עבור אפליקציות אחרות (למשל Hero Family):',lang:'العربية',mood:'מצב רוח היום',frust:'לחיצות «קשה לי» השבוע',rp:'סצנות תרגול חברתי',rcT:'«מה למדתי היום?» — זיכרון',rcLv:{ind:'✅ זוכר לבד',help:'🤝 זוכר עם עזרה',rev:'🔁 צריך חזרה'},rcNext:'חזרה הבאה',rcName:'מזהה את שם הנושא מדוגמה',rcDays:'ימים שבוצע',rcSaid:'מה כתב',rcDone:'נשלט 🌟',soc:'כישורים חברתיים',chall:'אתגר השבוע',chDone:'בוצע',chNot:'עוד לא',stories:'סיפורים חברתיים',newStory:'＋ סיפור חדש לאירוע קרוב',notes:'מה סאמר למד על ימאן',moods:{good:'😊 טוב',ok:'😐 רגיל',tired:'😫 עייף / לחוץ'},noMood:'עוד לא נבחר',interests:'תחומי עניין',tt:'מערכת שעות שבועית',ttEdit:'עריכה',days:['א׳','ב׳','ג׳','ד׳','ה׳','ו׳','שבת'],timeline:'דיוק במבחנים לפי שבוע ומקצוע (8 שבועות)',noTl:'הגרף יופיע אחרי כמה מבחנים.',tests:'מבחנים קרובים בבית הספר',addTest:'הוסף מבחן',daysLeft:'עוד {n} ימים',todayT:'היום',tomorrowT:'מחר',openT:'שאלות פתוחות',wk:'שבוע',addTopic:'הוסף נושא חדש',addHint:'כותבים שם נושא או מצלמים עמוד מהספר, והמורה בונה ממנו שיעור עם שאלות.'},
 ar:{
- title:location.search.includes('u=judy')?'متابعة الأهل – جودي':'متابعة الأهل – يمان',login:'اكتب رمز العائلة لتطبيق التعلّم الخاص بيمان.',code:'رمز العائلة',enter:'دخول',bad:'الرمز غير صحيح.',loading:'جارٍ تحميل البيانات…',fail:'لم أستطع تحميل البيانات. تأكّد من الاتصال وجرّب مرة أخرى.',retry:'جرّب مرة أخرى',
+ title:location.search.includes('u=judy')?'متابعة الأهل – جودي':location.search.includes('u=yaman')?'متابعة الأهل – يمان':'متابعة الأهل',login:'اكتب رمز العائلة لتطبيق التعلّم الخاص بيمان.',code:'رمز العائلة',enter:'دخول',bad:'الرمز غير صحيح.',loading:'جارٍ تحميل البيانات…',fail:'لم أستطع تحميل البيانات. تأكّد من الاتصال وجرّب مرة أخرى.',retry:'جرّب مرة أخرى',
  last:'آخر نشاط',none:'لا يوجد نشاط بعد',open:'افتح تطبيق التعلّم',refresh:'تحديث',
  minToday:'دقائق تعلّم اليوم',minWeek:'دقائق هذا الأسبوع',lessons:'دروس مكتملة',avgWeek:'معدّل امتحانات الأسبوع',review:'أسئلة مراجعة اليوم',of:'من',stars:'نجمة',level:'المستوى',badges:'أوسمة',
  weak:'مواضيع تحتاج تقوية',weakHint:'الضغط يفتح امتحانًا تدريبيًا في الموضوع',week:'دقائق التعلّم في آخر 7 أيام',scores:'علامات آخر الامتحانات',pink:'النقطة الوردية = امتحان مراجعة',noEx:'لا توجد امتحانات بعد.',
@@ -116,18 +117,55 @@ const loc=()=>LANG==='he'?'he':'ar';
 const subj=id=>META.subj.find(s=>s.id===id);
 const sn=s=>LANG==='he'?s.he:s.ar;
 const link=(h,txt,cls='go')=>`<a class="${cls}" href="/#${h}" target="_blank" rel="noopener">${txt}</a>`;
-function setLang(l){LANG=l;try{localStorage.setItem('yaman_parent_lang2',l)}catch(e){}document.documentElement.lang=l;document.title=t('title');DATA?draw():login()}
-const J=new URLSearchParams(location.search).get('u')==='judy';
-if(J){document.documentElement.classList.add('judy');META.subj=META.subj.filter(x=>['math','ar','en','he'].includes(x.id)).concat([{id:'fr',c:'--s-hist',he:'צרפתית',ar:'الفرنسية'}]);META.topics=[{"id": "j_add", "s": "math", "n": "الجمع والطرح"}, {"id": "j_mult", "s": "math", "n": "جدول الضرب (2 و5 و10)"}, {"id": "j_frac", "s": "math", "n": "الكسور: النصف والربع"}, {"id": "j_shapes", "s": "math", "n": "الأشكال الهندسية"}, {"id": "j_nv", "s": "ar", "n": "الاسم والفعل"}, {"id": "j_num", "s": "ar", "n": "المفرد والمثنى والجمع"}, {"id": "j_taa", "s": "ar", "n": "التاء المربوطة والمفتوحة"}, {"id": "j_en1", "s": "en", "n": "Colors and numbers: الألوان والأعداد"}, {"id": "j_en2", "s": "en", "n": "I am / You are / He is"}, {"id": "j_he1", "s": "he", "n": "تحيات بالعبرية: שלום"}, {"id": "j_he2", "s": "he", "n": "العائلة بالعبرية: משפחה"}, {"id": "j_fr1", "s": "fr", "n": "Bonjour: التحيات بالفرنسية"}, {"id": "j_fr2", "s": "fr", "n": "Couleurs et nombres: الألوان والأعداد"}, {"id": "j_fr3", "s": "fr", "n": "La famille: العائلة بالفرنسية"}];
+function setLang(l){LANG=l;try{localStorage.setItem('yaman_parent_lang2',l)}catch(e){}document.documentElement.lang=l;document.title=t('title');drawTabs();ALL?(CODE?loadAll():login()):(DATA?draw():login())}
+const JTOPICS=[{"id": "j_add", "s": "math", "n": "الجمع والطرح"}, {"id": "j_mult", "s": "math", "n": "جدول الضرب (2 و5 و10)"}, {"id": "j_frac", "s": "math", "n": "الكسور: النصف والربع"}, {"id": "j_shapes", "s": "math", "n": "الأشكال الهندسية"}, {"id": "j_nv", "s": "ar", "n": "الاسم والفعل"}, {"id": "j_num", "s": "ar", "n": "المفرد والمثنى والجمع"}, {"id": "j_taa", "s": "ar", "n": "التاء المربوطة والمفتوحة"}, {"id": "j_en1", "s": "en", "n": "Colors and numbers: الألوان والأعداد"}, {"id": "j_en2", "s": "en", "n": "I am / You are / He is"}, {"id": "j_he1", "s": "he", "n": "تحيات بالعبرية: שלום"}, {"id": "j_he2", "s": "he", "n": "العائلة بالعبرية: משפחה"}, {"id": "j_fr1", "s": "fr", "n": "Bonjour: التحيات بالفرنسية"}, {"id": "j_fr2", "s": "fr", "n": "Couleurs et nombres: الألوان والأعداد"}, {"id": "j_fr3", "s": "fr", "n": "La famille: العائلة بالفرنسية"}];
+const UQ=new URLSearchParams(location.search).get('u')||'';const J=UQ==='judy',ALL=UQ!=='judy'&&UQ!=='yaman';
+if(J){document.documentElement.classList.add('judy');META.subj=META.subj.filter(x=>['math','ar','en','he'].includes(x.id)).concat([{id:'fr',c:'--s-hist',he:'צרפתית',ar:'الفرنسية'}]);META.topics=JTOPICS;
  const st=document.createElement('style');st.textContent='.judy .ynly{display:none!important}';document.head.appendChild(st)}
 const hdr=api=>({'x-family-code':CODE,...(J?{'x-profile':'judy'}:{}),...api});
+const AT={ar:{ov:'نظرة عامة',y:'يمان',j:'جودي',stars:'النجوم',min:'دقائق اليوم',mood:'المزاج اليوم',last:'آخر دخول',due:'مراجعات مستحقة',lessons:'دروس مكتملة',open:'فتح التفاصيل',none:'لا يوجد',today:'اليوم',ago:n=>'قبل '+n+' أيام',never:'لم يبدأ بعد',al:'تنبيهات',ok:'كل شيء على ما يرام ✓',noStudy:(k,n,f)=>k+': '+(f?'لم تتعلّم':'لم يتعلّم')+' منذ '+n+' أيام',notStarted:(k,f)=>k+': '+(f?'لم تبدأ بعد':'لم يبدأ بعد'),tired:(k,f)=>k+': '+(f?'كانت متعبة أو متضايقة مؤخرًا. اسألوها كيف تشعر':'كان متعبًا أو متضايقًا مؤخرًا. اسألوه كيف يشعر'),weak:(k,w)=>k+': موضوع يحتاج تقوية: '+w,dueMany:(k,n)=>k+': '+n+' مراجعات تنتظر',ttl:'متابعة الأهل – يمان وجودي'},
+he:{ov:'סקירה',y:'ימאן',j:'ג׳ודי',stars:'כוכבים',min:'דקות היום',mood:'מצב רוח היום',last:'כניסה אחרונה',due:'חזרות ממתינות',lessons:'שיעורים שהושלמו',open:'פתח פירוט',none:'אין',today:'היום',ago:n=>'לפני '+n+' ימים',never:'עוד לא התחיל',al:'התראות',ok:'הכול תקין ✓',noStudy:(k,n,f)=>k+': '+(f?'לא למדה':'לא למד')+' '+n+' ימים',notStarted:(k,f)=>k+': '+(f?'עוד לא התחילה':'עוד לא התחיל'),tired:(k,f)=>k+': '+(f?'הייתה עייפה או מוטרדת לאחרונה. כדאי לשאול מה שלומה':'היה עייף או מוטרד לאחרונה. כדאי לשאול מה שלומו'),weak:(k,w)=>k+': נושא שצריך חיזוק: '+w,dueMany:(k,n)=>k+': '+n+' חזרות ממתינות',ttl:'מעקב הורים – ימאן וג׳ודי'}};
+const at=()=>AT[LANG==='he'?'he':'ar'];
+function drawTabs(){const a=at(),cur=ALL?'':J?'judy':'yaman';const L=(u,txt,on)=>`<a href="/parent${u?'?u='+u:''}" style="padding:.5em 1.1em;border-radius:999px;text-decoration:none;font-weight:700;border:1.5px solid var(--line);${on?'background:var(--accent);color:#fff;border-color:var(--accent)':'background:var(--surface);color:var(--ink)'}">${txt}</a>`;
+  $('kt').innerHTML=`<div class="row" style="gap:8px;flex-wrap:wrap;margin-top:10px">${L('',a.ov,ALL)}${L('yaman',a.y,cur==='yaman')}${L('judy',a.j,cur==='judy')}</div>`}
+function kidSum(S,topics,kid){const td=fmtDay(new Date()),names={};topics.forEach(x=>names[x.id]=x.n);
+  const days=(S.days||[]).slice().sort(),lastD=days[days.length-1]||'',ago=lastD?Math.round((new Date(td+'T12:00:00')-new Date(lastD+'T12:00:00'))/864e5):null;
+  const mo=S.moods||{},md=Object.keys(mo).sort().slice(-3).map(k=>mo[k]);
+  const weak=Object.entries(S.mastery||{}).filter(([id,m])=>names[id]&&m.t>=3&&m.r/m.t<0.7).sort((a,b)=>a[1].r/a[1].t-b[1].r/b[1].t).slice(0,2).map(([id])=>names[id]);
+  return {kid,stars:S.stars||0,min:(S.minutes||{})[td]||0,mood:mo[td]||'',ago,due:Object.values(S.review||{}).filter(r=>r.due<=Date.now()).length,done:topics.filter(x=>(S.lessons||{})[x.id]?.done).length,total:topics.length,tiredN:md.filter(x=>x==='tired').length,weak}}
+function alertsOf(k){const a=at(),nm=k.kid==='judy'?a.j:a.y,o=[];
+  if(k.ago===null)o.push(a.notStarted(nm,k.kid==='judy'));else if(k.ago>=2)o.push(a.noStudy(nm,k.ago,k.kid==='judy'));
+  if(k.tiredN>=2||k.mood==='tired')o.push(a.tired(nm,k.kid==='judy'));
+  if(k.weak.length)o.push(a.weak(nm,k.weak.join('، ')));
+  if(k.due>=5)o.push(a.dueMany(nm,k.due));return o}
+function kidCard(k){const a=at(),nm=k.kid==='judy'?a.j:a.y,mt=(t('moods')||{})[k.mood]||a.none;
+  const st=(l,v)=>`<div style="border:1px solid var(--line);border-radius:12px;padding:8px 10px;background:var(--surface2,var(--surface))"><b style="font-size:1.15em;display:block">${v}</b><span class="muted small">${l}</span></div>`;
+  return `<section class="card" style="border-inline-start:6px solid var(${k.kid==='judy'?'--s-he':'--s-math'})"><div class="row between"><h2 style="margin:0">${nm}</h2><a class="go" href="/parent?u=${k.kid}">${a.open} ←</a></div>
+   <div style="display:grid;grid-template-columns:repeat(2,1fr);gap:8px;margin-top:10px">${st(a.stars,STAR+' '+k.stars)}${st(a.min,k.min)}${st(a.mood,mt)}${st(a.last,k.ago===null?a.never:k.ago===0?a.today:a.ago(k.ago))}${st(a.due,k.due)}${st(a.lessons,'<bdi dir="ltr">'+k.done+' / '+k.total+'</bdi>')}</div></section>`}
+async function loadAll(){
+  $('app').innerHTML=`<div class="card muted">${t('loading')}</div>`;
+  try{
+    const g=h=>fetch('/api/state',{headers:{'x-family-code':CODE,...h},cache:'no-store'});
+    const [ry,rj]=await Promise.all([g({}),g({'x-profile':'judy'})]);
+    if(ry.status===401){CODE='';try{localStorage.removeItem('yaman_parent_code')}catch(_){}return login(t('bad'))}
+    if(!ry.ok||!rj.ok)throw 0;
+    const dy=(await ry.json()).data||{},dj=(await rj.json()).data||{};
+    const ks=[kidSum(dy.S||{},BUILTIN,'yaman'),kidSum(dj.S||{},JTOPICS,'judy')],al=ks.flatMap(alertsOf),a=at();
+    $('app').innerHTML=`<header class="row between"><h1>${a.ttl}</h1><button id="lg" class="small">${t('lang')}</button></header>
+     <section class="card" style="border-inline-start:5px solid ${al.length?'#D49400':'var(--ok,#2e7d32)'}"><h2>${a.al}</h2>${al.length?`<ul style="margin:.4em 0 0;padding-inline-start:1.3em;line-height:1.9">${al.map(x=>`<li>${esc(x)}</li>`).join('')}</ul>`:`<p style="margin:.3em 0 0">${a.ok}</p>`}</section>
+     ${ks.map(kidCard).join('')}`;
+    $('lg').onclick=()=>{setLang(LANG==='he'?'ar':'he')};
+  }catch(e){$('app').innerHTML=`<div class="card">${t('fail')} <button id="rt">${t('retry')}</button></div>`;$('rt').onclick=loadAll}
+}
 function login(err){
   $('app').innerHTML=`<form class="card login" id="f"><div class="row" style="justify-content:flex-end"><button type="button" id="lg" class="small">${t('lang')}</button></div><h1>${t('title')}</h1><p class="muted" style="margin:0">${t('login')}</p><input id="c" aria-label="${t('code')}" autocomplete="off">${err?`<div class="notice">${esc(err)}</div>`:''}<button class="btn-p">${t('enter')}</button></form>`;
   $('lg').onclick=()=>setLang(LANG==='he'?'ar':'he');
   $('c').focus();$('f').onsubmit=e=>{e.preventDefault();CODE=$('c').value.trim();if(!CODE)return;try{localStorage.setItem('yaman_parent_code',CODE)}catch(_){}load()};
 }
 async function load(){
+  drawTabs();
   if(!CODE)return login();
+  if(ALL)return loadAll();
   $('app').innerHTML=`<div class="card muted">${t('loading')}</div>`;
   try{
     const none=Promise.resolve({ok:false});const [r,w,tp]=await Promise.all([fetch('/api/state',{headers:hdr(),cache:'no-store'}),J?none:fetch('/api/rewards',{headers:hdr(),cache:'no-store'}),J?none:fetch('/api/topics',{headers:hdr(),cache:'no-store'})]);
