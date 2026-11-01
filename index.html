@@ -852,7 +852,7 @@ async function connect(){
     if(r.data&&r.data.S&&(!local||!local.t||(r.data.updated||0)>=local.t)){adopt(r.data);saveLocal()}
     else if(local&&local.S){dirty=true;flush()}
     chip('محفوظ في السحابة');applySettings();if(!routeFromHash())render();
-    api('tts').then(x=>{TTS=x&&x.provider;}).catch(()=>{});if(!PROFILE){loadRewards();loadTopics()}
+    api('tts').then(x=>{TTS=x&&x.provider;}).catch(()=>{});loadRewards();if(!PROFILE)loadTopics()
     api('ask').then(x=>{if(x&&x.ai){SAMPLE=makeSample();updateTeacherMode()}}).catch(()=>{});
   }catch(e){
     if(e.code==='auth'){CODE='';try{localStorage.removeItem(CODEKEY)}catch(_){}askCode('الرمز غير صحيح. جرّب مرة أخرى.');return}
