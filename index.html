@@ -20,7 +20,7 @@
   --bg:#EDF1F0; --surface:#FFFFFF; --surface2:#F5F8F7; --ink:#15252B; --muted:#56676D; --line:#D3DDDB;
   --accent:#1B6870; --accent-ink:#FFFFFF; --focus:#D99A00; --gold:#D49400;
   --good:#256F45; --good-bg:#E1F2E7; --warn:#8A5A00; --warn-bg:#FFF1D2; --bad:#A83636; --bad-bg:#FAE4E1;
-  --s-math:#2D66C4; --s-phys:#7347BF; --s-chem:#0B8282; --s-bio:#3A8538; --s-ar:#B86D00; --s-he:#B83A72; --s-en:#3B55A0; --s-hist:#8A5A2B; --s-civ:#1F7A8C; --s-rel:#2E7D32; --s-geo:#5F7F1A; --s-cs:#4A4E69;
+  --s-math:#2D66C4; --s-phys:#7347BF; --s-chem:#0B8282; --s-bio:#3A8538; --s-ar:#B86D00; --s-he:#B83A72; --s-en:#3B55A0; --s-hist:#8A5A2B; --s-civ:#1F7A8C; --s-rel:#2E7D32; --s-geo:#5F7F1A; --s-cs:#4A4E69; --s-soc:#C2410C;
   --r-a:#2D66C4; --r-b:#C45F00; --r-c:#5E6E74; --r-d:#7347BF; --r-e:#26804D; --r-f:#B83A72;
   --f-body:"Readex Pro","Noto Sans Hebrew",system-ui,"Segoe UI",Tahoma,sans-serif;
   --f-display:"Reem Kufi","Readex Pro",system-ui,sans-serif;
@@ -31,14 +31,14 @@
   --bg:#0F171A; --surface:#162125; --surface2:#1B292E; --ink:#E3ECEC; --muted:#9AADB1; --line:#2A3A40;
   --accent:#55B5BE; --accent-ink:#06211F; --focus:#F2C14E; --gold:#F2C14E;
   --good:#6FCF94; --good-bg:#183326; --warn:#F0C062; --warn-bg:#352A12; --bad:#F08A80; --bad-bg:#3A1C1A;
-  --s-math:#6E9CF0; --s-phys:#A688EA; --s-chem:#3CC1C1; --s-bio:#78C46F; --s-ar:#F0A546; --s-he:#EE7AAE; --s-en:#8397E0; --s-hist:#D9A06B; --s-civ:#5CC3D6; --s-rel:#7DD07F; --s-geo:#B5D45C; --s-cs:#A9ADC9;
+  --s-math:#6E9CF0; --s-phys:#A688EA; --s-chem:#3CC1C1; --s-bio:#78C46F; --s-ar:#F0A546; --s-he:#EE7AAE; --s-en:#8397E0; --s-hist:#D9A06B; --s-civ:#5CC3D6; --s-rel:#7DD07F; --s-geo:#B5D45C; --s-cs:#A9ADC9; --s-soc:#FB923C;
   --r-a:#6E9CF0; --r-b:#F59A4B; --r-c:#A3B2B7; --r-d:#A688EA; --r-e:#6FCF94; --r-f:#EE7AAE;
   color-scheme:dark}}
 :root[data-theme="dark"]{
   --bg:#0F171A; --surface:#162125; --surface2:#1B292E; --ink:#E3ECEC; --muted:#9AADB1; --line:#2A3A40;
   --accent:#55B5BE; --accent-ink:#06211F; --focus:#F2C14E; --gold:#F2C14E;
   --good:#6FCF94; --good-bg:#183326; --warn:#F0C062; --warn-bg:#352A12; --bad:#F08A80; --bad-bg:#3A1C1A;
-  --s-math:#6E9CF0; --s-phys:#A688EA; --s-chem:#3CC1C1; --s-bio:#78C46F; --s-ar:#F0A546; --s-he:#EE7AAE; --s-en:#8397E0; --s-hist:#D9A06B; --s-civ:#5CC3D6; --s-rel:#7DD07F; --s-geo:#B5D45C; --s-cs:#A9ADC9;
+  --s-math:#6E9CF0; --s-phys:#A688EA; --s-chem:#3CC1C1; --s-bio:#78C46F; --s-ar:#F0A546; --s-he:#EE7AAE; --s-en:#8397E0; --s-hist:#D9A06B; --s-civ:#5CC3D6; --s-rel:#7DD07F; --s-geo:#B5D45C; --s-cs:#A9ADC9; --s-soc:#FB923C;
   --r-a:#6E9CF0; --r-b:#F59A4B; --r-c:#A3B2B7; --r-d:#A688EA; --r-e:#6FCF94; --r-f:#EE7AAE;
   color-scheme:dark}
 html[data-size="l"]{--base:19px} html[data-size="xl"]{--base:21px}
@@ -266,6 +266,12 @@ aside#teacher{position:sticky;top:calc(env(safe-area-inset-top,0px) + 76px);alig
 details.field>summary{cursor:pointer;list-style:none}details.field>summary::-webkit-details-marker{display:none}
 details.field>summary::after{content:" ▾";color:var(--muted)}
 summary::-webkit-details-marker{display:none}summary::marker{content:''}
+.rp-bar{display:flex;gap:8px;align-items:center;padding:8px 10px;border-radius:12px;background:color-mix(in srgb,var(--s-soc) 12%,var(--surface));border:1.5px solid var(--s-soc);margin-bottom:6px}
+.tb-role{border-color:var(--s-soc);background:color-mix(in srgb,var(--s-soc) 8%,var(--surface))}.tb-role .tbh{color:var(--s-soc)}
+.tb-tip{border-color:#f59e0b}.tb-tip .tbh{color:#d97706}
+.tb-sum{border-color:#16a34a;background:color-mix(in srgb,#16a34a 8%,var(--surface))}.tb-sum .tbh{color:#16a34a}
+.tb-pic{border-color:#a855f7}
+.vz-rep{border-style:dashed}.vz-rep .opt{min-height:44px;text-align:start}.vz-rep .opt[aria-pressed=true]{border-color:var(--accent)}
 .mini-plan{list-style:none;margin:10px 0 0;padding:0;display:flex;gap:6px;flex-wrap:wrap;justify-content:center}
 .mini-plan li{display:flex;align-items:center;gap:5px;font-size:.82em;padding:3px 10px 3px 4px;border-radius:20px;background:var(--surface2);color:var(--muted);max-width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .mini-plan li span{display:grid;place-items:center;width:1.5em;height:1.5em;border-radius:50%;background:var(--line);color:var(--ink,#333);font-size:.85em;flex:0 0 auto}
@@ -410,6 +416,7 @@ html[data-motion="off"] *{animation:none!important;transition:none!important}
       <div style="flex:1;min-width:0"><b>الأستاذ سامر</b><div class="muted small" id="tMode">يجيب على أسئلتك خطوة خطوة</div></div>
       <button class="btn-ghost" id="tClose" aria-label="إغلاق" style="min-height:36px;padding:.2em .7em">✕</button>
     </div>
+    <div id="rpBar" class="rp-bar" hidden></div>
     <div class="chat" id="chat"></div>
     <div class="quick">
       <button data-q="simple">اشرح ببساطة</button>
@@ -452,7 +459,8 @@ const SUBJ=[
  {id:'civ',n:'المدنيات',ic:'⚖',c:'--s-civ'},
  {id:'rel',n:'التربية الإسلامية',ic:'☪',c:'--s-rel'},
  {id:'geo',n:'الجغرافيا',ic:'◍',c:'--s-geo'},
- {id:'cs',n:'الحاسوب',ic:'</>',c:'--s-cs'}];
+ {id:'cs',n:'الحاسوب',ic:'</>',c:'--s-cs'},
+ {id:'soc',n:'مهاراتي الاجتماعية',ic:'🤝',c:'--s-soc'}];
 const SCI=['math','phys','chem','bio','cs'];
 const MATHLEG={a:'المجهول / المتغيّر',b:'الأعداد',c:'العمليات'};
 const T=[
@@ -643,6 +651,48 @@ const SENT=[
  {w:[['إنَّ','ناسخ'],['العلمَ','اسم الناسخ'],['نورٌ','خبر الناسخ']]},
  {w:[['الشمسُ','مبتدأ'],['مشرقةٌ','خبر']]},
  {w:[['ليسَ','ناسخ'],['الامتحانُ','اسم الناسخ'],['صعبًا','خبر الناسخ']]}];
+T.push(
+{id:'soc_start',s:'soc',n:'كيف أبدأ محادثة',lab:'concepts',leg:{},steps:[
+ {t:'المحادثة مثل مشهد مدبلج',x:'في الاستوديو، المدبلج لا يتكلّم كل الوقت. يقول جملته، ثم ينتظر جملة الشخصية الأخرى.\nالمحادثة مع الناس تشبه ذلك:\n1. أنا أقول جملة.\n2. الشخص الآخر يردّ.\n3. أنا أسمع ثم أردّ.\nهذا اسمه «تبادل الأدوار».',q:'ماذا نفعل بعد أن نقول جملتنا في المحادثة؟',o:['نقول جملة أخرى فورًا','ننتظر ونسمع ردّ الشخص الآخر','نذهب بعيدًا','نغيّر الموضوع'],c:1,h:'تذكّر المدبلج: يقول جملته ثم ينتظر.',w:'بعد جملتي أنتظر وأسمع ردّ الآخر.',p:{k:[['تبادل الأدوار','أنا أتكلّم، ثم أنت تتكلّم'],['الاستماع','أنظر إلى الشخص وأنتظر حتى ينهي جملته'],['الدور','مثل دور الشخصية في المشهد']]}},
+ {t:'الخطوات الثلاث للبداية',x:'لبدء محادثة نستعمل 3 خطوات ثابتة:\n1. تحية: «مرحبًا» أو «صباح الخير».\n2. سؤال قصير عن الشخص: «كيف حالك؟» أو «ماذا فعلت في العطلة؟»\n3. نسمع الجواب، ثم نقول شيئًا صغيرًا عنه.\nمثال: «مرحبًا يا أحمد. كيف كان امتحان الإنجليزية؟»',q:'أي جملة هي بداية جيدة لمحادثة مع زميل؟',o:['«الكسور العشرية أهم شيء في الرياضيات.»','«مرحبًا يا سامي، كيف كان يومك؟»','«أنا لا أحب هذا الصف.»','لا أقول شيئًا وأنتظر'],c:1,h:'ابحث عن تحية + سؤال عن الشخص.',w:'تحية ثم سؤال عن الشخص: بداية ممتازة.',p:{k:[['تحية','مرحبًا، صباح الخير، أهلًا'],['سؤال عن الشخص','كيف حالك؟ كيف كان يومك؟'],['تعليق صغير','جميل! / هذا صعب فعلًا.']]}},
+ {t:'السؤال المفتوح والسؤال المغلق',x:'السؤال المغلق جوابه كلمة واحدة: «هل تحب الكرة؟» ← «نعم».\nالسؤال المفتوح جوابه جملة طويلة: «ما أكثر شيء تحبّه في كرة القدم؟»\nالسؤال المفتوح يجعل المحادثة تستمر.\nكلمات تبدأ سؤالًا مفتوحًا: ماذا، كيف، لماذا، ما رأيك.',q:'أي سؤال مفتوح؟',o:['هل شاهدت المباراة؟','هل أنت جائع؟','ما أكثر شخصية كرتون تحبّها، ولماذا؟','هل عندك واجب؟'],c:2,h:'السؤال المفتوح لا يُجاب بـ «نعم» أو «لا».',w:'«ما… ولماذا؟» سؤال مفتوح، جوابه جملة.',p:{k:[['سؤال مغلق','جوابه نعم أو لا'],['سؤال مفتوح','يبدأ بـ ماذا، كيف، لماذا، ما رأيك'],['سؤال متابعة','سؤال عن شيء قاله الشخص قبل قليل']]}}],
+ bank:[
+ {q:'زميل قال: «ذهبت أمس إلى البحر.» ما أفضل ردّ؟',o:['«أنا لا أحب البحر.»','«جميل! ماذا فعلت هناك؟»','«عندي لعبة جديدة.»','لا أردّ'],c:1,w:'تعليق صغير + سؤال متابعة عن كلامه.'},
+ {q:'أي كلمة تبدأ سؤالًا مفتوحًا؟',o:['هل','كيف','نعم','لا'],c:1,w:'«كيف» تبدأ سؤالًا جوابه جملة.'},
+ {q:'ما أول خطوة لبدء محادثة؟',o:['أتكلّم عن موضوعي المفضّل','تحية','أسأل سؤالًا صعبًا','أنتظر الآخر'],c:1,w:'نبدأ بالتحية.'},
+ {q:'ماذا يعني «تبادل الأدوار» في المحادثة؟',o:['شخص واحد يتكلّم كل الوقت','أتكلّم ثم أسمع ثم أتكلّم','نتكلّم معًا في نفس الوقت','نسكت'],c:1,w:'مثل المدبلجين: كل واحد يقول جملته في دوره.'}]},
+{id:'soc_turns',s:'soc',n:'الاستماع وموضوعي المفضّل',lab:'concepts',leg:{},steps:[
+ {t:'قاعدة الجمل الثلاث',x:'عندما أتكلّم عن شيء أحبّه كثيرًا، مثل الكرتون المدبلج، من السهل أن أتكلّم وقتًا طويلًا.\nالقاعدة: أقول 3 جمل تقريبًا، ثم أتوقّف وأسأل الشخص الآخر سؤالًا.\nمثال: «شاهدت حلقة جميلة. البطل ساعد فريقه. أحببت النهاية.» ثم: «وأنت، ماذا تحب أن تشاهد؟»',q:'تكلّمت 3 جمل عن الكرتون. ماذا أفعل الآن؟',o:['أكمل 10 جمل أخرى','أتوقّف وأسأل الشخص الآخر سؤالًا','أغادر','أرفع صوتي'],c:1,h:'بعد 3 جمل: نعطي الدور للآخر.',w:'أتوقّف وأسأل، فيشعر الآخر أنني مهتمّ به.',p:{k:[['قاعدة الجمل الثلاث','3 جمل ثم سؤال للآخر'],['إعطاء الدور','«وأنت؟ ما رأيك؟»'],['الموضوع المفضّل','جميل أن أشاركه، باختصار']]}},
+ {t:'علامات أن الشخص يريد الكلام',x:'المدبلج يراقب الشاشة ليعرف متى يبدأ. وأنا أراقب الشخص الآخر.\nعلامات أن الآخر يريد أن يتكلّم أو ملّ:\n1. ينظر بعيدًا أو إلى هاتفه.\n2. يقول «آه… نعم» بصوت قصير.\n3. يفتح فمه ليتكلّم.\nعندما أرى علامة: أتوقّف وأسأله.',q:'صديقك ينظر إلى هاتفه ويقول «آه… نعم». ماذا يعني هذا غالبًا؟',o:['أنه يحب كلامي كثيرًا','أنه ربما ملّ أو يريد أن يتكلّم','أنه غاضب جدًا','لا يعني شيئًا'],c:1,h:'النظر بعيدًا + جواب قصير = علامة.',w:'غالبًا ملّ أو يريد دوره. أتوقّف وأسأله.',p:{k:[['ينظر بعيدًا','ربما ملّ'],['جواب قصير','«آه… نعم»'],['يفتح فمه','يريد أن يتكلّم']]}},
+ {t:'كيف أُظهر أنني أستمع',x:'الاستماع ليس فقط السكوت. نُظهره بثلاثة أشياء:\n1. أنظر إلى جهة وجه الشخص (ليس شرطًا في العينين).\n2. أقول كلمات صغيرة: «آه»، «صحيح»، «فهمت».\n3. أسأل عن شيء قاله: «قلتَ إنك تحب الرسم، ماذا ترسم؟»',q:'أي شيء يُظهر أنني أستمع؟',o:['أتكلّم عن موضوع آخر','أسأل عن شيء قاله الشخص','أنظر إلى الأرض كل الوقت','أقاطعه'],c:1,h:'سؤال عن كلامه يدلّ على أنك سمعت.',w:'سؤال المتابعة أقوى علامة على الاستماع.',p:{k:[['كلمات صغيرة','آه، صحيح، فهمت'],['النظر','إلى جهة الوجه، لا يجب في العينين'],['سؤال متابعة','«قلتَ… ماذا…؟»']]}}],
+ bank:[
+ {q:'ما معنى «قاعدة الجمل الثلاث»؟',o:['أتكلّم 3 ساعات','أقول 3 جمل تقريبًا ثم أسأل الآخر','أسأل 3 أسئلة فقط','أسكت 3 دقائق'],c:1,w:'3 جمل ثم نعطي الدور.'},
+ {q:'صديقك بدأ يتكلّم وأنت في منتصف جملة. ماذا تفعل؟',o:['أرفع صوتي','أُنهي كلمتي بسرعة وأسمعه','أغادر','أتجاهله'],c:1,w:'نُنهي بهدوء ونعطيه الدور.'},
+ {q:'أي كلمة صغيرة تُظهر الاستماع؟',o:['«فهمت»','«اسكت»','«لا يهم»','«بسرعة»'],c:0,w:'«فهمت» تقول للشخص إنك معه.'}]},
+{id:'soc_feel',s:'soc',n:'المشاعر ونبرة الصوت',lab:'concepts',leg:{},steps:[
+ {t:'المدبلج يقرأ المشاعر',x:'قبل أن يسجّل المدبلج جملة، ينظر إلى وجه الشخصية: هل هي فرحة؟ حزينة؟ غاضبة؟ ثم يغيّر صوته حسب الشعور.\nنحن أيضًا نقرأ المشاعر من 3 أشياء:\n1. الوجه: الفم والحاجبان.\n2. الصوت: عالٍ أو منخفض، سريع أو بطيء.\n3. الجسم: يداه، وقفته.',q:'من أين نعرف شعور الشخص؟',o:['من لون ملابسه','من الوجه والصوت والجسم','من اسمه','من عمره'],c:1,h:'المدبلج ينظر إلى 3 أشياء.',w:'الوجه + الصوت + الجسم.',p:{k:[['فرح','ابتسامة، صوت مرتفع قليلًا'],['حزن','فم إلى الأسفل، صوت منخفض بطيء'],['غضب','حاجبان متقاربان، صوت عالٍ'],['توتّر','حركة كثيرة، كلام سريع']]}},
+ {t:'نفس الكلمة بنبرات مختلفة',x:'المدبلج يستطيع أن يقول «حسنًا» بثلاث طرق:\n«حسنًا!» بصوت فرح = موافق ومبسوط.\n«حسنًا…» بصوت منخفض = موافق لكنه حزين أو غير راضٍ.\n«حسنًا!!» بصوت عالٍ وقوي = غاضب.\nلذلك نسمع النبرة، وليس الكلمة فقط.',q:'أخوك قال «حسنًا…» بصوت منخفض ووجه حزين. ماذا يعني غالبًا؟',o:['هو سعيد جدًا','وافق لكنه غير راضٍ','يمزح','لم يسمعني'],c:1,h:'انتبه للصوت والوجه، ليس للكلمة.',w:'الكلمة «موافق» لكن النبرة تقول «غير راضٍ».',p:{k:[['النبرة','طريقة قول الكلمة'],['«حسنًا!»','فرح'],['«حسنًا…»','غير راضٍ'],['«حسنًا!!»','غضب']]}},
+ {t:'المزاح والسخرية',x:'أحيانًا يقول الناس عكس ما يقصدون، للمزاح.\nمثال: المطر قوي جدًا، وصديقك يقول مبتسمًا: «يا له من طقس رائع!»\nهو لا يقصد أن الطقس رائع. هو يمزح.\nالعلامات: ابتسامة، أو صوت فيه ضحكة، والكلام عكس ما نراه.\nإذا لم أكن متأكّدًا، أسأل بلطف: «هل تمزح؟»',q:'زميلك وقع منه الكوب وقال مبتسمًا: «أنا أمهر شخص في العالم!» ماذا يقصد؟',o:['أنه فعلًا أمهر شخص','يمزح عن نفسه','أنه غاضب مني','يطلب أن أصفّق'],c:1,h:'الكلام عكس ما حدث + ابتسامة.',w:'يمزح عن نفسه. يمكن أن أبتسم أو أقول: «يحدث للجميع».',p:{k:[['مزاح','كلام عكس الواقع مع ابتسامة'],['إذا لم أتأكّد','«هل تمزح؟»'],['ردّ لطيف','«يحدث للجميع»']]}}],
+ bank:[
+ {q:'صديقك يتكلّم بسرعة ويحرّك يديه كثيرًا قبل الامتحان. ما شعوره غالبًا؟',o:['ملل','توتّر','نوم','حزن'],c:1,w:'كلام سريع وحركة كثيرة = توتّر غالبًا.'},
+ {q:'ماذا تفعل إذا لم تعرف هل الشخص يمزح؟',o:['أغضب','أسأل بلطف: «هل تمزح؟»','أسكت دائمًا','أضحك بصوت عالٍ'],c:1,w:'السؤال اللطيف يوضّح الأمر.'},
+ {q:'حاجبان متقاربان وصوت عالٍ تعني غالبًا:',o:['فرح','غضب','نعاس','خجل'],c:1,w:'هذه علامات الغضب.'},
+ {q:'لماذا ينظر المدبلج إلى وجه الشخصية قبل التسجيل؟',o:['ليعرف لون شعرها','ليعرف شعورها ويغيّر صوته','ليعرف اسمها','بلا سبب'],c:1,w:'ليؤدّي الشعور الصحيح بصوته.'}]},
+{id:'soc_end',s:'soc',n:'إنهاء المحادثة والاعتذار',lab:'concepts',leg:{},steps:[
+ {t:'كيف أُنهي محادثة بلطف',x:'لا نذهب فجأة بدون كلام. نُنهي بـ 3 خطوات:\n1. جملة إشارة: «حسنًا، يجب أن أذهب الآن.»\n2. سبب قصير (إذا أردت): «عندي درس.»\n3. وداع: «أراك غدًا!»\nمثل نهاية حلقة الكرتون: هناك خاتمة، لا تنقطع فجأة.',q:'أي طريقة أفضل لإنهاء محادثة؟',o:['أمشي بدون كلام','«حسنًا، يجب أن أذهب. أراك غدًا!»','أدير ظهري','أقول «كفى»'],c:1,h:'إشارة + وداع.',w:'جملة إشارة ثم وداع: نهاية لطيفة.',p:{k:[['جملة إشارة','حسنًا، يجب أن أذهب'],['سبب قصير','عندي درس / سأنام'],['وداع','أراك غدًا! مع السلامة']]}},
+ {t:'الاعتذار الصحيح',x:'كلّنا نخطئ أحيانًا. الاعتذار الجيد له 3 أجزاء:\n1. أقول ماذا حدث: «أنا قاطعتك.»\n2. أعتذر: «أنا آسف.»\n3. أقول ماذا سأفعل: «سأنتظر حتى تُنهي كلامك.»\nفي الدبلجة، عندما يخطئ المدبلج يقول المخرج: «نعيد اللقطة». الخطأ يُصلَح، ونكمل.',q:'ما الجزء الذي ينقص هذا الاعتذار: «أنا آسف.»؟',o:['لا ينقص شيء','ماذا حدث وماذا سأفعل','التحية','الوداع'],c:1,h:'الاعتذار الكامل له 3 أجزاء.',w:'ينقص: ماذا حدث، وماذا سأفعل في المرة القادمة.',p:{k:[['ماذا حدث','«أنا قاطعتك»'],['اعتذار','«أنا آسف»'],['ماذا سأفعل','«سأنتظر دوري»'],['نعيد اللقطة','الخطأ يُصلَح ونكمل']]}}],
+ bank:[
+ {q:'ما أول خطوة في إنهاء المحادثة؟',o:['أمشي','جملة إشارة مثل «يجب أن أذهب»','أسكت','أغيّر الموضوع'],c:1,w:'نبدأ بجملة إشارة.'},
+ {q:'أخذت قلم زميلك بدون إذن. أي اعتذار أفضل؟',o:['«ماذا؟»','«أخذت قلمك بدون إذن، أنا آسف، في المرة القادمة سأسألك.»','«آسف» وأستمرّ','لا أقول شيئًا'],c:1,w:'ماذا حدث + آسف + ماذا سأفعل.'},
+ {q:'ماذا يقول المخرج في الاستوديو عندما يخطئ المدبلج؟',o:['«انتهى كل شيء»','«نعيد اللقطة»','«اخرج»','«لا تحاول»'],c:1,w:'الخطأ جزء من العمل: نعيد ونكمل.'}]},
+{id:'soc_team',s:'soc',n:'الصداقة والعمل في فريق',lab:'concepts',leg:{},steps:[
+ {t:'كل فريق أبطال له أدوار',x:'في الكرتون، الفريق ينجح لأن لكل واحد دورًا: واحد يخطّط، واحد سريع، واحد يشجّع.\nفي عمل جماعي في الصف:\n1. أسأل: «ماذا تريدون أن أفعل؟»\n2. أقترح فكرة واحدة بهدوء.\n3. أسمع أفكار الآخرين، حتى لو كانت مختلفة.',q:'في مشروع جماعي، ما أفضل جملة للبداية؟',o:['«سأعمل كل شيء وحدي.»','«ماذا تريدون أن أفعل؟ عندي فكرة صغيرة.»','«أفكاركم خطأ.»','لا أشارك'],c:1,h:'اسأل عن دورك واقترح بهدوء.',w:'السؤال عن الدور + اقتراح بهدوء = عضو فريق ممتاز.',p:{k:[['دوري','«ماذا تريدون أن أفعل؟»'],['اقتراح','«عندي فكرة، ما رأيكم؟»'],['احترام','أسمع الفكرة المختلفة']]}},
+ {t:'عندما لا أوافق',x:'من الطبيعي أن نختلف. نقول ذلك بلطف:\n«فكرتك جيدة. عندي فكرة أخرى: …»\nلا نقول: «أنت مخطئ» أو «فكرتك سيّئة».\nإذا لم يتّفق الفريق، نصوّت أو نسأل المعلّم.',q:'زميلك اقترح فكرة لا تعجبك. ماذا تقول؟',o:['«فكرتك سيّئة.»','«فكرتك جيدة. عندي فكرة أخرى أيضًا.»','أغضب وأسكت','أترك المجموعة'],c:1,h:'ابدأ بشيء لطيف، ثم فكرتك.',w:'نحترم فكرته ونضيف فكرتنا.',p:{k:[['جملة لطيفة','«فكرتك جيدة»'],['فكرتي','«عندي فكرة أخرى»'],['حلّ الخلاف','نصوّت أو نسأل المعلّم']]}},
+ {t:'كيف أدعو صديقًا',x:'لدعوة صديق لنشاط:\n1. أسأل عن اهتمامه: «تحب ألعاب الفيديو؟»\n2. أدعوه بوضوح: «هل تريد أن نلعب معًا يوم الجمعة؟»\n3. أقبل جوابه: إذا قال «لا أستطيع»، أقول: «لا مشكلة، ربما مرة أخرى.»\n«لا» لا تعني أنه لا يحبّني. ربما هو مشغول فقط.',q:'دعوت صديقًا وقال: «لا أستطيع هذا الأسبوع.» ماذا تقول؟',o:['«أنت لا تحبّني.»','«لا مشكلة، ربما مرة أخرى.»','أغضب','لا أدعوه أبدًا بعد ذلك'],c:1,h:'«لا» قد تعني «مشغول» فقط.',w:'نقبل الجواب بلطف ونترك الباب مفتوحًا.',p:{k:[['دعوة واضحة','«هل تريد أن…؟»'],['قبول الرفض','«لا مشكلة، مرة أخرى»'],['تذكير','«لا» قد تعني «مشغول»']]}}],
+ bank:[
+ {q:'ما معنى «لا أستطيع اليوم» غالبًا؟',o:['لا يحبّني','مشغول اليوم','غاضب','لن نتكلّم أبدًا'],c:1,w:'غالبًا مشغول فقط.'},
+ {q:'كيف تقول إنك لا توافق بلطف؟',o:['«أنت مخطئ»','«فكرتك جيدة، وعندي فكرة أخرى»','أصرخ','أسكت وأغضب'],c:1,w:'نبدأ بالاحترام ثم نضيف رأينا.'},
+ {q:'لماذا ينجح فريق الأبطال في الكرتون؟',o:['لأن واحدًا يعمل وحده','لأن لكل واحد دورًا ويتعاونون','لأنهم لا يتكلّمون','بالصدفة'],c:1,w:'الأدوار والتعاون.'}]});
 const ROLECOL={'فعل':'d','فاعل':'a','مبتدأ':'a','مفعول به':'b','خبر':'e','ناسخ':'d','اسم الناسخ':'a','خبر الناسخ':'e'};
 const CARDS=[
  ['אני','أنا','آني','ضمير'],['אתה','أنتَ','أتا','ضمير'],['את','أنتِ','أت','ضمير'],['הוא','هو','هو','ضمير'],['היא','هي','هي','ضمير'],['אנחנו','نحن','أنَحنو','ضمير'],
@@ -666,11 +716,11 @@ const ORG={
 
 /* ============ STATE & STORAGE ============ */
 const LS='yaman_tutor_v4';
-const blank=()=>({lessons:{},mastery:{},days:[],gen:{},review:{},minutes:{},stars:0,starLog:[],badges:{},claims:[],goalDone:{},settings:{size:'m',motion:'on',rate:0.8,timer:'none',chime:'on',autoread:'off',narrate:'on',predict:'on',voiceStyle:'cartoon',interests:['كرتون سبيس تون المدبلج'],intAsked:1,stMig:1,calm:'off',focus:'off'}});
+const blank=()=>({lessons:{},mastery:{},days:[],gen:{},review:{},minutes:{},stars:0,starLog:[],badges:{},claims:[],goalDone:{},settings:{size:'m',motion:'on',rate:0.8,timer:'none',chime:'on',autoread:'off',narrate:'on',predict:'on',voiceStyle:'cartoon',interests:['كرتون سبيس تون المدبلج','الدبلجة والمدبلجون السوريون (مثل عروة الأمين)'],dubMig:1,intAsked:1,stMig:1,calm:'off',focus:'off'}});
 const today=()=>new Intl.DateTimeFormat('en-CA',{timeZone:'Asia/Jerusalem'}).format(new Date());
 let S=blank(), EXAMS=[];
 function adopt(o){if(!o||!o.S)return;S={...blank(),...o.S,settings:{...blank().settings,...(o.S.settings||{})}};EXAMS=Array.isArray(o.E)?o.E:[];migrate()}
-function migrate(){const st=S.settings;if(!st.stMig){st.stMig=1;const l=new Set(st.interests||[]);l.add('كرتون سبيس تون المدبلج');st.interests=[...l];st.intAsked=1}}
+function migrate(){const st=S.settings;if(!st.dubMig){st.dubMig=1;const l=new Set(st.interests||[]);l.add('الدبلجة والمدبلجون السوريون (مثل عروة الأمين)');st.interests=[...l]}if(!st.stMig){st.stMig=1;const l=new Set(st.interests||[]);l.add('كرتون سبيس تون المدبلج');st.interests=[...l];st.intAsked=1}}
 try{adopt(JSON.parse(localStorage.getItem(LS)||'null'))}catch(e){}
 let CODE='';try{CODE=localStorage.getItem(LS+'_code')||''}catch(e){}
 let ONLINE=false, SAMPLE=null, saving=false, dirty=false, saveTimer=null;
@@ -827,7 +877,12 @@ const QUOTES=[
  ['العقل السليم في الجسم السليم.','مثل','النوم الجيد والحركة يساعدان الدماغ على التركيز.'],
  ['كل سؤال تجيب عنه يجعلك أقوى.','الأستاذ سامر','كل إجابة، صحيحة أو خاطئة، تعلّمك شيئًا جديدًا.'],
  ['الصبر مفتاح الفرج.','مثل عربي','عندما نصبر ونستمر، تأتي النتيجة الجيدة.'],
- ['كل بطل في الرسوم المتحركة تدرّب كثيرًا قبل أن ينتصر.','الأستاذ سامر','التدريب كل يوم هو الذي يجعلنا أقوى، مثل أبطال الكرتون.']];
+ ['كل بطل في الرسوم المتحركة تدرّب كثيرًا قبل أن ينتصر.','الأستاذ سامر','التدريب كل يوم هو الذي يجعلنا أقوى، مثل أبطال الكرتون.'],
+ ['المدبلج الماهر يعيد اللقطة مرات كثيرة حتى تصبح ممتازة.','الأستاذ سامر','إعادة المحاولة جزء من الإتقان، في الاستوديو وفي الدراسة.'],
+ ['صوتك مهم. قل رأيك بهدوء ووضوح.','الأستاذ سامر','كلامك له قيمة، والناس يحبون أن يسمعوه عندما يكون واضحًا ولطيفًا.'],
+ ['في كل حلقة، الأبطال يساعدون بعضهم.','الأستاذ سامر','الصداقة تعني أن نساعد الآخرين، وأن نطلب المساعدة عندما نحتاجها.'],
+ ['المدبلجون السوريون أوصلوا أصوات الكرتون إلى ملايين الأطفال بالتدريب والصبر.','الأستاذ سامر','العمل الكبير يبدأ بتدريب صغير كل يوم.'],
+ ['قبل التسجيل يقرأ المدبلج النص جيدًا. وقبل الامتحان نقرأ السؤال جيدًا.','الأستاذ سامر','القراءة الهادئة للسؤال نصف الحل.']];
 const quoteToday=()=>{const n=Math.floor(Date.now()/864e5);return QUOTES[n%QUOTES.length]};
 const BADGES=[
  {id:'first_lesson',n:'أول درس',d:'أنهِ أول درس.',ic:'1',t:()=>doneCount()>=1},
@@ -842,6 +897,8 @@ const BADGES=[
  {id:'hour',n:'ساعة تركيز',d:'تعلّم 60 دقيقة في يوم واحد.',ic:'60',t:()=>Object.values(S.minutes).some(m=>m>=60)},
  {id:'goals5',n:'5 أهداف',d:'أكمل هدف اليوم 5 مرات.',ic:'◎',t:()=>Object.keys(S.goalDone||{}).length>=5},
  {id:'asker',n:'سؤال ذكي',d:'اسأل الأستاذ سامر 5 أسئلة.',ic:'؟',t:()=>(S.asked||0)>=5},
+ {id:'studio',n:'نجم الاستوديو',d:'أكمل 3 مشاهد في استوديو المهارات الاجتماعية.',ic:'🎬',t:()=>(S.rpDone||0)>=3},
+ {id:'friend',n:'صديق رائع',d:'أنهِ كل دروس المهارات الاجتماعية.',ic:'🤝',t:()=>subjProgress('soc').pct===100},
  {id:'explorer',n:'مستكشف',d:'جرّب الصور التفاعلية 30 مرة.',ic:'⚗',t:()=>(S.labActs||0)>=30}];
 let audioCtx=null;
 function chime(){if(S.settings.chime==='off'||S.settings.calm==='on')return;try{audioCtx=audioCtx||new (window.AudioContext||window.webkitAudioContext)();const t0=audioCtx.currentTime;[[880,0],[1318.5,.12]].forEach(([f,d])=>{const o=audioCtx.createOscillator(),g=audioCtx.createGain();o.type='sine';o.frequency.value=f;g.gain.setValueAtTime(0,t0+d);g.gain.linearRampToValueAtTime(.08,t0+d+.02);g.gain.exponentialRampToValueAtTime(.0001,t0+d+.45);o.connect(g).connect(audioCtx.destination);o.start(t0+d);o.stop(t0+d+.5)})}catch(e){}}
@@ -883,6 +940,8 @@ function routeFromHash(){
   if(r==='result'){const x=EXAMS.find(e=>String(e.ts)===arg);if(x&&x.d){lastReview=fromRecord(x);go('examres')}else go('progress');return true}
   if(r==='review'){const due=dueReviews();if(due.length)startExam({pool:due.slice(0,12).map(r=>r.q),n:Math.min(12,due.length),mode:'practice',timer:'none',review:true,ids:[]});else go('home');return true}
   if(r==='test'){go('testnew');return true}
+  if(r==='social'){go('social');return true}
+  if(r==='rp'&&SCEN.find(x=>x.id===arg)){go('social');setTimeout(()=>{if(SAMPLE)startRP(arg)},800);return true}
   if(r==='timetable'){go('timetable');return true}
   if(r==='open'&&topic(arg)){startOpen(arg);return true}
   if(r==='addtopic'){ADD=null;if(subj(arg))CUR.sub=arg;go('addtopic');return true}
@@ -1000,8 +1059,9 @@ window.addEventListener('offline',()=>chip('بدون إنترنت – التعل
 
 /* ============ SUPPORT FOR ASD: SESSION SCHEDULE, MOOD, HELP, INTERESTS ============ */
 const SPACETOON='كرتون سبيس تون المدبلج';
-const INTERESTS=[SPACETOON,'كرة القدم','السيارات','ألعاب الفيديو','الحيوانات','الفضاء','الحاسوب والبرمجة','القطارات','الطبخ','الرسم','الطبيعة','الهواتف والتكنولوجيا','الخرائط والبلدان'];
-const interestLine=()=>{const l=(S.settings.interests||[]).filter(Boolean);return (l.length?`اهتمامات يمان: ${l.join('، ')}. استعمل أمثلة من هذه الاهتمامات عندما يكون ذلك مناسبًا وطبيعيًا.`:'')+(l.includes(SPACETOON)?' يمان يحب الرسوم المتحركة المدبلجة على قناة سبيس تون، ولغتها فصحى. يمكنك أن تصوغ الأمثلة كمشهد من مغامرة كرتونية (فريق أبطال، مهمة، سباق، مباراة، رحلة فضاء) بفصحى واضحة مثل الدبلجة. لا تذكر تفاصيل محدّدة عن مسلسلات بعينها قد تكون غير دقيقة، ولا تجعل القصة تطغى على الفكرة العلمية.':'')};
+const DUB='الدبلجة والمدبلجون السوريون (مثل عروة الأمين)';
+const INTERESTS=[SPACETOON,DUB,'كرة القدم','السيارات','ألعاب الفيديو','الحيوانات','الفضاء','الحاسوب والبرمجة','القطارات','الطبخ','الرسم','الطبيعة','الهواتف والتكنولوجيا','الخرائط والبلدان'];
+const interestLine=()=>{const l=(S.settings.interests||[]).filter(Boolean);return (l.length?`اهتمامات يمان: ${l.join('، ')}. استعمل أمثلة من هذه الاهتمامات عندما يكون ذلك مناسبًا وطبيعيًا.`:'')+(l.includes(SPACETOON)?' يمان يحب الرسوم المتحركة المدبلجة على قناة سبيس تون، ولغتها فصحى. يمكنك أن تصوغ الأمثلة كمشهد من مغامرة كرتونية (فريق أبطال، مهمة، سباق، مباراة، رحلة فضاء) بفصحى واضحة مثل الدبلجة. لا تذكر تفاصيل محدّدة عن مسلسلات بعينها قد تكون غير دقيقة، ولا تجعل القصة تطغى على الفكرة العلمية.':'')+(l.includes(DUB)?' يمان يحب عالم الدبلجة والمدبلجين السوريين، ومعجب بالمدبلج عروة الأمين. استعمل أحيانًا تشبيهات من الاستوديو للتشجيع والشرح: إعادة اللقطة، قراءة مشاعر الشخصية قبل التسجيل، التدريب على النص، تبادل الأدوار في المشهد، المخرج الذي يعطي ملاحظة. يمكنك ذكر عروة الأمين كمثال على مدبلج سوري يحبه يمان، لكن لا تنسب إليه أدوارًا أو أقوالًا أو معلومات محدّدة.':'')};
 const ST_ICON={lesson:'📖',practice:'✎',review:'↻',break:'◯',done:'★'};
 const sessionActive=()=>S.session&&S.session.date===today()&&!S.session.ended;
 const curStep=()=>sessionActive()?S.session.steps[S.session.i]:null;
@@ -1106,7 +1166,7 @@ document.querySelectorAll('[data-nav]').forEach(b=>b.onclick=()=>{if(E&&!E.done&
 function render(){
   document.querySelectorAll('[data-nav]').forEach(b=>b.setAttribute('aria-current',(b.dataset.nav===VIEW||(VIEW==='lesson'&&b.dataset.nav==='learn')||(VIEW.startsWith('exam')&&b.dataset.nav==='exam'))?'page':'false'));
   const v=$('view');
-  ({home:vHome,learn:vLearn,lesson:vLesson,exam:vExamSetup,examrun:vExamRun,examres:vExamRes,progress:vProgress,settings:vSettings,achieve:vAchieve,addtopic:vAddTopic,testnew:vTestNew,open:vOpen,sessiondone:vSessionDone,timetable:vTimetable}[VIEW]||vHome)(v);
+  ({home:vHome,learn:vLearn,lesson:vLesson,exam:vExamSetup,examrun:vExamRun,examres:vExamRes,progress:vProgress,settings:vSettings,achieve:vAchieve,addtopic:vAddTopic,testnew:vTestNew,open:vOpen,sessiondone:vSessionDone,timetable:vTimetable,social:vSocial}[VIEW]||vHome)(v);
   if(['home','lesson','examrun','examres','open','learn'].includes(VIEW)&&sessionActive()){v.insertAdjacentHTML('afterbegin',sessionStrip())}
   bindSession(v);bindInterests(v);v.querySelectorAll('[data-focusbtn]').forEach(b=>b.onclick=()=>setFocus(true));
   updateTeacherMode();updateStarChip();
@@ -1134,6 +1194,7 @@ function vHome(v){
    <button class="btn-p big-start" data-startsess>${sessionActive()?'▶ تابع الجلسة: '+esc(stepLabel(curStep())):S.session&&S.session.date===today()?'▶ ابدأ جلسة أخرى':'▶ ابدأ جلسة اليوم'}</button>
   </section>
   ${homeExtras()}
+  <button class="card link-row" data-go="social" style="border-inline-start:6px solid var(--s-soc)"><span style="font-size:1.6em">🎬</span><span style="flex:1"><b>استوديو المهارات الاجتماعية</b><br><span class="muted small">تدرّب على محادثة حقيقية مع الأستاذ سامر. 5 نجوم لكل مشهد.</span></span><span class="go-arrow" aria-hidden="true">←</span></button>
   ${ttCard()}
   ${interestsCard()}
   <details class="card"><summary class="row between" style="cursor:pointer;list-style:none"><h3>خطة الجلسة</h3><span class="muted small">${plan.length} خطوات ▾</span></summary>
@@ -1267,7 +1328,7 @@ function vLesson(v){
   $('lSpeak').onclick=()=>speak(st.t+'. '+st.x.replace(/\n/g,'. '));$('lStop').onclick=stopSpeak;
   $('lHint').onclick=()=>{L.hint=!L.hint;render()};
   v.querySelectorAll('[data-o]').forEach(b=>b.onclick=()=>{if(L.ok)return;L.sel=+b.dataset.o;const c=$('lCheck');c.disabled=false;c.click();requestAnimationFrame(()=>{const f=document.querySelector('[aria-live=polite] .notice');if(f)f.scrollIntoView({block:'nearest',behavior:reduceMotion()?'auto':'smooth'});const nx=$('lNext');if(L.ok&&nx)nx.focus({preventScroll:true})})});
-  $('lCheck').onclick=()=>{if(L.sel===null)return;L.checked=true;L.tries[L.step]=(L.tries[L.step]||0)+1;L.ok=L.sel===st.c;if(L.ok){const k=L.tries[L.step];teacherSay((k===1?['ممتاز يا يمان، من المحاولة الأولى.','أحسنت، إجابة صحيحة من أول مرة.','صحيح تمامًا. أنت تفهم الفكرة.']:['أحسنت. حاولت مرة أخرى ووصلت إلى الإجابة.','صحيح. المحاولة الثانية نجحت، وهذا جيد.','ممتاز. لم تستسلم، ووجدت الإجابة.'])[L.step%3]+' '+(st.w||''));addStars(k===1?3:k===2?2:1,k===1?'إجابة صحيحة من المحاولة الأولى':'إجابة صحيحة')}else{const k=L.tries[L.step];L.helped=L.helped||{};if(k>=2&&!L.helped[L.step]){L.helped[L.step]=1;setTimeout(()=>helpMenu('lesson',true),800)}}render()};
+  $('lCheck').onclick=()=>{if(L.sel===null)return;L.checked=true;L.tries[L.step]=(L.tries[L.step]||0)+1;L.ok=L.sel===st.c;if(L.ok){const k=L.tries[L.step];teacherSay((k===1?['ممتاز يا يمان! لقطة ممتازة من أول تسجيل.','أحسنت، إجابة صحيحة من أول مرة.','صحيح تمامًا. أداء نجم في الاستوديو.']:['أحسنت! أعدنا اللقطة ونجحت، مثل المدبلجين تمامًا.','صحيح. المحاولة الثانية نجحت، وهذا جيد.','ممتاز. لم تستسلم، ووجدت الإجابة.'])[L.step%3]+' '+(st.w||''));addStars(k===1?3:k===2?2:1,k===1?'إجابة صحيحة من المحاولة الأولى':'إجابة صحيحة')}else{const k=L.tries[L.step];L.helped=L.helped||{};if(k>=2&&!L.helped[L.step]){L.helped[L.step]=1;setTimeout(()=>helpMenu('lesson',true),800)}}render()};
   const toTop=()=>window.scrollTo({top:0,behavior:'auto'});
   $('lPrev').onclick=()=>{L.step--;resetStep();render();toTop()};
   $('lNext').onclick=()=>{if(!L.ok)return;if(L.step===n-1)finishLesson(t);else{L.step++;resetStep();render();toTop()}};
@@ -1826,17 +1887,68 @@ function vzFraction(el,sp,st){if(!st.v)st.v={n:Math.max(0,Number(sp.n)||1),d:Mat
     el.querySelector('svg').innerHTML=g;el.querySelector('.vz-f').innerHTML=`<bdi dir="ltr" class="mrun">${n}/${d} = ${vzN(n/d)} = ${vzN(n/d*100)}%</bdi>${n>d?' <span class="muted small">(أكبر من واحد صحيح)</span>':''}`};
   el.querySelectorAll('input[type=range]').forEach(r=>r.oninput=()=>{st.v[r.dataset.k]=Number(r.value);el.querySelector(`[data-o="${r.dataset.k}"]`).textContent=r.value;draw()});draw()}
 function mountViz(root){root.querySelectorAll('.viz[data-vk]').forEach(el=>{const k=el.dataset.vk,sp=VZS[k];if(!sp)return;const st=VZS[k+'_st']||(VZS[k+'_st']={});
-  try{({shape:vzShape,graph:vzGraph,steps:vzSteps,choice:vzChoice,fraction:vzFraction}[sp.type]||(()=>{el.remove()}))(el,sp,st)}catch(e){el.remove()}})}
+  try{({shape:vzShape,graph:vzGraph,steps:vzSteps,choice:vzChoice,fraction:vzFraction,replies:vzReplies}[sp.type]||(()=>{el.remove()}))(el,sp,st)}catch(e){el.remove()}})}
+
+/* ============ SOCIAL: ROLE-PLAY STUDIO ============ */
+const SCEN=[
+ {id:'newkid',ic:'👋',t:'زميل جديد في الصف',who:'رامي، طالب جديد في الصف، هادئ وخجول قليلًا، يحب كرة القدم',goal:'عرّف بنفسك، واسأل رامي سؤالين عنه.',open:'مرحبًا… أنا رامي. أنا جديد هنا، لا أعرف أحدًا بعد.'},
+ {id:'cartoon',ic:'📺',t:'حديث عن الكرتون مع زميل',who:'سامي، زميل في الصف، يحب ألعاب الفيديو أكثر من الكرتون، لطيف',goal:'تكلّم عن الكرتون الذي تحبّه في 3 جمل، ثم اسأل سامي عمّا يحبّه هو.',open:'هاي! ماذا فعلت في العطلة؟'},
+ {id:'teacher',ic:'🧑‍🏫',t:'طلب مساعدة من المعلّمة',who:'المعلّمة هالة، معلّمة الرياضيات، مشغولة قليلًا لكنها لطيفة',goal:'اطلب منها بأدب أن تشرح لك تمرينًا لم تفهمه.',open:'نعم يا يمان؟ هل تحتاج شيئًا؟'},
+ {id:'invite',ic:'🎮',t:'دعوة صديق للّعب',who:'كريم، صديق من الصف، مشغول هذا الأسبوع (سيرفض بلطف أول مرة ويقترح وقتًا آخر)',goal:'ادعُ كريم بوضوح، واقبل جوابه بلطف.',open:'أهلًا يمان! كيف حالك؟'},
+ {id:'shop',ic:'🛒',t:'في الدكّان',who:'أبو خالد، صاحب الدكّان، كبير في السن، ودود',goal:'اسأل عن سعر شيء، واشترِه، واشكره.',open:'أهلًا وسهلًا يا ابني! ماذا تريد اليوم؟'},
+ {id:'disagree',ic:'🤝',t:'خلاف في مشروع جماعي',who:'لينا، زميلة في مجموعة المشروع، تريد أن يكون العرض عن الحيوانات',goal:'قل إن عندك فكرة أخرى، بلطف، وحاولا الوصول إلى اتفاق.',open:'أنا أقترح أن يكون مشروعنا عن الحيوانات. موافق؟'},
+ {id:'sorry',ic:'🙏',t:'اعتذار لصديق',who:'أحمد، صديق، زعلان قليلًا لأن يمان قاطعه كثيرًا أمس',goal:'اعتذر بالخطوات الثلاث: ماذا حدث، آسف، ماذا ستفعل.',open:'…مرحبًا.'},
+ {id:'studio',ic:'🎙️',t:'مقابلة في استوديو الدبلجة',who:'الأستاذ نزار، مدبلج ومخرج دبلجة (شخصية خيالية) في استوديو في دمشق، يحب أن يشرح عمله للشباب',goal:'أنت صحفي صغير: اسأل الأستاذ نزار 3 أسئلة مفتوحة عن عمله، واسمع أجوبته.',open:'أهلًا بك في الاستوديو! تفضّل، الميكروفون جاهز. ماذا تريد أن تعرف؟'}];
+let RP=null;
+const RPSYS=s=>`أنت تساعد يمان (طالب في الصف العاشر أو الحادي عشر، على طيف التوحّد) على التدرّب على مهارات المحادثة الاجتماعية في مشهد تمثيلي آمن، مثل مشهد في استوديو دبلجة.
+المشهد: «${s.t}». أنت تؤدّي دور: ${s.who}. يمان يؤدّي دوره هو نفسه.
+هدف يمان في المشهد: ${s.goal}
+
+في كل ردّ اكتب بالضبط هذه الأجزاء، كل جزء في سطر جديد ويبدأ بالكلمة نفسها:
+الشخصية: ردّ الشخصية على كلام يمان، جملة أو جملتان قصيرتان، بفصحى بسيطة طبيعية مثل الدبلجة، وابقَ في الدور.
+نصيحة: صوت الأستاذ سامر (المدرّب)، سطر واحد: ابدأ بشيء محدّد فعله يمان جيدًا، ثم نصيحة صغيرة واحدة فقط إن لزم. لغة دافئة ومشجّعة، أحيانًا بتعابير من عالم الدبلجة (لقطة ممتازة، نعيد اللقطة، أداء رائع). لا تنتقد بقسوة.
+ثم كتلة اقتراحات ردود يستطيع يمان أن يضغط عليها إذا لم يعرف ماذا يقول، 3 ردود قصيرة مختلفة كلها مناسبة (واحد منها يحقّق الهدف بشكل ممتاز):
+\`\`\`viz
+{"type":"replies","o":["…","…","…"]}
+\`\`\`
+
+قواعد:
+- المشهد واقعي ولطيف. الشخصية لا تسخر من يمان ولا تكون قاسية.
+- إذا قال يمان شيئًا غير مناسب اجتماعيًا (مقاطعة، كلام طويل جدًا عن موضوع واحد، كلام جارح بدون قصد)، الشخصية تتفاعل بشكل واقعي خفيف، و«نصيحة» تشرح بهدوء ماذا حدث وماذا يقول بدلًا من ذلك.
+- إذا حقّق يمان الهدف، قل ذلك في «نصيحة» بوضوح: «حقّقت هدف المشهد!»
+- إذا كتب يمان «أنهيت التدريب»: لا تكتب «الشخصية» ولا اقتراحات. اكتب فقط:
+ملخّص: سطران: شيئان محدّدان فعلهما جيدًا، وشيء واحد للتدريب في المرة القادمة، بتشجيع من عالم الدبلجة.
+- لا تذكر أنك نموذج ذكاء اصطناعي. لا تنسب أقوالًا أو أدوارًا لأشخاص حقيقيين.`;
+function startRP(id){const s=SCEN.find(x=>x.id===id);if(!s)return;RP={id,turns:0};if(tAbort)tAbort.abort();
+  CHAT.push({role:'assistant',text:`🎬 مشهد تدريب: ${s.t}\nالهدف: ${s.goal}\nاكتب أو تكلّم كما لو كنت في الموقف الحقيقي. إذا لم تعرف ماذا تقول، اضغط على أحد الاقتراحات.`});
+  const sug={newkid:['أهلًا يا رامي، أنا يمان. أهلًا بك في صفّنا!','مرحبًا، من أي مدرسة جئت؟','أهلًا، أنا يمان.'],cartoon:['شاهدت كرتونًا مدبلجًا جميلًا. وأنت؟','لعبت قليلًا وشاهدت الكرتون.','لا شيء كثير. وأنت، ماذا فعلت؟'],teacher:['نعم، لو سمحتِ، لم أفهم التمرين الثالث. هل يمكنك أن تشرحيه؟','عندي سؤال عن الواجب.','لا شيء، شكرًا.'],invite:['أنا بخير، وأنت؟','بخير. هل تريد أن نلعب معًا يوم الجمعة؟','أهلًا كريم!'],shop:['أريد عصيرًا، كم سعره لو سمحت؟','مرحبًا يا عمّ، عندك دفاتر؟','السلام عليكم.'],disagree:['فكرتك جيدة. عندي فكرة أخرى: الفضاء. ما رأيك؟','لا أعرف.','ممكن نصوّت؟'],sorry:['مرحبًا أحمد. أمس قاطعتك كثيرًا، أنا آسف.','هل أنت زعلان مني؟','أهلًا.'],studio:['كيف أصبحت مدبلجًا؟','ما أصعب شيء في الدبلجة؟','كيف تغيّر صوتك لكل شخصية؟']}[id];
+  CHAT.push({role:'assistant',text:'الشخصية: '+s.open+'\n```viz\n'+JSON.stringify({type:'replies',o:sug})+'\n```'});
+  lastT=s.open;drawChat();drawRPBar();const tp=$('teacher');tp.classList.add('open');if(S.settings.autoread==='on')speak(s.open)}
+function endRP(){if(!RP)return;const s=SCEN.find(x=>x.id===RP.id);const n=RP.turns;const done=RP;
+  if(n>=2){S.rpDone=(S.rpDone||0)+1;S.rpLog=[...(S.rpLog||[]),{d:today(),id:s.id,n}].slice(-60);addStars(5,'أكملت مشهد: '+s.t);checkBadges();persist()}
+  if(n>=1&&SAMPLE){ask('أنهيت التدريب','simple').then(()=>{RP=null;drawRPBar()})}else{RP=null;drawRPBar();teacherSay(n?'أحسنت! انتهى المشهد. لقطة جيدة، ونتدرّب مرة أخرى قريبًا.':'لا بأس، نجرّب المشهد في وقت آخر.')}}
+function drawRPBar(){const b=$('rpBar'),q=document.querySelector('#teacher .quick');if(!RP){b.hidden=true;if(q)q.hidden=false;updateTeacherMode();return}const s=SCEN.find(x=>x.id===RP.id);b.hidden=false;if(q)q.hidden=true;updateTeacherMode();
+  b.innerHTML=`<span style="flex:1;min-width:0"><b>🎬 ${esc(s.t)}</b><br><span class="small muted">${esc(s.goal)}</span></span><button class="btn-p" id="rpEnd" style="min-height:38px">${RP.turns>=4?'أنهِ المشهد ✓':'أنهِ'}</button>`;$('rpEnd').onclick=endRP}
+function vzReplies(el,sp,st){const o=(sp.o||[]).slice(0,4).map(String);el.classList.add('vz-rep');
+  el.innerHTML=`<div class="vz-h small">💬 لا تعرف ماذا تقول؟ اختر ردًّا أو اكتب ردّك:</div><div class="vz-opts">${o.map((x,i)=>`<button class="opt" data-i="${i}" ${st.used!=null?'disabled':''} ${st.used===i?'aria-pressed="true"':''}><bdi>${esc(x)}</bdi></button>`).join('')}</div>`;
+  el.querySelectorAll('.opt').forEach(b=>b.onclick=()=>{if(st.used!=null)return;st.used=+b.dataset.i;sendT(o[st.used])})}
+function vSocial(v){const n=S.rpDone||0,ts=T.filter(t=>t.s==='soc');
+  v.innerHTML=`<section class="card" style="--sc:var(--s-soc)"><h2>🎬 استوديو المهارات الاجتماعية</h2><p class="muted" style="margin:.3em 0 0">هنا نتدرّب على المحادثة مثل المدبلجين في الاستوديو: كل مشهد له هدف صغير. إذا أخطأنا، نعيد اللقطة. لا أحد يرى المشهد غيرك.</p>
+   <div class="row" style="margin-top:8px"><span class="chip">${STAR} 5 نجوم لكل مشهد</span><span class="chip">${n} مشاهد أكملتها</span></div></section>
+  <section class="card"><h3>اختر مشهدًا</h3><div class="plan-list" style="margin-top:10px">${SCEN.map(s=>`<button class="plan-row" data-rp="${s.id}" style="--pc:var(--s-soc)"><span class="pic" style="--pc:var(--s-soc);font-size:1.4em">${s.ic}</span><span style="flex:1;min-width:0"><b>${esc(s.t)}</b><br><span class="muted small">${esc(s.goal)}</span></span><span class="go-arrow" aria-hidden="true">←</span></button>`).join('')}</div></section>
+  <section class="card"><h3>دروس قصيرة قبل التدريب</h3><div class="topic-list" style="margin-top:8px">${ts.map(t=>`<button class="topic-btn" data-t="${t.id}"><span><b>${esc(t.n)}</b><br><span class="muted small">${t.steps.length} خطوات · بطاقات</span></span><span class="chip ${S.lessons[t.id]?.done?'good':''}">${S.lessons[t.id]?.done?'أنهيته ✓':'ابدأ'}</span></button>`).join('')}</div></section>`;
+  v.querySelectorAll('[data-rp]').forEach(b=>b.onclick=()=>{if(!SAMPLE){toastT('التدريب على المشاهد يحتاج المعلّم الذكي. جرّب الدروس القصيرة الآن.');return}startRP(b.dataset.rp)});
+  v.querySelectorAll('[data-t]').forEach(b=>b.onclick=()=>startLesson(b.dataset.t))}
 
 /* ============ TEACHER ============ */
 const CHAT=[];let tAbort=null,lastT='';
 function addMsg(role,text,img){CHAT.push({role,text,img});drawChat()}
-const TBLK=[['الفكرة','idea'],['صورة في الذهن','pic'],['مثال محلول','ex'],['انتبه','warn'],['سؤال لك','q']];
+const TBLK=[['الشخصية','role'],['نصيحة','tip'],['ملخّص','sum'],['في الصورة','pic'],['الفكرة','idea'],['صورة في الذهن','pic'],['مثال محلول','ex'],['انتبه','warn'],['سؤال لك','q']];
 const MRUN=/(?:−(?=[0-9A-Za-z(√])|[A-Za-z0-9(√])[A-Za-z0-9.,/²³√₀-₉⁺⁻⁰()=+−×÷·<>≤≥\-]*(?:\s+[A-Za-z0-9.,/²³√₀-₉⁺⁻⁰()=+−×÷·<>≤≥\-]+)*/g;
 function mathRuns(x){let o='',l=0,m;MRUN.lastIndex=0;while((m=MRUN.exec(x))){let w=m[0];const tr=w.match(/[.,]+$/);if(tr)w=w.slice(0,-tr[0].length);o+=esc(x.slice(l,m.index))+`<bdi dir="ltr" class="mrun">${esc(w)}</bdi>`;l=m.index+w.length}return o+esc(x.slice(l))}
 function fmtMsg(t,mi){const vx=vzExtract(t);vx.specs.forEach((sp,j)=>{VZS[mi+'_'+j]=sp});t=vx.txt;const inl=x=>mathRuns(x.replace(/^#+\s*/,'')).replace(/\*\*(.+?)\*\*/g,'<b>$1</b>');
   const out=[];let cur=null;
-  for(const raw of String(t).split('\n')){const ln=raw.replace(/^\s*[-*]\s+/,'• ').replace(/^\s*#+\s*/,'').replace(/\*\*(الفكرة|صورة في الذهن|مثال محلول|انتبه|سؤال لك)\s*(:?)\s*\*\*\s*:?/,'$1:');
+  for(const raw of String(t).split('\n')){const ln=raw.replace(/^\s*[-*]\s+/,'• ').replace(/^\s*#+\s*/,'').replace(/\*\*(الشخصية|نصيحة|ملخّص|في الصورة|الفكرة|صورة في الذهن|مثال محلول|انتبه|سؤال لك)\s*(:?)\s*\*\*\s*:?/,'$1:');
     const hit=TBLK.find(([k])=>ln.trim().startsWith(k+':')||ln.trim().startsWith(k+' :'));
     if(hit){cur={k:hit[1],h:hit[0],l:[]};out.push(cur);const rest=ln.trim().slice(ln.trim().indexOf(':')+1).trim();if(rest)cur.l.push(rest);continue}
     if(!cur){cur={k:'',l:[]};out.push(cur)}cur.l.push(ln)}
@@ -1845,7 +1957,7 @@ function fmtMsg(t,mi){const vx=vzExtract(t);vx.specs.forEach((sp,j)=>{VZS[mi+'_'
 function drawChat(){const c=$('chat');c.innerHTML=CHAT.map((m,i)=>`<div class="msg ${m.role==='user'?'u':'t'}">${m.img?`<img class="timg" src="${m.img}" alt="صورة التمرين">`:''}${m.role==='user'?fmtMsg(m.text,'u'+i).replace(/<div class="viz"[^>]*><\/div>/g,''):fmtMsg(m.text,i)}</div>`).join('');mountViz(c);c.scrollTop=c.scrollHeight}
 function teacherSay(t){lastT=t;addMsg('assistant',t)}
 function toastT(t){teacherSay(t)}
-function updateTeacherMode(){const m=$('tMode');if(!m)return;m.textContent=VIEW==='examrun'&&E&&E.mode==='exam'?'أثناء الامتحان: أشرح المفاهيم فقط ولا أعطي إجابات':SAMPLE?'معلّم ذكي: اسألني أي سؤال':'إجابات جاهزة من الدرس (المعلّم الذكي غير مفعّل)'}
+function updateTeacherMode(){const m=$('tMode');if(!m)return;if(typeof RP!=='undefined'&&RP){m.textContent='مشهد تدريب: سامر يؤدّي الدور ويعطيك نصائح';return}m.textContent=VIEW==='examrun'&&E&&E.mode==='exam'?'أثناء الامتحان: أشرح المفاهيم فقط ولا أعطي إجابات':SAMPLE?'معلّم ذكي: اسألني أي سؤال':'إجابات جاهزة من الدرس (المعلّم الذكي غير مفعّل)'}
 function context(){
   if(VIEW==='lesson'&&L&&!L.finished){const t=topic(L.tid),st=t.steps[L.step];return `يمان الآن في درس "${t.n}" (مادة ${subj(t.s).n})، الخطوة ${L.step+1}: "${st.t}".\nالشرح في الخطوة: ${st.x}${st.w?'\nمثال من الدرس: '+st.w:''}${st.h?'\nتلميح من الدرس: '+st.h:''}\nسؤال التمرين: ${st.q}\nالخيارات: ${st.o.join(' / ')}\nللمعلّم فقط: الإجابة الصحيحة "${st.o[st.c]}". لا تكشفها مباشرة؛ أعطِ تلميحًا أولًا. اكشفها فقط إذا طلب يمان الحل صراحة بعد أن حاول.`}
   if(VIEW==='examrun'&&E){const q=E.qs[E.i],t=topic(q.tid);return E.mode==='exam'?`يمان الآن في امتحان تجريبي في موضوع "${t.n}". ممنوع أن تعطي الإجابة أو تلميحًا يكشفها. يمكنك فقط تهدئته وشرح المفهوم العام بكلمات عامة.`:`يمان يتدرّب على سؤال في موضوع "${t.n}": ${q.q} (الخيارات: ${q.o.join(' / ')}). للمعلّم فقط: الصحيحة "${q.o[q.c]}". أعطِ تلميحًا أولًا ولا تكشف الحل إلا إذا طلبه بعد محاولة.`}
@@ -1932,6 +2044,8 @@ c هو رقم الخيار الصحيح ابتداءً من 0. لا تكشف ا�
 - إذا سأل سؤالًا قصيرًا أو بسيطًا (معنى كلمة، نعم أو لا): أجب باختصار، بدون شكل الجواب الكامل.
 - الطول: حتى 200 كلمة تقريبًا (كتل الرسم لا تُحسب). إذا كان الموضوع كبيرًا، اشرح الجزء الأول فقط، واسأله: «نكمل الجزء الثاني؟»
 - يمان قد يكتب بالعامية أو مع أخطاء إملائية. افهم قصده ولا تصحّح إملاءه.
+- شجّع يمان بصدق وتحديد: قل ماذا فعل جيدًا بالضبط. أحيانًا استعمل تعابير من عالم الدبلجة: «لقطة ممتازة»، «نعيد اللقطة ونكمل».
+- إذا سأل عن موقف اجتماعي (صديق، خلاف، كيف أتكلّم مع أحد)، ساعده بخطوات واضحة وجمل جاهزة يستطيع قولها، واقترح عليه التدريب في «استوديو المهارات الاجتماعية».
 - إذا كان متعبًا أو متوتّرًا، اقترح استراحة قصيرة بلطف.
 - إذا سأل عن شيء خارج الدراسة، أجب باختصار ولطف ثم أرجعه للدرس.`;
 function offline(kind){
@@ -1948,10 +2062,12 @@ async function ask(text,kind,img){
   CHAT.push({role:'assistant',text:'…'});drawChat();const idx=CHAT.length-1;
   const hist=CHAT.slice(0,idx-1).filter(m=>m.text&&m.text!=='…').slice(-8).map(m=>({...m,text:m.text.replace(/```\s*viz[\s\S]*?```/g,'[رسم تفاعلي]')}));
   const turns=[];for(const m of hist){const r=m.role==='user'?'user':'assistant';if(!turns.length&&r==='assistant')continue;if(turns.length&&turns.at(-1).role===r)turns.at(-1).content+='\n'+m.text;else turns.push({role:r,content:m.text})}
-  const final='السياق الآن (للمعلّم، لا تكرّره ليمان):\n'+context()+'\n\nما تعرفه عن يمان (استعمله لتكييف الشرح، لا تقرأه له):\n'+learnerProfile()+(img?'\n\nأرفق يمان صورة تمرين. ابدأ بسطر «في الصورة:» تكتب فيه نص التمرين كما فهمته (حتى يتأكّد أنك قرأته صحيحًا). ثم اشرح الحل خطوة خطوة، ويفضَّل مع رسم steps أو shape أو graph. إذا كانت الصورة غير واضحة، قل ذلك واطلب صورة أوضح.':'')+'\n\nرسالة يمان: '+text;
+  const rps=RP&&SCEN.find(x=>x.id===RP.id);if(rps&&text!=='أنهيت التدريب')RP.turns++;if(rps)drawRPBar();
+  const final=rps?('ما تعرفه عن يمان: '+(S.tnotes||[]).map(n=>n.t).join('؛ ')+'\n\nكلام يمان في المشهد: '+text):'السياق الآن (للمعلّم، لا تكرّره ليمان):\n'+context()+'\n\nما تعرفه عن يمان (استعمله لتكييف الشرح، لا تقرأه له):\n'+learnerProfile()+(img?'\n\nأرفق يمان صورة تمرين. ابدأ بسطر «في الصورة:» تكتب فيه نص التمرين كما فهمته (حتى يتأكّد أنك قرأته صحيحًا). ثم اشرح الحل خطوة خطوة، ويفضَّل مع رسم steps أو shape أو graph. إذا كانت الصورة غير واضحة، قل ذلك واطلب صورة أوضح.':'')+'\n\nرسالة يمان: '+text;
+  const sysP=rps?RPSYS(rps)+'\n'+interestLine():SYS+'\n'+interestLine();
   if(turns.length&&turns.at(-1).role==='user')turns.at(-1).content+='\n\n'+final;else turns.push({role:'user',content:final});
   if(img){const last=turns.at(-1);last.content=[{type:'image',source:{type:'base64',media_type:'image/jpeg',data:img}},{type:'text',text:last.content}]}
-  try{const r=await SAMPLE(turns,{signal:tAbort.signal,cache:false,role:'teacher',max:1400,system:SYS+'\n'+interestLine(),onText:({text})=>{CHAT[idx].text=text||'…';drawChat()}});CHAT[idx].text=takeNotes(r.text);lastT=plainTeacher(CHAT[idx].text);drawChat();if(S.settings.autoread==='on')speak(lastT)}
+  try{const r=await SAMPLE(turns,{signal:tAbort.signal,cache:false,role:'teacher',max:1400,system:sysP,onText:({text})=>{CHAT[idx].text=text||'…';drawChat()}});CHAT[idx].text=takeNotes(r.text);lastT=plainTeacher(CHAT[idx].text);drawChat();if(S.settings.autoread==='on')speak(lastT)}
   catch(e){if(e&&(e.code==='aborted'||e.name==='AbortError'))return;CHAT[idx].text=e&&e.code==='rate_limited'?'أسئلة كثيرة الآن. انتظر قليلًا ثم اسأل مرة أخرى.':e&&e.code==='not_granted'?'لم يُسمح لي بالإجابة الذكية هنا. هذا جواب من الدرس:\n'+offline(kind):'لم أستطع الإجابة الآن. هذا جواب من الدرس:\n'+offline(kind);drawChat()}
 }
 document.querySelectorAll('[data-q]').forEach(b=>b.onclick=()=>{const k=b.dataset.q;if(k==='break'){openBreak();return}ask({simple:'اشرح لي هذه الخطوة ببساطة أكثر.',hint:'أعطني تلميحًا صغيرًا بدون الحل.',example:'أعطني مثالًا آخر مشابهًا.'}[k],k)});
