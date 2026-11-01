@@ -471,7 +471,6 @@ html[data-motion="off"] *{animation:none!important;transition:none!important}
 /* ============ CONTENT ============ */
 const SUBJ=[
  {id:'math',n:'الرياضيات',ic:'∑',c:'--s-math'},
- {id:'phys',n:'الفيزياء',ic:'F',c:'--s-phys'},
  {id:'chem',n:'الكيمياء',ic:'pH',c:'--s-chem'},
  {id:'bio',n:'الأحياء',ic:'◎',c:'--s-bio'},
  {id:'ar',n:'العربية',ic:'ض',c:'--s-ar'},
@@ -483,7 +482,7 @@ const SUBJ=[
  {id:'geo',n:'الجغرافيا',ic:'◍',c:'--s-geo'},
  {id:'cs',n:'الحاسوب',ic:'</>',c:'--s-cs'},
  {id:'soc',n:'مهاراتي الاجتماعية',ic:'🤝',c:'--s-soc'}];
-const SCI=['math','phys','chem','bio','cs'];
+const SCI=['math','chem','bio','cs'];
 const MATHLEG={a:'المجهول / المتغيّر',b:'الأعداد',c:'العمليات'};
 const T=[
 {id:'linear',s:'math',n:'المعادلة الخطية',lab:'balance',auto:1,leg:MATHLEG,steps:[
@@ -715,6 +714,7 @@ T.push(
  {q:'ما معنى «لا أستطيع اليوم» غالبًا؟',o:['لا يحبّني','مشغول اليوم','غاضب','لن نتكلّم أبدًا'],c:1,w:'غالبًا مشغول فقط.'},
  {q:'كيف تقول إنك لا توافق بلطف؟',o:['«أنت مخطئ»','«فكرتك جيدة، وعندي فكرة أخرى»','أصرخ','أسكت وأغضب'],c:1,w:'نبدأ بالاحترام ثم نضيف رأينا.'},
  {q:'لماذا ينجح فريق الأبطال في الكرتون؟',o:['لأن واحدًا يعمل وحده','لأن لكل واحد دورًا ويتعاونون','لأنهم لا يتكلّمون','بالصدفة'],c:1,w:'الأدوار والتعاون.'}]});
+for(let i=T.length-1;i>=0;i--)if(T[i].s==='phys')T.splice(i,1); /* Yaman does not study physics */
 const ROLECOL={'فعل':'d','فاعل':'a','مبتدأ':'a','مفعول به':'b','خبر':'e','ناسخ':'d','اسم الناسخ':'a','خبر الناسخ':'e'};
 const CARDS=[
  ['אני','أنا','آني','ضمير'],['אתה','أنتَ','أتا','ضمير'],['את','أنتِ','أت','ضمير'],['הוא','هو','هو','ضمير'],['היא','هي','هي','ضمير'],['אנחנו','نحن','أنَحنو','ضمير'],
@@ -966,6 +966,7 @@ function routeFromHash(){
   if(r==='test'){go('testnew');return true}
   if(r==='social'){go('social');return true}
   if(r==='recall'){setTimeout(startRecall,600);return true}
+  if(r==='calm'){CALM=null;go('calm');return true}
   if(r==='story'){STY=null;go('story');return true}
   if(r==='rp'&&SCEN.find(x=>x.id===arg)){go('social');setTimeout(()=>{if(SAMPLE)startRP(arg)},800);return true}
   if(r==='timetable'){go('timetable');return true}
@@ -974,6 +975,36 @@ function routeFromHash(){
   if(['home','progress','settings','achieve'].includes(r)){go(r);return true}
   return false}
 window.addEventListener('hashchange',()=>{routeFromHash()});
+
+/* ============ CALM TOOLBOX ============ */
+let CALM=null;
+const FEEL=[
+ {id:'test',e:'😰',n:'متوتر قبل امتحان',why:'الجسم يظن أن الامتحان خطر فيرفع نبض القلب. هذا طبيعي ويعني أنك تهتم، وسيهدأ إذا تنفّسنا ببطء.',steps:['ضع يدك على صدرك وتنفّس ببطء 5 مرات','قل لنفسك: «أنا أعرف أشياء كثيرة، وسأحاول خطوة خطوة»','اقرأ السؤال الأول فقط، لا تفكّر في الباقي'],say:'سأحاول خطوة خطوة. الخطأ ليس نهاية العالم.'},
+ {id:'angry',e:'😠',n:'غاضب أو منزعج',why:'الغضب إشارة أن شيئًا لم يعجبني. لا بأس بالشعور، ونختار ماذا نفعل به بعد أن نهدأ.',steps:['اضغط يديك معًا بقوة 5 ثوان ثم أرخِهما','تنفّس: نفَس من الأنف وزفير طويل من الفم 5 مرات','ابتعد قليلًا إلى مكان هادئ، ثم قل ما يزعجك بجملة واحدة'],say:'أحتاج دقيقة لأهدأ، ثم أتكلم.'},
+ {id:'lost',e:'😵‍💫',n:'مرتبك لا أفهم',why:'عندما لا نفهم يشعر الدماغ بالزحمة. نقسم المهمة إلى جزء صغير جدًا فيعود الوضوح.',steps:['خذ ورقة واكتب: ما الذي فهمته حتى الآن؟','اختر جزءًا واحدًا صغيرًا فقط وأعد قراءته','اضغط «الأستاذ سامر» واطلب: اشرح لي هذا الجزء بمثال'],say:'ليس مشكلة أنني لا أفهم الآن. سأطلب مثالًا.'},
+ {id:'sad',e:'😔',n:'حزين أو متعب',why:'أحيانًا يكون اليوم ثقيلًا. من الجيد أن نعطي الجسم راحة ونتكلم مع شخص قريب.',steps:['اشرب كوب ماء وخذ استراحة قصيرة','اختر شيئًا تحبه لمدة 5 دقائق: موسيقى أو كرتون','قل لأبيك أو أمك: «أنا حزين اليوم» ولا حاجة لشرح السبب'],say:'أنا حزين اليوم وهذا مسموح. سأطلب حضنًا أو كلمة طيبة.'},
+ {id:'many',e:'🌪️',n:'ضجيج وزحمة حولي',why:'الأصوات والأضواء قد تصبح أكثر من اللازم. نخفّف المدخلات حتى يرتاح الدماغ.',steps:['اذهب إلى مكان أهدأ أو ضع سماعات إن توفّرت','أغمض عينيك وعدّ ببطء حتى 20','عندما تعود، قل: «كان هناك ضجيج كثير وأحتاج هدوءًا»'],say:'أحتاج مكانًا هادئًا قليلًا.'}];
+function ground(host){const sn=[['5','أشياء أراها'],['4','أشياء ألمسها'],['3','أصوات أسمعها'],['2','روائح أشمّها'],['1','طعم أتذكّره']];let i=0;
+ const draw=()=>{host.innerHTML=i>=sn.length?`<p style="margin:0"><b>أحسنت.</b> أنت هنا الآن وكل شيء بخير. ✓</p>`:`<div class="row between"><div><span style="font-size:2.4em;font-weight:800">${sn[i][0]}</span> <b>${sn[i][1]}</b></div><button class="btn-p" id="gNext">التالي</button></div><p class="muted small" style="margin:6px 0 0">انظر حولك وسمِّها بصوت منخفض أو في رأسك.</p>`;const b=host.querySelector('#gNext');if(b)b.onclick=()=>{i++;draw()}};draw()}
+function vCalm(v){
+  if(!CALM){v.innerHTML=`<section class="card"><h2>🫶 أنا أشعر…</h2><p class="muted" style="margin:.3em 0 0">كل المشاعر مسموحة. اختر الأقرب إلى ما تشعر به الآن.</p></section>
+  <section class="card"><div class="plan-list">${FEEL.map(f=>`<button class="plan-row" data-feel="${f.id}" style="--pc:var(--s-chem)"><span class="pic" style="--pc:var(--s-chem);font-size:1.5em">${f.e}</span><span style="flex:1"><b>${f.n}</b></span><span class="muted">←</span></button>`).join('')}</div></section>
+  <button class="btn-ghost" data-go="home">رجوع</button>`;
+   v.querySelectorAll('[data-feel]').forEach(b=>b.onclick=()=>{CALM={f:b.dataset.feel};render()});
+   v.querySelectorAll('[data-go]').forEach(b=>b.onclick=()=>go(b.dataset.go));return}
+  const f=FEEL.find(x=>x.id===CALM.f)||FEEL[0];
+  v.innerHTML=`<section class="card"><h2>${f.e} ${f.n}</h2><p style="margin:.4em 0 0">${esc(f.why)}</p></section>
+  <section class="card"><h3>جرّب هذه الخطوات</h3><ol style="margin:.5em 0 0;padding-inline-start:1.3em;line-height:1.9">${f.steps.map(x=>`<li>${esc(x)}</li>`).join('')}</ol>
+   <div class="notice" style="margin-top:10px"><b>جملة تساعدك:</b> «${esc(f.say)}»</div>
+   <button class="btn-ghost small" id="cSay" style="margin-top:8px;min-height:34px">🔊 اسمع الجملة</button></section>
+  <section class="card"><h3>أدوات سريعة</h3><div class="row" style="margin-top:8px"><button class="btn-p" id="cBreath">🌬️ تنفّس معي دقيقتين</button><button class="btn-ghost" id="cGround">👀 5-4-3-2-1</button></div><div id="cHost" style="margin-top:10px"></div></section>
+  <section class="card"><div class="row"><button class="btn-p" id="cBetter">أشعر بتحسن ✓</button><button class="btn-ghost" id="cAdult">أحتاج أبي أو أمي</button></div><div id="cMsg" class="muted small" style="margin-top:8px"></div></section>
+  <button class="btn-ghost" id="cBack">اختر شعورًا آخر</button>`;
+  $('cSay').onclick=()=>speak(f.say);$('cBreath').onclick=()=>openBreak(true);$('cGround').onclick=()=>ground($('cHost'));
+  const log=h=>{S.calmLog=[...(S.calmLog||[]),{d:today(),t:Date.now(),f:f.id,h}].slice(-60);persist(true)};
+  $('cBetter').onclick=()=>{log('better');addStars(2,'اعتنيت بنفسك');$('cMsg').textContent='فخور بك. عرفت كيف تهتم بنفسك.';speak('أحسنت يا يمان')};
+  $('cAdult').onclick=()=>{log('adult');$('cMsg').innerHTML='<b>طلب المساعدة شجاعة.</b> اذهب إلى أبيك أو أمك وقل: «أحتاج مساعدة». سيعرف الوالدان أنك طلبت.'};
+  $('cBack').onclick=()=>{CALM=null;render()}}
 
 /* ============ SCHOOL, TESTS, OPEN QUESTIONS ============ */
 const daysUntil=d=>Math.round((new Date(d+'T00:00:00')-new Date(today()+'T00:00:00'))/864e5);
@@ -1192,7 +1223,7 @@ document.querySelectorAll('[data-nav]').forEach(b=>b.onclick=()=>{if(E&&!E.done&
 function render(){
   document.querySelectorAll('[data-nav]').forEach(b=>b.setAttribute('aria-current',(b.dataset.nav===VIEW||(VIEW==='lesson'&&b.dataset.nav==='learn')||(VIEW.startsWith('exam')&&b.dataset.nav==='exam'))?'page':'false'));
   const v=$('view');
-  ({home:vHome,learn:vLearn,lesson:vLesson,exam:vExamSetup,examrun:vExamRun,examres:vExamRes,progress:vProgress,settings:vSettings,achieve:vAchieve,addtopic:vAddTopic,testnew:vTestNew,open:vOpen,sessiondone:vSessionDone,timetable:vTimetable,social:vSocial,story:vStory,recall:vRecall}[VIEW]||vHome)(v);
+  ({home:vHome,learn:vLearn,lesson:vLesson,exam:vExamSetup,examrun:vExamRun,examres:vExamRes,progress:vProgress,settings:vSettings,achieve:vAchieve,addtopic:vAddTopic,testnew:vTestNew,open:vOpen,sessiondone:vSessionDone,timetable:vTimetable,social:vSocial,story:vStory,recall:vRecall,calm:vCalm}[VIEW]||vHome)(v);
   if(['home','lesson','examrun','examres','open','learn'].includes(VIEW)&&sessionActive()){v.insertAdjacentHTML('afterbegin',sessionStrip())}
   bindSession(v);bindInterests(v);v.querySelectorAll('[data-focusbtn]').forEach(b=>b.onclick=()=>setFocus(true));
   updateTeacherMode();updateStarChip();
@@ -1221,6 +1252,7 @@ function vHome(v){
   </section>
   ${recallCard()}
   ${eveningCard()}
+  <button class="card link-row" data-go="calm" style="border-inline-start:6px solid var(--s-chem)"><span style="font-size:1.6em">🫶</span><span style="flex:1"><b>أنا أشعر…</b><br><span class="muted small">متوتر؟ غاضب؟ مرتبك؟ اختر شعورك وسنهدأ معًا.</span></span><span class="muted">←</span></button>
   ${homeExtras()}
   <button class="card link-row" data-go="social" style="border-inline-start:6px solid var(--s-soc)"><span style="font-size:1.6em">🎬</span><span style="flex:1"><b>استوديو المهارات الاجتماعية</b><br><span class="muted small">تدرّب على محادثة حقيقية مع الأستاذ سامر. 5 نجوم لكل مشهد.</span></span><span class="go-arrow" aria-hidden="true">←</span></button>
   ${challCard()}
