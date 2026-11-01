@@ -71,7 +71,7 @@ body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset
 .nav{display:flex;gap:6px;flex-wrap:wrap}
 .nav button{border-color:transparent;background:transparent;font-weight:500}
 .nav button[aria-current="page"]{background:var(--surface2);border-color:var(--line);color:var(--accent);font-weight:700}
-.save-chip{font-size:.75em;padding:2px 10px;border-radius:20px;background:var(--surface2);color:var(--muted);border:1px solid var(--line)}
+.save-chip{white-space:nowrap;font-size:.75em;padding:2px 10px;border-radius:20px;background:var(--surface2);color:var(--muted);border:1px solid var(--line)}
 .wrap{max-width:1240px;margin:auto;display:grid;grid-template-columns:minmax(0,1fr) 340px;gap:18px;padding-block:18px 90px;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
 main{min-width:0;display:flex;flex-direction:column;gap:16px}
 .card{background:var(--surface);border:1px solid var(--line);border-radius:var(--radius);padding:20px;min-width:0}
@@ -265,6 +265,16 @@ aside#teacher{position:sticky;top:calc(env(safe-area-inset-top,0px) + 76px);alig
 .chips-scroll button{white-space:nowrap;flex:none}
 details.field>summary{cursor:pointer;list-style:none}details.field>summary::-webkit-details-marker{display:none}
 details.field>summary::after{content:" ▾";color:var(--muted)}
+summary::-webkit-details-marker{display:none}summary::marker{content:''}
+.mini-plan{list-style:none;margin:10px 0 0;padding:0;display:flex;gap:6px;flex-wrap:wrap;justify-content:center}
+.mini-plan li{display:flex;align-items:center;gap:5px;font-size:.82em;padding:3px 10px 3px 4px;border-radius:20px;background:var(--surface2);color:var(--muted);max-width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.mini-plan li span{display:grid;place-items:center;width:1.5em;height:1.5em;border-radius:50%;background:var(--line);color:var(--ink,#333);font-size:.85em;flex:0 0 auto}
+.mini-plan li.now{background:color-mix(in srgb,var(--accent) 14%,var(--surface));color:var(--accent);font-weight:700}.mini-plan li.now span{background:var(--accent);color:#fff}
+.link-row{display:flex;align-items:center;gap:10px;width:100%;text-align:start;cursor:pointer;font:inherit;color:inherit}
+.subj-row{display:flex;gap:8px;overflow-x:auto;padding:2px 2px 8px;scrollbar-width:none;scroll-snap-type:x proximity}.subj-row::-webkit-scrollbar{display:none}
+.subj-chip{flex:0 0 auto;display:flex;align-items:center;gap:6px;padding:6px 12px 6px 8px;border-radius:24px;border:1.5px solid color-mix(in srgb,var(--sc) 40%,var(--line));background:var(--surface);font-weight:700;min-height:44px;scroll-snap-align:center}
+.subj-chip .ic{display:grid;place-items:center;width:28px;height:28px;border-radius:8px;background:var(--sc);color:#fff;font-size:.8em}
+.subj-chip[aria-pressed=true]{background:var(--sc);color:#fff;border-color:var(--sc)}.subj-chip[aria-pressed=true] .ic{background:rgba(255,255,255,.25)}
 .sticky-cta{position:sticky;bottom:calc(10px + env(safe-area-inset-bottom,0px));z-index:5;display:flex;gap:8px;flex-wrap:wrap;padding:10px;border-radius:16px;background:color-mix(in srgb,var(--surface) 92%,transparent);backdrop-filter:blur(6px);border:1px solid var(--line);box-shadow:0 6px 18px rgba(0,0,0,.08)}
 .sticky-cta .btn-p{flex:1;min-height:52px;font-size:1.08em}
 .sticky-cta.row.between .btn-p{flex:0 1 auto;min-height:48px}
@@ -375,7 +385,7 @@ html[data-motion="off"] *{animation:none!important;transition:none!important}
   #teacherFab{display:flex;position:fixed;z-index:35;bottom:calc(16px + env(safe-area-inset-bottom,0px));left:calc(16px + env(safe-area-inset-left,0px));align-items:center;gap:8px;border-radius:30px;padding:.6em 1.1em;box-shadow:0 4px 16px rgba(0,0,0,.18)}
   .plan{grid-template-columns:minmax(0,1fr)}
 }
-@media (max-width:560px){.card{padding:15px}.formula{font-size:1.35em}.brand small{display:none}.brand b{font-size:1.2em}.top-in{flex-wrap:nowrap;gap:8px;padding-block:8px}.subjects{grid-template-columns:repeat(3,minmax(0,1fr))}.subj{padding:10px;align-items:center;text-align:center}.subj .ic{width:36px;height:36px}.lesson-head,.lesson-body{padding-left:14px;padding-right:14px}}
+@media (max-width:560px){.brand b{white-space:nowrap}.save-chip{font-size:0;width:12px;height:12px;padding:0;border-radius:50%;background:#f59e0b;border:0;flex:0 0 auto}.card{padding:15px}.formula{font-size:1.35em}.brand small{display:none}.brand b{font-size:1.2em}.top-in{flex-wrap:nowrap;gap:8px;padding-block:8px}.subjects{grid-template-columns:repeat(3,minmax(0,1fr))}.subj{padding:10px;align-items:center;text-align:center}.subj .ic{width:36px;height:36px}.lesson-head,.lesson-body{padding-left:14px;padding-right:14px}}
 </style>
 </head>
 <body>
@@ -1056,7 +1066,7 @@ const todaySubs=()=>((S.timetable||{})[dowJ(today())]||[]).filter(id=>subj(id));
 const tomorrowSubs=()=>{const d=new Date(today()+'T12:00:00');d.setDate(d.getDate()+1);return ((S.timetable||{})[d.getDay()]||[]).filter(id=>subj(id))};
 let TT={day:null,busy:false,msg:'',img:null};
 function ttCard(){const has=S.timetable&&Object.values(S.timetable).some(a=>a&&a.length);const td=todaySubs(),tm=tomorrowSubs(),ut=upcomingTests().slice(0,2);
-  if(!has&&!ut.length)return `<section class="card"><div class="row between"><div><h3>برنامجي الأسبوعي</h3><span class="muted small">أضف برنامج الدروس في المدرسة، فنعرف ماذا نراجع كل يوم.</span></div><button data-go="timetable">أضف البرنامج</button></div></section>`;
+  if(!has&&!ut.length)return `<button class="card link-row" data-go="timetable"><span style="flex:1"><b>📅 أضف برنامجي الأسبوعي</b><br><span class="muted small">حتى نعرف ماذا نراجع كل يوم</span></span><span class="go-arrow" aria-hidden="true">←</span></button>`;
   const chips=a=>a.map(id=>{const x=subj(id);return `<button class="chip" data-sub="${id}" style="cursor:pointer;min-height:34px;color:var(${x.c});border-color:var(${x.c})">${x.n}</button>`}).join('');
   return `<section class="card"><div class="row between" style="margin-bottom:6px"><h3>برنامجي</h3><button class="btn-ghost small" data-go="timetable" style="min-height:34px">البرنامج كاملًا ←</button></div>
    ${td.length?`<div class="small muted">اليوم في المدرسة:</div><div class="row" style="margin:4px 0 8px">${chips([...new Set(td)])}</div>`:''}
@@ -1091,7 +1101,7 @@ function vTimetable(v){
 
 /* ============ ROUTER ============ */
 let VIEW='home', CUR={sub:'math',tid:'linear'}, L=null, E=null, LAB=null, examSetup=null, lastReview=null;
-function go(v){VIEW=v;stopSpeak();if(typeof animTok!=='undefined')animTok++;if(v!=='lesson')LAB=null;setHash(v==='lesson'&&L?'lesson-'+L.tid:v==='examres'&&lastReview?'result-'+lastReview.rec.ts:v==='examrun'?'exam':v==='learn'?'learn-'+CUR.sub:v);render();window.scrollTo({top:0,behavior:reduceMotion()?'auto':'smooth'})}
+function go(v){VIEW=v;stopSpeak();if(typeof animTok!=='undefined')animTok++;if(v!=='lesson')LAB=null;setHash(v==='lesson'&&L?'lesson-'+L.tid:v==='examres'&&lastReview?'result-'+lastReview.rec.ts:v==='examrun'?'exam':v==='learn'?'learn-'+CUR.sub:v);render();window.scrollTo({top:0,behavior:'auto'})}
 document.querySelectorAll('[data-nav]').forEach(b=>b.onclick=()=>{if(E&&!E.done&&VIEW==='examrun'){confirmBox('الامتحان لم ينتهِ بعد. هل تريد الخروج؟ لن تُحفظ النتيجة.','نعم، اخرج','أكمل الامتحان',()=>{E=null;go(b.dataset.nav)});return}go(b.dataset.nav==='learn'?'learn':b.dataset.nav)});
 function render(){
   document.querySelectorAll('[data-nav]').forEach(b=>b.setAttribute('aria-current',(b.dataset.nav===VIEW||(VIEW==='lesson'&&b.dataset.nav==='learn')||(VIEW.startsWith('exam')&&b.dataset.nav==='exam'))?'page':'false'));
@@ -1116,19 +1126,18 @@ function vHome(v){
   const nowI=S.lessons[nt.id]?.done&&dayOf(S.lessons[nt.id].ts)===today()?1:0;
   v.innerHTML=`
   <section class="card hero-next">
-   <div class="row between"><h2>${greeting()}</h2><button class="star-chip" data-go="achieve" aria-label="نجومي">${STAR} ${st}</button></div>
+   <h2>${greeting()}</h2>
    <div class="lvlbar"><span class="small">مستواك: <b>${LEVELS[li][1]}</b></span><div class="bar" style="--sc:var(--gold);flex:1"><i style="width:${lvlPct}%"></i></div><span class="small muted">${nx?`بقي ${nx[0]-st}`:'الأعلى'}</span></div>
    <div class="goal-mini" aria-label="هدف اليوم">${gs.map(g=>`<div class="${g.ok?'ok':''}">${ring(g.p)}<b>${g.n}</b><span class="muted small">${g.sub}</span></div>`).join('')}</div>
    <div class="muted small" style="margin-top:6px;text-align:center">هدف اليوم: أكمل الثلاثة لتحصل على 15 نجمة</div>
+   <ol class="mini-plan" aria-label="خطة الجلسة">${plan.map((x,i)=>`<li class="${i===nowI?'now':''}"><span>${i+1}</span>${x.t.replace(/<[^>]+>/g,'')}</li>`).join('')}</ol>
    <button class="btn-p big-start" data-startsess>${sessionActive()?'▶ تابع الجلسة: '+esc(stepLabel(curStep())):S.session&&S.session.date===today()?'▶ ابدأ جلسة أخرى':'▶ ابدأ جلسة اليوم'}</button>
   </section>
-  ${interestsCard()}
-  ${ttCard()}
   ${homeExtras()}
-  <section class="card"><div class="row between" style="margin-bottom:8px"><h3>خطة الجلسة</h3><span class="muted small">بالترتيب، بدون وقت محدد</span></div>
-   <div class="plan-list">${plan.map((x,i)=>`<button class="plan-row ${i===nowI?'now':''}" ${x.act} style="--pc:var(${x.pc})"><span class="pnum">${i+1}</span><span class="pic" style="--pc:var(${x.pc})">${x.ic}</span><span style="flex:1;min-width:0"><span class="muted small">${x.k}</span><br><b>${x.t}</b><br><span class="muted small">${x.d}</span>${i===nowI?'<br><span class="now-cta">ابدأ الآن</span>':''}</span><span class="go-arrow" aria-hidden="true">←</span></button>`).join('')}</div></section>
-  <section class="card"><div class="row between" style="margin-bottom:10px"><h3>المواد</h3><span class="muted small">${doneN} من ${T.length} دروس</span></div>
-   <div class="grid subjects">${SUBJ.filter(x=>T.some(t=>t.s===x.id)).map(x=>{const p=subjProgress(x.id);return `<button class="subj" style="--sc:var(${x.c})" data-sub="${x.id}"><span class="ic">${x.ic}</span><b>${x.n}</b><span class="muted small">${p.done}/${p.total}</span><span class="bar" style="width:100%"><i style="width:${p.pct}%"></i></span></button>`}).join('')}</div></section>
+  ${ttCard()}
+  ${interestsCard()}
+  <details class="card"><summary class="row between" style="cursor:pointer;list-style:none"><h3>خطة الجلسة</h3><span class="muted small">${plan.length} خطوات ▾</span></summary>
+   <div class="plan-list" style="margin-top:10px">${plan.map((x,i)=>`<button class="plan-row ${i===nowI?'now':''}" ${x.act} style="--pc:var(${x.pc})"><span class="pnum">${i+1}</span><span class="pic" style="--pc:var(${x.pc})">${x.ic}</span><span style="flex:1;min-width:0"><span class="muted small">${x.k}</span><br><b>${x.t}</b><br><span class="muted small">${x.d}</span></span><span class="go-arrow" aria-hidden="true">←</span></button>`).join('')}</div></details>
   <section class="card quote"><span class="muted small">قول اليوم</span><blockquote style="margin-top:4px;font-size:1.12em">${esc(q[0])}</blockquote><div class="muted small">${esc(q[1])}</div>
    <details style="margin-top:6px"><summary class="small" style="cursor:pointer">ما المعنى؟</summary><p style="margin:.4em 0">${esc(q[2])}</p></details><button class="btn-ghost small" data-sayq style="min-height:34px">اسمع</button></section>
   <a class="card hero-link" href="${HERO_URL}" target="_blank" rel="noopener"><span class="hero-ic">H</span><span style="flex:1"><b>مهامي في Hero Family</b><br><span class="muted small">بعد الدراسة، سجّل أنك أنهيت مراجعة الدروس.</span></span><span class="go-arrow" aria-hidden="true">←</span></a>`;
@@ -1146,11 +1155,11 @@ function vHome(v){
 function vLearn(v){
   const s=subj(CUR.sub),ts=T.filter(t=>t.s===CUR.sub);
   v.innerHTML=`<section class="card"><h2 style="margin-bottom:12px">الدروس</h2>
-   <div class="grid subjects">${SUBJ.map(x=>`<button class="subj" style="--sc:var(${x.c})" aria-pressed="${x.id===CUR.sub}" data-sub="${x.id}"><span class="ic">${x.ic}</span><b>${x.n}</b></button>`).join('')}</div></section>
+   <div class="subj-row" role="tablist">${SUBJ.map(x=>`<button class="subj-chip" role="tab" style="--sc:var(${x.c})" aria-selected="${x.id===CUR.sub}" aria-pressed="${x.id===CUR.sub}" data-sub="${x.id}"><span class="ic">${x.ic}</span>${x.n}</button>`).join('')}</div></section>
    <section class="card" style="--sc:var(${s.c})"><div class="row between" style="margin-bottom:10px"><h3>${s.n}</h3><span class="chip">${ts.length} مواضيع</span></div>
    <div class="topic-list">${ts.length?'':`<p class="muted" style="margin:0">لا توجد دروس في هذه المادة بعد. أضف أول موضوع، والأستاذ سامر يبني منه درسًا.</p>`}${ts.map(t=>{const sc=lessonPct(t.id),m=mast(t.id);return `<div style="display:flex;gap:6px;align-items:stretch"><button class="topic-btn" data-t="${t.id}" style="flex:1"><span><b>${esc(t.n)}</b>${t.custom?' <span class="chip" style="font-size:.7em">أضيف</span>':''}<br><span class="muted small">${t.steps.length} خطوات · ${t.custom?'بطاقات مفاهيم':'صورة تفاعلية'} · ${t.bank.length+t.steps.length+(S.gen[t.id]?.length||0)} سؤال للامتحان</span></span><span class="row">${sc!==null?`<span class="chip good">الدرس ${sc}%</span>`:'<span class="chip">لم يبدأ</span>'}${m!==null?`<span class="chip ${m>=80?'good':m>=60?'warn':'bad'}">الامتحانات ${m}%</span>`:''}</span></button>${t.custom?`<button class="btn-ghost" data-del="${t.id}" aria-label="احذف الموضوع" title="احذف" style="padding:.4em .7em">✕</button>`:''}</div>`}).join('')}</div>
    <div class="row" style="margin-top:12px"><button class="btn-p" data-add>＋ أضف موضوعًا إلى ${s.n}</button></div></section>`;
-  v.querySelectorAll('[data-sub]').forEach(b=>b.onclick=()=>{CUR.sub=b.dataset.sub;render()});
+  v.querySelectorAll('[data-sub]').forEach(b=>b.onclick=()=>{CUR.sub=b.dataset.sub;setHash('learn-'+CUR.sub);render()});requestAnimationFrame(()=>{const a=v.querySelector('.subj-chip[aria-pressed=true]');if(a)a.scrollIntoView({inline:'center',block:'nearest'})});
   v.querySelectorAll('[data-t]').forEach(b=>b.onclick=()=>startLesson(b.dataset.t));
   v.querySelector('[data-add]').onclick=()=>{ADD={sub:CUR.sub,mode:'ai',name:'',notes:'',imgs:[],draft:null,busy:false,msg:''};go('addtopic')};
   v.querySelectorAll('[data-del]').forEach(b=>b.onclick=()=>{const t=topic(b.dataset.del);confirmBox(`هل تريد حذف الموضوع «${t.n}»؟`,'نعم، احذف','لا',async()=>{try{await api('topics',{method:'POST',body:JSON.stringify({delete:t.id})})}catch(e){}T.splice(T.indexOf(t),1);render()})});
@@ -1244,23 +1253,24 @@ function vLesson(v){
    </div></div>
   </section>
   <section class="card" style="--sc:var(${s.c})">
-   <div class="row between"><h3>تمرين: أجب لكي تنتقل للخطوة التالية</h3><button id="lHint" class="btn-ghost">${L.hint?'أخفِ التلميح':'أريد تلميحًا'}</button></div>
+   <div class="row between"><h3>تمرين: اضغط على الإجابة</h3><button id="lHint" class="btn-ghost">${L.hint?'أخفِ التلميح':'أريد تلميحًا'}</button></div>
    ${L.hint?`<div class="notice warn" style="margin-top:10px">${esc(st.h)}</div>`:''}
    ${L.step===n-1?`<div class="notice small" style="margin-top:10px">هذه آخر خطوة في الدرس. بعدها: ${curStep()&&curStep().type==='lesson'&&S.session.steps[S.session.i+1]?esc(stepLabel(S.session.steps[S.session.i+1])):'ملخّص الدرس'}.</div>`:''}
    <p class="qtext" style="margin:12px 0">${hl(st.q,t)}</p>
    <div class="opts">${st.o.map((o,i)=>{let cls='';if(L.checked&&L.sel===i)cls=L.ok?'right':'wrong';return `<button class="opt ${cls}" data-o="${i}" aria-pressed="${L.sel===i}" ${L.ok?'disabled':''}><span class="k">${AR[i]}</span><bdi>${esc(o)}</bdi></button>`}).join('')}</div>
    <div aria-live="polite" style="margin-top:12px">${L.checked?(L.ok?`<div class="notice good"><b>إجابة صحيحة.</b> ${esc(st.w||'')}</div>`:`<div class="notice warn"><b>ليست هذه الإجابة.</b> لا بأس، الخطأ جزء من التعلّم. جرّب مرة أخرى أو خذ تلميحًا.</div>`):''}</div>
    <div class="sticky-cta row between" style="margin-top:14px"><button id="lPrev" ${L.step===0?'disabled':''}>السابق</button>
-   <div class="row"><button id="lCheck" ${L.ok||L.sel===null?'disabled':''}>تحقّق</button><button id="lNext" class="btn-p" ${L.ok?'':'disabled'}>${L.step===n-1?'أنهِ الدرس':'الخطوة التالية'}</button></div></div>
+   <div class="row"><button id="lCheck" hidden ${L.ok||L.sel===null?'disabled':''}>تحقّق</button><button id="lNext" class="btn-p" ${L.ok?'':'disabled'}>${L.step===n-1?'أنهِ الدرس':'الخطوة التالية'}</button></div></div>
   </section>`;
   renderLab();
   v.querySelectorAll('[data-help]').forEach(b=>b.onclick=()=>helpMenu('lesson'));
   $('lSpeak').onclick=()=>speak(st.t+'. '+st.x.replace(/\n/g,'. '));$('lStop').onclick=stopSpeak;
   $('lHint').onclick=()=>{L.hint=!L.hint;render()};
-  v.querySelectorAll('[data-o]').forEach(b=>b.onclick=()=>{if(L.ok)return;L.sel=+b.dataset.o;L.checked=false;render()});
+  v.querySelectorAll('[data-o]').forEach(b=>b.onclick=()=>{if(L.ok)return;L.sel=+b.dataset.o;const c=$('lCheck');c.disabled=false;c.click();requestAnimationFrame(()=>{const f=document.querySelector('[aria-live=polite] .notice');if(f)f.scrollIntoView({block:'nearest',behavior:reduceMotion()?'auto':'smooth'});const nx=$('lNext');if(L.ok&&nx)nx.focus({preventScroll:true})})});
   $('lCheck').onclick=()=>{if(L.sel===null)return;L.checked=true;L.tries[L.step]=(L.tries[L.step]||0)+1;L.ok=L.sel===st.c;if(L.ok){const k=L.tries[L.step];teacherSay((k===1?['ممتاز يا يمان، من المحاولة الأولى.','أحسنت، إجابة صحيحة من أول مرة.','صحيح تمامًا. أنت تفهم الفكرة.']:['أحسنت. حاولت مرة أخرى ووصلت إلى الإجابة.','صحيح. المحاولة الثانية نجحت، وهذا جيد.','ممتاز. لم تستسلم، ووجدت الإجابة.'])[L.step%3]+' '+(st.w||''));addStars(k===1?3:k===2?2:1,k===1?'إجابة صحيحة من المحاولة الأولى':'إجابة صحيحة')}else{const k=L.tries[L.step];L.helped=L.helped||{};if(k>=2&&!L.helped[L.step]){L.helped[L.step]=1;setTimeout(()=>helpMenu('lesson',true),800)}}render()};
-  $('lPrev').onclick=()=>{L.step--;resetStep();render()};
-  $('lNext').onclick=()=>{if(!L.ok)return;if(L.step===n-1)finishLesson(t);else{L.step++;resetStep();render()}};
+  const toTop=()=>window.scrollTo({top:0,behavior:'auto'});
+  $('lPrev').onclick=()=>{L.step--;resetStep();render();toTop()};
+  $('lNext').onclick=()=>{if(!L.ok)return;if(L.step===n-1)finishLesson(t);else{L.step++;resetStep();render();toTop()}};
 }
 function resetStep(){L.sel=null;L.checked=false;L.ok=false;L.hint=false;initLab()}
 function finishLesson(t){
@@ -1564,8 +1574,9 @@ function vExamSetup(v){
   v.innerHTML=`<section class="card"><h2>امتحان تجريبي</h2><p class="muted" style="margin:.3em 0 0">اختر المواضيع وعدد الأسئلة. يمكنك الرجوع لأي سؤال قبل التسليم.</p></section>
   <section class="card grid" style="gap:16px">
    <div class="field"><b>المادة</b><div class="seg chips-scroll"><button data-sub="all" aria-pressed="${X.sub==='all'}">كل المواد</button>${SUBJ.map(s=>`<button data-sub="${s.id}" aria-pressed="${X.sub===s.id}">${s.n}</button>`).join('')}</div></div>
-   <div class="field"><div class="row between"><b>المواضيع</b><span class="row"><button class="btn-ghost" data-all="1">اختر الكل</button><button class="btn-ghost" data-all="0">ألغِ الكل</button></span></div>
-    <div class="check-list">${list.map(t=>`<label style="--sc:var(${subj(t.s).c})"><input type="checkbox" data-tid="${t.id}" ${X.ids.has(t.id)?'checked':''}><span><b>${esc(t.n)}</b><br><span class="muted small">${subj(t.s).n} · ${poolFor(t.id).length} سؤال</span></span></label>`).join('')}</div></div>
+   <details class="field" id="xTopics" ${X.topOpen?'open':''}><summary style="cursor:pointer;list-style:none" class="row between"><b>المواضيع</b><span class="chip">${list.filter(t=>X.ids.has(t.id)).length} من ${list.length} مختارة ▾</span></summary>
+    <div class="row" style="margin:6px 0"><button class="btn-ghost" data-all="1">اختر الكل</button><button class="btn-ghost" data-all="0">ألغِ الكل</button></div>
+    <div class="check-list">${list.map(t=>`<label style="--sc:var(${subj(t.s).c})"><input type="checkbox" data-tid="${t.id}" ${X.ids.has(t.id)?'checked':''}><span><b>${esc(t.n)}</b><br><span class="muted small">${subj(t.s).n} · ${poolFor(t.id).length} سؤال</span></span></label>`).join('')}</div></details>
    <div class="field"><b>عدد الأسئلة</b><div class="seg">${[5,10,15,20].map(n=>`<button data-n="${n}" aria-pressed="${X.n===n}">${n}</button>`).join('')}</div><span class="muted small">متوفّر في المواضيع المختارة: ${avail} سؤال</span></div>
    <div class="field"><b>طريقة الامتحان</b><div class="seg"><button data-mode="exam" aria-pressed="${X.mode==='exam'}">امتحان حقيقي: النتيجة في النهاية</button><button data-mode="practice" aria-pressed="${X.mode==='practice'}">تدريب: ملاحظة بعد كل سؤال</button></div></div>
    <details class="field" ${X.timer!=='none'?'open':''}><summary><b>الوقت</b> <span class="muted small">${X.timer==='none'?'بدون ساعة':X.timer==='up'?'يظهر الوقت':'وقت محدد'}</span></summary><div class="seg" style="margin-top:6px"><button data-timer="none" aria-pressed="${X.timer==='none'}">بدون ساعة</button><button data-timer="up" aria-pressed="${X.timer==='up'}">أظهر الوقت الذي مرّ</button><button data-timer="down" aria-pressed="${X.timer==='down'}">وقت محدد (دقيقة ونصف لكل سؤال)</button></div><span class="muted small">في الوقت المحدد لا يُغلق الامتحان عند انتهاء الوقت؛ تظهر ملاحظة هادئة فقط.</span></details>
@@ -1574,6 +1585,7 @@ function vExamSetup(v){
    <div class="sticky-cta"><button class="btn-p" id="xStart" ${X.ids.size?'':'disabled'}>ابدأ الامتحان (${Math.min(X.n,avail)} أسئلة)</button></div>
    <div id="genMsg" class="muted small">${X.ids.size===1?'':'لإنشاء أسئلة جديدة أو للأسئلة المفتوحة اختر موضوعًا واحدًا فقط.'}</div>
   </section>`;
+  {const d=$('xTopics');if(d)d.ontoggle=()=>{X.topOpen=d.open}}
   v.querySelectorAll('[data-sub]').forEach(b=>b.onclick=()=>{X.sub=b.dataset.sub;if(X.sub!=='all'){CUR.sub=X.sub;X.ids=new Set(T.filter(t=>t.s===X.sub).map(t=>t.id))}render()});
   v.querySelectorAll('[data-tid]').forEach(c=>c.onchange=()=>{c.checked?X.ids.add(c.dataset.tid):X.ids.delete(c.dataset.tid);render()});
   v.querySelectorAll('[data-all]').forEach(b=>b.onclick=()=>{list.forEach(t=>b.dataset.all==='1'?X.ids.add(t.id):X.ids.delete(t.id));render()});
