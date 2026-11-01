@@ -208,6 +208,25 @@ aside#teacher{position:sticky;top:calc(env(safe-area-inset-top,0px) + 76px);alig
 .tb-warn{border-color:#f59e0b}.tb-warn .tbh{color:#d97706}
 .tb-q{border-color:#ec4899;background:color-mix(in srgb,#ec4899 8%,var(--surface))}.tb-q .tbh{color:#db2777}
 .mrun{white-space:nowrap;font-family:ui-monospace,Menlo,Consolas,monospace;font-size:.95em}
+.viz{margin:8px 0;padding:8px;border-radius:12px;background:var(--surface);border:1.5px solid var(--line)}
+.vz-h{font-weight:700;font-size:.9em;margin-bottom:4px}
+.vz-svg{width:100%;height:auto;display:block;background:var(--surface2);border-radius:10px}
+.vz-svg text{font-family:inherit}
+.vz-fill{fill:color-mix(in srgb,#f59e0b 35%,transparent);stroke:#d97706;stroke-width:2.5;transition:all .25s}
+.vz-d1{stroke:#e11d48;stroke-width:2.5;stroke-dasharray:6 4}.vz-d2{stroke:#2563eb;stroke-width:2.5;stroke-dasharray:6 4}
+.vz-box{fill:none;stroke:#6b7280;stroke-width:1.5;stroke-dasharray:4 4}
+.vz-grid{stroke:color-mix(in srgb,var(--ink,#333) 12%,transparent);stroke-width:1}
+.vz-axis{stroke:color-mix(in srgb,var(--ink,#333) 60%,transparent);stroke-width:1.5}
+.vz-lb{font-size:12px;font-weight:700;paint-order:stroke;stroke:var(--surface2);stroke-width:3px}
+.vz-ax{font-size:9px;fill:color-mix(in srgb,var(--ink,#333) 60%,transparent)}
+.vz-f{margin:6px 0;font-weight:700;text-align:center;font-size:.92em}.vz-f .mrun{white-space:normal}
+.vz-ctl{display:grid;gap:4px}
+.vz-sl{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.6fr) 2.6em;gap:8px;align-items:center;font-size:.85em}
+.vz-sl input{width:100%;accent-color:var(--accent);min-height:30px}
+.vz-step{display:flex;gap:8px;align-items:flex-start;padding:6px;border-radius:8px;margin:3px 0}.vz-step.now{background:color-mix(in srgb,#16a34a 12%,transparent)}
+.vz-step>span{flex:0 0 auto;min-width:1.6em;height:1.6em;border-radius:50%;background:#16a34a;color:#fff;font-size:.8em;display:grid;place-items:center}
+.vz-opts{display:grid;gap:6px}
+.vz-t[aria-pressed=true]{background:var(--accent);color:#fff}
 .tstep{display:flex;gap:8px;align-items:flex-start;margin:4px 0}.tstep>span{flex:0 0 auto;min-width:1.6em;height:1.6em;border-radius:50%;background:#16a34a;color:#fff;font-size:.8em;display:grid;place-items:center}.tstep>div{min-width:0}
 .msg.u{background:color-mix(in srgb,var(--accent) 12%,var(--surface));align-self:flex-end}
 .quick{display:flex;gap:6px;flex-wrap:wrap}
@@ -1697,21 +1716,110 @@ function openBreak(keep){const o=$('overlay');o.hidden=false;let sec=120;
   $('bEnd').onclick=()=>{clearInterval(breakTimer);o.hidden=true;teacherSay('أهلًا بعودتك. نكمل من حيث توقفنا، بهدوء.');if(!keep&&advance('break')){render()}else if(keep)render()};$('bEnd').focus()}
 document.addEventListener('keydown',e=>{if(e.key==='Escape'&&!$('overlay').hidden){clearInterval(breakTimer);$('overlay').hidden=true}});
 
+/* ============ TEACHER VISUALS (interactive) ============ */
+const VZS={};
+const vzN=v=>{const r=Math.round(v*100)/100;return String(r).replace('-','−')};
+function vzParse(src){const s=String(src).replace(/−/g,'-').replace(/×|·/g,'*').replace(/÷/g,'/').replace(/²/g,'^2').replace(/³/g,'^3').replace(/√/g,'sqrt').toLowerCase();let i=0;const toks=[];
+  while(i<s.length){const c=s[i];if(/\s/.test(c)){i++;continue}if(/[0-9.]/.test(c)){let j=i;while(j<s.length&&/[0-9.]/.test(s[j]))j++;toks.push({t:'n',v:parseFloat(s.slice(i,j))});i=j;continue}
+    if(/[a-z_]/.test(c)){let j=i;while(j<s.length&&/[a-z_0-9]/.test(s[j]))j++;toks.push({t:'i',v:s.slice(i,j)});i=j;continue}if('+-*/^(),'.includes(c)){toks.push({t:c});i++;continue}throw new Error('bad')}
+  const out=[];toks.forEach((k,n)=>{const p=out[out.length-1];if(p&&(p.t==='n'||p.t===')'||(p.t==='i'&&!FN[p.v]))&&(k.t==='n'||k.t==='i'||k.t==='('))out.push({t:'*'});out.push(k)});
+  let p=0;const peek=()=>out[p],eat=t=>{if(out[p]&&out[p].t===t)return out[p++];throw new Error('expect '+t)};
+  function ex(){let a=term();while(peek()&&(peek().t==='+'||peek().t==='-')){const o=out[p++].t,b=term(),A=a;a=o==='+'?e=>A(e)+b(e):e=>A(e)-b(e)}return a}
+  function term(){let a=un();while(peek()&&(peek().t==='*'||peek().t==='/')){const o=out[p++].t,b=un(),A=a;a=o==='*'?e=>A(e)*b(e):e=>A(e)/b(e)}return a}
+  function un(){if(peek()&&peek().t==='-'){p++;const a=un();return e=>-a(e)}if(peek()&&peek().t==='+'){p++;return un()}return pw()}
+  function pw(){const a=at();if(peek()&&peek().t==='^'){p++;const b=un();return e=>Math.pow(a(e),b(e))}return a}
+  function at(){const k=out[p++];if(!k)throw new Error('end');if(k.t==='n')return()=>k.v;if(k.t==='('){const a=ex();eat(')');return a}
+    if(k.t==='i'){if(FN[k.v]){eat('(');const a=ex();eat(')');return e=>FN[k.v](a(e))}if(k.v==='pi')return()=>Math.PI;if(k.v==='e'&&!(peek()&&peek().t==='('))return e=>('e' in e?e.e:Math.E);return e=>{if(!(k.v in e))throw new Error('var '+k.v);return e[k.v]}}throw new Error('tok')}
+  const f=ex();if(p<out.length)throw new Error('trail');return f}
+const FN={sin:Math.sin,cos:Math.cos,tan:Math.tan,sqrt:Math.sqrt,abs:Math.abs,ln:Math.log,log:Math.log10,exp:Math.exp};
+function vzExtract(t){const specs=[];let txt=String(t).replace(/```\s*viz\s*([\s\S]*?)```/g,(m,j)=>{try{specs.push(JSON.parse(j.trim()))}catch(e){}return '\n\uE000'+String.fromCharCode(0xE100+specs.length-1)+'\uE000\n'});txt=txt.replace(/```\s*viz[\s\S]*$/,'');return {txt,specs}}
+function plainTeacher(t){return vzExtract(t).txt.replace(/\uE000[\uE100-\uE1FF]\uE000/g,'')}
+const SHAPES={
+  rect:{n:'مستطيل',p:{a:['الطول',6],b:['العرض',4]},S:v=>v.a*v.b,f:v=>`S = a · b = ${vzN(v.a)} · ${vzN(v.b)} = ${vzN(v.a*v.b)}`},
+  square:{n:'مربّع',p:{a:['الضلع',5]},S:v=>v.a*v.a,f:v=>`S = a² = ${vzN(v.a)}² = ${vzN(v.a*v.a)}`},
+  triangle:{n:'مثلث',p:{b:['القاعدة',6],h:['الارتفاع',4]},S:v=>v.b*v.h/2,f:v=>`S = (b · h) ÷ 2 = (${vzN(v.b)} · ${vzN(v.h)}) ÷ 2 = ${vzN(v.b*v.h/2)}`},
+  parallelogram:{n:'متوازي أضلاع',p:{b:['القاعدة',6],h:['الارتفاع',4]},S:v=>v.b*v.h,f:v=>`S = b · h = ${vzN(v.b)} · ${vzN(v.h)} = ${vzN(v.b*v.h)}`},
+  trapezoid:{n:'شبه منحرف',p:{a:['القاعدة الكبيرة',8],b:['القاعدة الصغيرة',4],h:['الارتفاع',4]},S:v=>(v.a+v.b)*v.h/2,f:v=>`S = (a + b) · h ÷ 2 = (${vzN(v.a)} + ${vzN(v.b)}) · ${vzN(v.h)} ÷ 2 = ${vzN((v.a+v.b)*v.h/2)}`},
+  kite:{n:'دالتون',p:{d1:['القطر الأول',8],d2:['القطر الثاني',6]},S:v=>v.d1*v.d2/2,f:v=>`S = (d1 · d2) ÷ 2 = (${vzN(v.d1)} · ${vzN(v.d2)}) ÷ 2 = ${vzN(v.d1*v.d2/2)}`},
+  rhombus:{n:'معيّن',p:{d1:['القطر الأول',8],d2:['القطر الثاني',6]},S:v=>v.d1*v.d2/2,f:v=>`S = (d1 · d2) ÷ 2 = (${vzN(v.d1)} · ${vzN(v.d2)}) ÷ 2 = ${vzN(v.d1*v.d2/2)}`},
+  circle:{n:'دائرة',p:{r:['نصف القطر',3]},S:v=>Math.PI*v.r*v.r,f:v=>`S = π · r² = 3.14 · ${vzN(v.r)}² ≈ ${vzN(Math.PI*v.r*v.r)}`}};
+const SHALIAS={deltoid:'kite',dalton:'kite',kite:'kite',rectangle:'rect',rect:'rect',square:'square',triangle:'triangle',parallelogram:'parallelogram',trapezoid:'trapezoid',trapezium:'trapezoid',rhombus:'rhombus',circle:'circle'};
+function vzSlider(id,label,v,min,max,step){return `<label class="vz-sl"><span>${esc(label)}</span><input type="range" data-k="${id}" min="${min}" max="${max}" step="${step}" value="${v}"><b class="mrun" dir="ltr" data-o="${id}">${vzN(v)}</b></label>`}
+function vzShape(el,sp,st){const kind=SHALIAS[String(sp.shape||'').toLowerCase()]||'rect',D=SHAPES[kind];
+  if(!st.v){st.v={};for(const k in D.p)st.v[k]=Number(sp.p&&sp.p[k])>0?Number(sp.p[k]):D.p[k][1];st.grid=false;st.box=false}
+  const ctl=Object.keys(D.p).map(k=>vzSlider(k,D.p[k][0]+' ('+k+')',st.v[k],1,12,kind==='circle'?.5:1)).join('');
+  el.innerHTML=`<div class="vz-h">${esc(sp.title||('حرّك وشاهد: مساحة '+D.n))}</div><svg viewBox="0 0 300 210" class="vz-svg"></svg><div class="vz-f"><bdi dir="ltr" class="mrun"></bdi></div><div class="vz-ctl">${ctl}</div><div class="row" style="gap:6px"><button class="chip vz-t" data-t="grid">عدّ المربّعات</button>${kind==='kite'||kind==='rhombus'||kind==='triangle'?'<button class="chip vz-t" data-t="box">أظهر المستطيل حوله</button>':''}</div>`;
+  const draw=()=>{const v=st.v,svg=el.querySelector('svg');let W,H;
+    if(kind==='circle'){W=H=2*v.r}else if(kind==='kite'||kind==='rhombus'){W=v.d2;H=v.d1}else if(kind==='square'){W=H=v.a}else if(kind==='rect'){W=v.a;H=v.b}else if(kind==='trapezoid'){W=Math.max(v.a,v.b);H=v.h}else if(kind==='parallelogram'){W=v.b+2;H=v.h}else{W=v.b;H=v.h}
+    const sc=Math.min(260/W,170/H),ox=150-W*sc/2,oy=105-H*sc/2,X=x=>ox+x*sc,Y=y=>oy+(H-y)*sc;let g='',lab='';
+    if(st.grid){for(let i=0;i<=Math.ceil(W);i++)g+=`<line x1="${X(i)}" y1="${Y(0)}" x2="${X(i)}" y2="${Y(H)}" class="vz-grid"/>`;for(let j=0;j<=Math.ceil(H);j++)g+=`<line x1="${X(0)}" y1="${Y(j)}" x2="${X(W)}" y2="${Y(j)}" class="vz-grid"/>`}
+    let shape='';const pts=a=>a.map(([x,y])=>X(x)+','+Y(y)).join(' ');
+    const t=(x,y,s,c)=>`<text x="${x}" y="${y}" class="vz-lb" ${c?`style="fill:${c}"`:''} text-anchor="middle">${s}</text>`;
+    if(kind==='circle'){shape=`<circle cx="${X(v.r)}" cy="${Y(v.r)}" r="${v.r*sc}" class="vz-fill"/><line x1="${X(v.r)}" y1="${Y(v.r)}" x2="${X(2*v.r)}" y2="${Y(v.r)}" class="vz-d1"/>`;lab=t((X(v.r)+X(2*v.r))/2,Y(v.r)-6,'r = '+vzN(v.r),'#e11d48')}
+    else if(kind==='kite'||kind==='rhombus'){const cy=kind==='kite'?v.d1*0.68:v.d1/2;if(st.box)g+=`<rect x="${X(0)}" y="${Y(H)}" width="${W*sc}" height="${H*sc}" class="vz-box"/>`;shape=`<polygon points="${pts([[W/2,H],[W,cy],[W/2,0],[0,cy]])}" class="vz-fill"/><line x1="${X(W/2)}" y1="${Y(H)}" x2="${X(W/2)}" y2="${Y(0)}" class="vz-d1"/><line x1="${X(0)}" y1="${Y(cy)}" x2="${X(W)}" y2="${Y(cy)}" class="vz-d2"/>`;lab=t(X(W/2)+18,Y(H*0.25),'d1 = '+vzN(v.d1),'#e11d48')+t(X(W*0.22),Y(cy)-6,'d2 = '+vzN(v.d2),'#2563eb')}
+    else if(kind==='triangle'){const ax=W*0.35;if(st.box)g+=`<rect x="${X(0)}" y="${Y(H)}" width="${W*sc}" height="${H*sc}" class="vz-box"/>`;shape=`<polygon points="${pts([[0,0],[W,0],[ax,H]])}" class="vz-fill"/><line x1="${X(ax)}" y1="${Y(H)}" x2="${X(ax)}" y2="${Y(0)}" class="vz-d1"/>`;lab=t(X(W/2),Y(0)+15,'b = '+vzN(v.b),'#2563eb')+t(X(ax)+22,Y(H/2),'h = '+vzN(v.h),'#e11d48')}
+    else if(kind==='trapezoid'){const off=(v.a-v.b)/2;shape=`<polygon points="${pts([[0,0],[v.a,0],[off+v.b,H],[off,H]])}" class="vz-fill"/><line x1="${X(off)}" y1="${Y(H)}" x2="${X(off)}" y2="${Y(0)}" class="vz-d1"/>`;lab=t(X(v.a/2),Y(0)+15,'a = '+vzN(v.a),'#2563eb')+t(X(off+v.b/2),Y(H)-6,'b = '+vzN(v.b),'#16a34a')+t(X(off)+22,Y(H/2),'h = '+vzN(v.h),'#e11d48')}
+    else if(kind==='parallelogram'){shape=`<polygon points="${pts([[0,0],[v.b,0],[v.b+2,H],[2,H]])}" class="vz-fill"/><line x1="${X(2)}" y1="${Y(H)}" x2="${X(2)}" y2="${Y(0)}" class="vz-d1"/>`;lab=t(X(v.b/2),Y(0)+15,'b = '+vzN(v.b),'#2563eb')+t(X(2)+22,Y(H/2),'h = '+vzN(v.h),'#e11d48')}
+    else{const a=kind==='square'?v.a:v.a,b=kind==='square'?v.a:v.b;shape=`<rect x="${X(0)}" y="${Y(b)}" width="${a*sc}" height="${b*sc}" class="vz-fill"/>`;lab=t(X(a/2),Y(0)+15,'a = '+vzN(a),'#2563eb')+(kind==='rect'?t(X(a)+16,Y(b/2),'b = '+vzN(b),'#e11d48'):'')}
+    svg.innerHTML=g+shape+lab;el.querySelector('.vz-f bdi').textContent=D.f(v);
+    el.querySelectorAll('.vz-t').forEach(b=>b.setAttribute('aria-pressed',String(!!st[b.dataset.t])))};
+  el.querySelectorAll('input[type=range]').forEach(r=>r.oninput=()=>{st.v[r.dataset.k]=Number(r.value);el.querySelector(`[data-o="${r.dataset.k}"]`).textContent=vzN(Number(r.value));draw()});
+  el.querySelectorAll('.vz-t').forEach(b=>b.onclick=()=>{st[b.dataset.t]=!st[b.dataset.t];draw()});draw()}
+function vzGraph(el,sp,st){let fs=(Array.isArray(sp.f)?sp.f:[sp.f]).filter(Boolean).slice(0,3),fns;try{fns=fs.map(vzParse)}catch(e){el.innerHTML='<div class="muted small">لم أستطع رسم هذه الدالة.</div>';return}
+  if(!st.v){st.v={};for(const k in (sp.p||{}))st.v[k]=Number(sp.p[k])||0}
+  const xr=Array.isArray(sp.x)&&sp.x.length===2?sp.x.map(Number):[-6,6];const cols=['#2563eb','#e11d48','#16a34a'];
+  const ctl=Object.keys(st.v).map(k=>{const r=(sp.r&&sp.r[k])||[-6,6];return vzSlider(k,k,st.v[k],r[0],r[1],r[2]||0.5)}).join('');
+  el.innerHTML=`<div class="vz-h">${esc(sp.title||'حرّك المؤشّرات وشاهد كيف يتغيّر الرسم')}</div><svg viewBox="0 0 300 220" class="vz-svg" style="touch-action:none"></svg><div class="vz-f"></div><div class="vz-read muted small">المس الرسم لترى النقطة (x, y).</div><div class="vz-ctl">${ctl}</div>`;
+  const svg=el.querySelector('svg');let pick=null;
+  const draw=()=>{const ev=(f,x)=>{try{const y=f({...st.v,x});return isFinite(y)?y:NaN}catch(e){return NaN}};
+    let ys=[];fns.forEach(f=>{for(let i=0;i<=60;i++){const y=ev(f,xr[0]+(xr[1]-xr[0])*i/60);if(isFinite(y))ys.push(y)}});
+    let y0=Array.isArray(sp.y)?Number(sp.y[0]):Math.min(-1,...ys.filter(y=>Math.abs(y)<1e4)),y1=Array.isArray(sp.y)?Number(sp.y[1]):Math.max(1,...ys.filter(y=>Math.abs(y)<1e4));if(!isFinite(y0)||!isFinite(y1)||y0===y1){y0=-6;y1=6}const pad=(y1-y0)*.08;y0-=pad;y1+=pad;
+    const X=x=>20+(x-xr[0])/(xr[1]-xr[0])*270,Y=y=>205-(y-y0)/(y1-y0)*195;let g='';
+    const stp=(a,b)=>{const r=b-a,s=r>40?10:r>16?5:r>8?2:1;return s};const sx=stp(xr[0],xr[1]),sy=stp(y0,y1);
+    for(let x=Math.ceil(xr[0]/sx)*sx;x<=xr[1];x+=sx)g+=`<line x1="${X(x)}" y1="10" x2="${X(x)}" y2="205" class="vz-grid"/>`+(x?`<text x="${X(x)}" y="${Math.min(203,Math.max(18,Y(0)+12))}" class="vz-ax" text-anchor="middle">${vzN(x)}</text>`:'');
+    for(let y=Math.ceil(y0/sy)*sy;y<=y1;y+=sy)g+=`<line x1="20" y1="${Y(y)}" x2="290" y2="${Y(y)}" class="vz-grid"/>`+(Math.abs(y)>1e-9?`<text x="${Math.min(282,Math.max(24,X(0)+4))}" y="${Y(y)+3}" class="vz-ax">${vzN(y)}</text>`:'');
+    if(y0<0&&y1>0)g+=`<line x1="20" y1="${Y(0)}" x2="290" y2="${Y(0)}" class="vz-axis"/>`;if(xr[0]<0&&xr[1]>0)g+=`<line x1="${X(0)}" y1="10" x2="${X(0)}" y2="205" class="vz-axis"/>`;
+    let marks='';fns.forEach((f,fi)=>{let d='',pen=false,prev=null;for(let i=0;i<=240;i++){const x=xr[0]+(xr[1]-xr[0])*i/240,y=ev(f,x);if(!isFinite(y)||y<y0-(y1-y0)||y>y1+(y1-y0)){pen=false;prev=null;continue}d+=(pen?'L':'M')+X(x).toFixed(1)+' '+Y(y).toFixed(1);pen=true;
+      if(prev&&prev[1]*y<0&&Math.abs(prev[1]-y)<(y1-y0)/2){const xz=prev[0]-prev[1]*(x-prev[0])/(y-prev[1]);marks+=`<circle cx="${X(xz)}" cy="${Y(0)}" r="4.5" fill="${cols[fi]}" stroke="#fff" stroke-width="1.5"/>`}else if(y===0)marks+=`<circle cx="${X(x)}" cy="${Y(0)}" r="4.5" fill="${cols[fi]}" stroke="#fff" stroke-width="1.5"/>`;prev=[x,y]}
+      g+=`<path d="${d}" fill="none" stroke="${cols[fi]}" stroke-width="3" stroke-linecap="round"/>`;const yi=ev(f,0);if(isFinite(yi)&&xr[0]<=0&&xr[1]>=0&&yi>=y0&&yi<=y1)marks+=`<rect x="${X(0)-4}" y="${Y(yi)-4}" width="8" height="8" fill="${cols[fi]}" stroke="#fff"/>`});
+    if(pick!==null){const y=ev(fns[0],pick);if(isFinite(y)){marks+=`<line x1="${X(pick)}" y1="${Y(0)}" x2="${X(pick)}" y2="${Y(y)}" class="vz-box"/><circle cx="${X(pick)}" cy="${Y(y)}" r="6" fill="#f59e0b" stroke="#fff" stroke-width="2"/>`;el.querySelector('.vz-read').innerHTML=`النقطة: <bdi dir="ltr" class="mrun">(${vzN(pick)}, ${vzN(y)})</bdi>`}}
+    svg.innerHTML=g+marks;
+    const pretty=s=>s.replace(/\s+/g,'').replace(/\*\*/g,'^').replace(/\^2/g,'²').replace(/\^3/g,'³').replace(/\*/g,'').replace(/-/g,'−').replace(/\+\(−([\d.]+)\)/g,'−$1').replace(/−\(−([\d.]+)\)/g,'+$1').replace(/(^|[(*])\(−([\d.]+)\)/g,'$1−$2').replace(/\(([\d.]+)\)/g,'$1').replace(/(^|[+−(])1(?=x)/g,'$1').replace(/(^|[+−(])0x[²³]?(?=[+−)]|$)/g,'$1').replace(/\+\+/g,'+').replace(/\+−|−\+/g,'−').replace(/−−/g,'+').replace(/[+−]0(?![\d.x])/g,'').replace(/\+(?=$|\))/g,'').replace(/^\+/,'').replace(/([+−])/g,' $1 ').replace(/^\s*−\s*/,'−').trim()||'0';
+    const sub=s=>pretty(s.replace(/\b([a-wz])\b/gi,(m,k)=>k in st.v?'('+vzN(st.v[k]).replace('−','-')+')':m));
+    el.querySelector('.vz-f').innerHTML=fs.map((s,i)=>`<div style="color:${cols[i]}"><bdi dir="ltr" class="mrun">y = ${esc(Object.keys(st.v).length?sub(s):pretty(s))}</bdi></div>`).join('')+'<div class="muted small">● نقطة تقاطع مع محور x &nbsp; ■ تقاطع مع محور y</div>'};
+  const touch=e=>{const b=svg.getBoundingClientRect(),p=e.touches?e.touches[0]:e;const sx=(p.clientX-b.left)/b.width*300;pick=Math.round((xr[0]+(sx-20)/270*(xr[1]-xr[0]))*10)/10;pick=Math.max(xr[0],Math.min(xr[1],pick));draw()};
+  svg.addEventListener('pointerdown',e=>{touch(e);svg.setPointerCapture&&svg.setPointerCapture(e.pointerId)});svg.addEventListener('pointermove',e=>{if(e.buttons)touch(e)});
+  el.querySelectorAll('input[type=range]').forEach(r=>r.oninput=()=>{st.v[r.dataset.k]=Number(r.value);el.querySelector(`[data-o="${r.dataset.k}"]`).textContent=vzN(Number(r.value));draw()});draw()}
+function vzSteps(el,sp,st){const L=(sp.lines||[]).slice(0,10),W=sp.why||[];if(st.i==null)st.i=0;
+  const draw=()=>{el.innerHTML=`<div class="vz-h">${esc(sp.title||'الحل خطوة خطوة')}</div><div class="vz-steps">${L.slice(0,st.i+1).map((l,i)=>`<div class="vz-step ${i===st.i?'now':''}"><span>${i+1}</span><div><bdi dir="ltr" class="mrun" style="white-space:normal">${esc(l)}</bdi>${i>0&&W[i-1]?`<div class="small" style="color:#16a34a">${esc(W[i-1])}</div>`:''}</div></div>`).join('')}</div><div class="row" style="gap:6px;margin-top:6px">${st.i<L.length-1?'<button class="btn-p vz-nx">الخطوة التالية ←</button>':'<span class="chip good">انتهى الحل ✓</span>'}${st.i>0?'<button class="btn-ghost vz-rs">من البداية</button>':''}</div>`;
+    const nx=el.querySelector('.vz-nx');if(nx)nx.onclick=()=>{st.i++;draw()};const rs=el.querySelector('.vz-rs');if(rs)rs.onclick=()=>{st.i=0;draw()}};draw()}
+function vzChoice(el,sp,st){const o=(sp.o||[]).slice(0,5);
+  const draw=()=>{el.innerHTML=`<div class="vz-h">سؤال لك</div><div style="margin:4px 0 8px">${mathRuns(sp.q||'')}</div><div class="vz-opts">${o.map((x,i)=>`<button class="opt ${st.a!=null?(i===sp.c?'right':i===st.a?'wrong':''):''}" data-i="${i}" ${st.a!=null&&st.a===sp.c?'disabled':''}><bdi>${esc(x)}</bdi></button>`).join('')}</div>${st.a!=null?`<div class="notice ${st.a===sp.c?'good':'warn'}" style="margin-top:6px">${st.a===sp.c?'صحيح! ':'ليس بعد. '}${sp.w?esc(sp.w):''}</div>`:''}`;
+    el.querySelectorAll('.opt').forEach(b=>b.onclick=()=>{const i=Number(b.dataset.i);if(st.a===sp.c)return;const first=st.a==null;st.a=i;if(i===sp.c&&first&&!st.paid){st.paid=1;try{addStars(1,'أجبت على سؤال الأستاذ سامر')}catch(e){}}draw()})};draw()}
+function vzFraction(el,sp,st){if(!st.v)st.v={n:Math.max(0,Number(sp.n)||1),d:Math.max(1,Number(sp.d)||4)};
+  el.innerHTML=`<div class="vz-h">${esc(sp.title||'الكسر كقطع من دائرة ومن شريط')}</div><svg viewBox="0 0 300 150" class="vz-svg"></svg><div class="vz-f"></div><div class="vz-ctl">${vzSlider('n','البسط',st.v.n,0,24,1)}${vzSlider('d','المقام',st.v.d,1,12,1)}</div>`;
+  const draw=()=>{const {n,d}=st.v;let g='';const cx=70,cy=72,R=58;for(let i=0;i<d;i++){const a0=-Math.PI/2+i*2*Math.PI/d,a1=a0+2*Math.PI/d,on=i<n%d||(n>=d&&n%d===0)||i<Math.min(n,d)&&n<d;const f=i<Math.min(n,d)?'#f59e0b':'var(--surface)';g+=d===1?`<circle cx="${cx}" cy="${cy}" r="${R}" fill="${n>=1?'#f59e0b':'var(--surface)'}" stroke="var(--ink,#333)"/>`:`<path d="M${cx} ${cy}L${cx+R*Math.cos(a0)} ${cy+R*Math.sin(a0)}A${R} ${R} 0 0 1 ${cx+R*Math.cos(a1)} ${cy+R*Math.sin(a1)}Z" fill="${f}" stroke="var(--ink,#333)" stroke-width="1.2"/>`}
+    const bw=150/d;for(let i=0;i<d;i++)g+=`<rect x="${140+i*bw}" y="55" width="${bw}" height="34" fill="${i<Math.min(n,d)?'#16a34a':'var(--surface)'}" stroke="var(--ink,#333)" stroke-width="1.2"/>`;
+    el.querySelector('svg').innerHTML=g;el.querySelector('.vz-f').innerHTML=`<bdi dir="ltr" class="mrun">${n}/${d} = ${vzN(n/d)} = ${vzN(n/d*100)}%</bdi>${n>d?' <span class="muted small">(أكبر من واحد صحيح)</span>':''}`};
+  el.querySelectorAll('input[type=range]').forEach(r=>r.oninput=()=>{st.v[r.dataset.k]=Number(r.value);el.querySelector(`[data-o="${r.dataset.k}"]`).textContent=r.value;draw()});draw()}
+function mountViz(root){root.querySelectorAll('.viz[data-vk]').forEach(el=>{const k=el.dataset.vk,sp=VZS[k];if(!sp)return;const st=VZS[k+'_st']||(VZS[k+'_st']={});
+  try{({shape:vzShape,graph:vzGraph,steps:vzSteps,choice:vzChoice,fraction:vzFraction}[sp.type]||(()=>{el.remove()}))(el,sp,st)}catch(e){el.remove()}})}
+
 /* ============ TEACHER ============ */
 const CHAT=[];let tAbort=null,lastT='';
 function addMsg(role,text){CHAT.push({role,text});drawChat()}
 const TBLK=[['الفكرة','idea'],['صورة في الذهن','pic'],['مثال محلول','ex'],['انتبه','warn'],['سؤال لك','q']];
 const MRUN=/(?:−(?=[0-9A-Za-z(√])|[A-Za-z0-9(√])[A-Za-z0-9.,/²³√₀-₉⁺⁻⁰()=+−×÷·<>≤≥\-]*(?:\s+[A-Za-z0-9.,/²³√₀-₉⁺⁻⁰()=+−×÷·<>≤≥\-]+)*/g;
 function mathRuns(x){let o='',l=0,m;MRUN.lastIndex=0;while((m=MRUN.exec(x))){let w=m[0];const tr=w.match(/[.,]+$/);if(tr)w=w.slice(0,-tr[0].length);o+=esc(x.slice(l,m.index))+`<bdi dir="ltr" class="mrun">${esc(w)}</bdi>`;l=m.index+w.length}return o+esc(x.slice(l))}
-function fmtMsg(t){const inl=x=>mathRuns(x.replace(/^#+\s*/,'')).replace(/\*\*(.+?)\*\*/g,'<b>$1</b>');
+function fmtMsg(t,mi){const vx=vzExtract(t);vx.specs.forEach((sp,j)=>{VZS[mi+'_'+j]=sp});t=vx.txt;const inl=x=>mathRuns(x.replace(/^#+\s*/,'')).replace(/\*\*(.+?)\*\*/g,'<b>$1</b>');
   const out=[];let cur=null;
   for(const raw of String(t).split('\n')){const ln=raw.replace(/^\s*[-*]\s+/,'• ').replace(/^\s*#+\s*/,'').replace(/\*\*(الفكرة|صورة في الذهن|مثال محلول|انتبه|سؤال لك)\s*(:?)\s*\*\*\s*:?/,'$1:');
     const hit=TBLK.find(([k])=>ln.trim().startsWith(k+':')||ln.trim().startsWith(k+' :'));
     if(hit){cur={k:hit[1],h:hit[0],l:[]};out.push(cur);const rest=ln.trim().slice(ln.trim().indexOf(':')+1).trim();if(rest)cur.l.push(rest);continue}
     if(!cur){cur={k:'',l:[]};out.push(cur)}cur.l.push(ln)}
   return out.map(b=>{const body=b.l.join('\n').trim().split('\n').map(x=>{const m=x.match(/^\s*(\d+)[.)-]\s*(.*)$/);return m?`<div class="tstep"><span>${m[1]}</span><div>${inl(m[2])}</div></div>`:x.trim()?`<div>${inl(x)}</div>`:''}).join('');
-    return b.k?`<div class="tb tb-${b.k}"><b class="tbh">${b.h}</b>${body}</div>`:body}).join('')}
-function drawChat(){const c=$('chat');c.innerHTML=CHAT.map(m=>`<div class="msg ${m.role==='user'?'u':'t'}">${fmtMsg(m.text)}</div>`).join('');c.scrollTop=c.scrollHeight}
+    return b.k?`<div class="tb tb-${b.k}"><b class="tbh">${b.h}</b>${body}</div>`:body}).join('').replace(/(?:<div>)?\uE000([\uE100-\uE1FF])\uE000(?:<\/div>)?/g,(m,c)=>`<div class="viz" data-vk="${mi}_${c.charCodeAt(0)-0xE100}"></div>`)}
+function drawChat(){const c=$('chat');c.innerHTML=CHAT.map((m,i)=>`<div class="msg ${m.role==='user'?'u':'t'}">${m.role==='user'?fmtMsg(m.text,'u'+i).replace(/<div class="viz"[^>]*><\/div>/g,''):fmtMsg(m.text,i)}</div>`).join('');mountViz(c);c.scrollTop=c.scrollHeight}
 function teacherSay(t){lastT=t;addMsg('assistant',t)}
 function toastT(t){teacherSay(t)}
 function updateTeacherMode(){const m=$('tMode');if(!m)return;m.textContent=VIEW==='examrun'&&E&&E.mode==='exam'?'أثناء الامتحان: أشرح المفاهيم فقط ولا أعطي إجابات':SAMPLE?'معلّم ذكي: اسألني أي سؤال':'إجابات جاهزة من الدرس (المعلّم الذكي غير مفعّل)'}
@@ -1734,6 +1842,30 @@ const SYS=`أنت "الأستاذ سامر"، معلّم ماهر وصبور و�
 انتبه: الخطأ الأكثر شيوعًا في هذا الموضوع، وكيف نتجنّبه. سطر واحد.
 سؤال لك: سؤال قصير واحد بأرقام مختلفة، ليتأكّد يمان أنه فهم. لا تكتب حلّه.
 
+رسم تفاعلي (مهمّ جدًا، يمان يفهم بالصور):
+في كل شرح لموضوع يمكن رسمه، أضف بعد «مثال محلول» رسمًا تفاعليًا واحدًا داخل كتلة كود من نوع viz، بصيغة JSON صحيحة فقط. التطبيق يحوّلها إلى رسم يحرّكه يمان بإصبعه. الأنواع المتاحة:
+1) شكل هندسي مع مؤشّرات وحساب المساحة مباشرة:
+\`\`\`viz
+{"type":"shape","shape":"kite","p":{"d1":8,"d2":6}}
+\`\`\`
+الأشكال: rect (a,b) و square (a) و triangle (b,h) و parallelogram (b,h) و trapezoid (a,b,h) و kite أي الدالتون (d1,d2) و rhombus (d1,d2) و circle (r). القيم بين 1 و 12.
+2) رسم دالة مع مؤشّرات للمعاملات (يمان يلمس الرسم ويرى النقاط):
+\`\`\`viz
+{"type":"graph","f":"a*x^2+b*x+c","p":{"a":1,"b":-2,"c":-3},"x":[-5,5]}
+\`\`\`
+يمكن أن تكون f قائمة حتى 3 دوال، مثلًا ["2*x+1","-x+4"] لتقاطع مستقيمين. استعمل * للضرب و ^ للأس، والمتغيّر x فقط، والمعاملات في p. استعمل "r":{"a":[-3,3,0.5]} لتحديد مدى مؤشّر.
+3) حل معادلة خطوة خطوة، يمان يضغط «الخطوة التالية»:
+\`\`\`viz
+{"type":"steps","lines":["2x + 3 = 11","2x = 8","x = 4"],"why":["نطرح 3 من الطرفين","نقسم الطرفين على 2"]}
+\`\`\`
+4) كسر كقطع دائرة وشريط: {"type":"fraction","n":3,"d":4}
+5) «سؤال لك» بخيارات يضغط عليها يمان (استعمله بدل كتابة «سؤال لك» نصًّا عندما يناسب):
+\`\`\`viz
+{"type":"choice","q":"ما مساحة دالتون قطراه 10 و 4؟","o":["14","20","40"],"c":1,"w":"10 · 4 = 40، ثم نقسم على 2 فنحصل على 20."}
+\`\`\`
+c هو رقم الخيار الصحيح ابتداءً من 0. لا تكشف الحل في النص قبل الكتلة.
+اكتب قبل الرسم جملة واحدة تقول ليمان ماذا يحرّك وماذا يلاحظ، مثلًا: «حرّك القطر الأول، ولاحظ أن المساحة تكبر».
+
 قواعد مهمّة:
 - اشرح الموضوع نفسه بدقّة. لا تكتب كلامًا عامًا مثل «هذا موضوع مهم» أو «ركّز جيدًا».
 - استعمل المصطلحات التي تُستعمل في الكتب المدرسية العربية في إسرائيل، واكتب المصطلح بالإنجليزية أو العبرية بين قوسين عند الحاجة.
@@ -1744,7 +1876,7 @@ const SYS=`أنت "الأستاذ سامر"، معلّم ماهر وصبور و�
 - إذا أجاب يمان عن «سؤال لك»: قل أولًا هل الجواب صحيح. إذا كان خطأ، أشر إلى الخطوة التي فيها الخطأ بالضبط، ثم أعطه فرصة ثانية.
 - إذا طلب تلميحًا: أعطِ تلميحًا واحدًا صغيرًا فقط (سطران)، بدون الحل، وبدون شكل الجواب الكامل.
 - إذا سأل سؤالًا قصيرًا أو بسيطًا (معنى كلمة، نعم أو لا): أجب باختصار، بدون شكل الجواب الكامل.
-- الطول: حتى 200 كلمة تقريبًا. إذا كان الموضوع كبيرًا، اشرح الجزء الأول فقط، واسأله: «نكمل الجزء الثاني؟»
+- الطول: حتى 200 كلمة تقريبًا (كتل الرسم لا تُحسب). إذا كان الموضوع كبيرًا، اشرح الجزء الأول فقط، واسأله: «نكمل الجزء الثاني؟»
 - يمان قد يكتب بالعامية أو مع أخطاء إملائية. افهم قصده ولا تصحّح إملاءه.
 - إذا كان متعبًا أو متوتّرًا، اقترح استراحة قصيرة بلطف.
 - إذا سأل عن شيء خارج الدراسة، أجب باختصار ولطف ثم أرجعه للدرس.`;
@@ -1760,11 +1892,11 @@ async function ask(text,kind){
   if(!SAMPLE){teacherSay(offline(kind));return}
   if(tAbort)tAbort.abort();tAbort=new AbortController();
   CHAT.push({role:'assistant',text:'…'});drawChat();const idx=CHAT.length-1;
-  const hist=CHAT.slice(0,idx-1).filter(m=>m.text&&m.text!=='…').slice(-8);
+  const hist=CHAT.slice(0,idx-1).filter(m=>m.text&&m.text!=='…').slice(-8).map(m=>({...m,text:m.text.replace(/```\s*viz[\s\S]*?```/g,'[رسم تفاعلي]')}));
   const turns=[];for(const m of hist){const r=m.role==='user'?'user':'assistant';if(!turns.length&&r==='assistant')continue;if(turns.length&&turns.at(-1).role===r)turns.at(-1).content+='\n'+m.text;else turns.push({role:r,content:m.text})}
   const final='السياق الآن (للمعلّم، لا تكرّره ليمان):\n'+context()+'\n\nرسالة يمان: '+text;
   if(turns.length&&turns.at(-1).role==='user')turns.at(-1).content+='\n\n'+final;else turns.push({role:'user',content:final});
-  try{const r=await SAMPLE(turns,{signal:tAbort.signal,cache:false,role:'teacher',max:1400,system:SYS+'\n'+interestLine(),onText:({text})=>{CHAT[idx].text=text||'…';drawChat()}});CHAT[idx].text=r.text;lastT=r.text;drawChat();if(S.settings.autoread==='on')speak(r.text)}
+  try{const r=await SAMPLE(turns,{signal:tAbort.signal,cache:false,role:'teacher',max:1400,system:SYS+'\n'+interestLine(),onText:({text})=>{CHAT[idx].text=text||'…';drawChat()}});CHAT[idx].text=r.text;lastT=plainTeacher(r.text);drawChat();if(S.settings.autoread==='on')speak(lastT)}
   catch(e){if(e&&(e.code==='aborted'||e.name==='AbortError'))return;CHAT[idx].text=e&&e.code==='rate_limited'?'أسئلة كثيرة الآن. انتظر قليلًا ثم اسأل مرة أخرى.':e&&e.code==='not_granted'?'لم يُسمح لي بالإجابة الذكية هنا. هذا جواب من الدرس:\n'+offline(kind):'لم أستطع الإجابة الآن. هذا جواب من الدرس:\n'+offline(kind);drawChat()}
 }
 document.querySelectorAll('[data-q]').forEach(b=>b.onclick=()=>{const k=b.dataset.q;if(k==='break'){openBreak();return}ask({simple:'اشرح لي هذه الخطوة ببساطة أكثر.',hint:'أعطني تلميحًا صغيرًا بدون الحل.',example:'أعطني مثالًا آخر مشابهًا.'}[k],k)});

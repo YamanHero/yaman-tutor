@@ -1,6 +1,6 @@
 import { authorized, deny } from './_lib.js';
 
-const clean_ = v => String(v || '').trim().replace(/^["'`]+|["'`]+$/g, '').trim();
+const clean_ = v => String(v || '').trim().replace(/^["'`]+|["'`]+$/g, '').trim().toLowerCase();
 const MODEL = clean_(process.env.ANTHROPIC_MODEL) || 'claude-sonnet-5-5';
 const TEACHER_MODEL = clean_(process.env.TEACHER_MODEL) || MODEL;
 const FALLBACKS = ['claude-sonnet-5-5', 'claude-opus-5-5', 'claude-haiku-5-5'];
