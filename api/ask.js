@@ -1,7 +1,9 @@
 import { authorized, deny } from './_lib.js';
 
-const MODEL = process.env.ANTHROPIC_MODEL || 'claude-sonnet-5-5';
-const TEACHER_MODEL = process.env.TEACHER_MODEL || MODEL;
+const clean_ = v => String(v || '').trim().replace(/^["'`]+|["'`]+$/g, '').trim();
+const MODEL = clean_(process.env.ANTHROPIC_MODEL) || 'claude-sonnet-5-5';
+const TEACHER_MODEL = clean_(process.env.TEACHER_MODEL) || MODEL;
+const FALLBACKS = ['claude-sonnet-5-5', 'claude-opus-5-5', 'claude-haiku-5-5'];
 
 export default async function handler(req, res) {
   if (!authorized(req)) return deny(res);
@@ -27,19 +29,29 @@ export default async function handler(req, res) {
   const system = typeof body.system === 'string' ? body.system.slice(0, 20000) : undefined;
   const model = body.role === 'teacher' ? TEACHER_MODEL : MODEL;
 
+  const chain = [...new Set([model, ...FALLBACKS])];
   try {
-    const r = await fetch('https://api.anthropic.com/v1/messages', {
-      method: 'POST',
-      headers: {
-        'content-type': 'application/json',
-        'x-api-key': key,
-        'anthropic-version': '2023-06-01',
-      },
-      body: JSON.stringify({ model, max_tokens: max, messages: clean, ...(system ? { system } : {}) }),
-    });
-    const j = await r.json();
+    let r, j, used;
+    for (const m of chain) {
+      used = m;
+      r = await fetch('https://api.anthropic.com/v1/messages', {
+        method: 'POST',
+        headers: {
+          'content-type': 'application/json',
+          'x-api-key': key,
+          'anthropic-version': '2023-06-01',
+        },
+        body: JSON.stringify({ model: m, max_tokens: max, messages: clean, ...(system ? { system } : {}) }),
+      });
+      j = await r.json();
+      if (r.status === 404 || (r.status === 400 && /model/i.test(j?.error?.message || ''))) {
+        console.error('anthropic model unavailable:', JSON.stringify(m), '-', j?.error?.message);
+        continue;
+      }
+      break;
+    }
     if (!r.ok) {
-      console.error('anthropic error', r.status, j?.error?.type);
+      console.error('anthropic error', r.status, j?.error?.type, used, j?.error?.message);
       return res.status(r.status === 429 ? 429 : 502).json({ code: r.status === 429 ? 'rate_limited' : 'upstream', message: j?.error?.message || 'error' });
     }
     const text = (j.content || []).filter(c => c.type === 'text').map(c => c.text).join('\n');
