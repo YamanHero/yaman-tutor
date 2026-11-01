@@ -1,10 +1,10 @@
-import { authorized, loadState, saveState, deny } from './_lib.js';
+import { authorized, loadState, saveState, deny, profileOf } from './_lib.js';
 
 export default async function handler(req, res) {
   if (!authorized(req)) return deny(res);
   try {
     if (req.method === 'GET') {
-      const data = await loadState();
+      const data = await loadState(profileOf(req));
       return res.status(200).json({ data });
     }
     if (req.method === 'POST') {
@@ -12,7 +12,7 @@ export default async function handler(req, res) {
       if (!body || typeof body.S !== 'object') return res.status(400).json({ code: 'bad_request' });
       const size = JSON.stringify(body).length;
       if (size > 2_000_000) return res.status(413).json({ code: 'too_large' });
-      await saveState({ S: body.S, E: Array.isArray(body.E) ? body.E.slice(-300) : [], updated: Date.now() });
+      await saveState({ S: body.S, E: Array.isArray(body.E) ? body.E.slice(-300) : [], updated: Date.now() }, profileOf(req));
       return res.status(200).json({ ok: true });
     }
     res.setHeader('Allow', 'GET, POST');

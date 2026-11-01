@@ -715,6 +715,87 @@ T.push(
  {q:'كيف تقول إنك لا توافق بلطف؟',o:['«أنت مخطئ»','«فكرتك جيدة، وعندي فكرة أخرى»','أصرخ','أسكت وأغضب'],c:1,w:'نبدأ بالاحترام ثم نضيف رأينا.'},
  {q:'لماذا ينجح فريق الأبطال في الكرتون؟',o:['لأن واحدًا يعمل وحده','لأن لكل واحد دورًا ويتعاونون','لأنهم لا يتكلّمون','بالصدفة'],c:1,w:'الأدوار والتعاون.'}]});
 for(let i=T.length-1;i>=0;i--)if(T[i].s==='phys')T.splice(i,1); /* Yaman does not study physics */
+const PROFILE=(()=>{let u='';try{u=new URLSearchParams(location.search).get('u')||'';if(u)localStorage.setItem('yt_profile',u);else u=localStorage.getItem('yt_profile')||''}catch(e){}return u==='judy'?'judy':''})();
+/* ============ JUDY PROFILE (grade 3) ============ */
+const KID=PROFILE==='judy'?'جودي':'يمان';
+if(PROFILE==='judy'){
+const J=(id,s,n,steps,bank)=>({id,s,n,lab:'concepts',leg:{},steps:steps.map(([t,x,q,o,c,h,k])=>({t,x,q,o,c,h,w:h,p:{k:k||[]}})),bank:bank.map(([q,o,c,w])=>({q,o,c,w}))});
+const JT=[
+J('j_add','math','الجمع والطرح',[
+ ["الجمع: نضمّ الأعداد","الجمع معناه أن نضمّ عددين لنحصل على عدد أكبر.\nمثال: 23 + 14 = 37.\nنجمع الآحاد أولًا: 3 + 4 = 7، ثم العشرات: 2 + 1 = 3.","كم يساوي 23 + 14؟",["35","37","47","27"],1,"اجمعي الآحاد ثم العشرات.",[["الآحاد","الرقم الأخير في العدد"],["العشرات","الرقم الذي قبل الأخير"],["الجمع","نضمّ عددين معًا"]]],
+ ["الجمع مع الحمل","عندما يصير مجموع الآحاد 10 أو أكثر، نكتب الآحاد ونحمل عشرة.\nمثال: 18 + 15: الآحاد 8 + 5 = 13، نكتب 3 ونحمل 1. العشرات 1 + 1 + 1 = 3. الجواب 33.","18 + 15 = ؟",["33","23","32","43"],0,"8 + 5 = 13، نكتب 3 ونحمل 1.",[["الحمل","عندما يزيد مجموع الآحاد عن 9 نحمل واحدًا إلى العشرات"]]],
+ ["الطرح: نأخذ من العدد","الطرح معناه أن نأخذ جزءًا من عدد.\nمثال: 45 − 20 = 25.\nنطرح العشرات: 4 − 2 = 2، والآحاد تبقى 5.","45 − 20 = ؟",["65","25","35","15"],1,"اطرحي العشرات فقط.",[["الطرح","نأخذ جزءًا من العدد فيصير أصغر"]]]],
+ [["50 + 30 = ؟",["70","80","90","20"],1,"5 عشرات + 3 عشرات = 8 عشرات = 80."],["27 + 6 = ؟",["32","33","34","31"],1,"7 + 6 = 13، نكتب 3 ونحمل 1، فيصير 33."],["90 − 40 = ؟",["40","50","60","130"],1,"9 عشرات − 4 عشرات = 5 عشرات = 50."],["كان مع سامي 30 قلمًا وأعطى صديقه 12. كم بقي معه؟",["42","18","28","22"],1,"30 − 12 = 18."],["كان عندي 8 تفاحات واشتريت 5 أخرى. أي عملية نستعمل؟",["جمع","طرح","ضرب","قسمة"],0,"نضيف تفاحات، إذن جمع."]]),
+J('j_mult','math','جدول الضرب (2 و5 و10)',[
+ ["الضرب جمع متكرّر","3 × 2 معناه 2 + 2 + 2 = 6.\nأي ثلاث مجموعات، في كل مجموعة اثنان.","4 × 2 = ؟",["6","8","10","12"],1,"2 + 2 + 2 + 2.",[["الضرب","جمع العدد نفسه عدة مرات"]]],
+ ["جدول 5 وجدول 10","جدول 5 ينتهي دائمًا بـ 5 أو 0: 5، 10، 15، 20، 25.\nجدول 10: نضع صفرًا بعد العدد: 3 × 10 = 30.","6 × 5 = ؟",["25","30","35","11"],1,"عدّي بالخمسات: 5، 10، 15، 20، 25، 30.",[["جدول 5","ينتهي بـ 5 أو 0"],["جدول 10","نضع صفرًا بعد العدد"]]],
+ ["الترتيب لا يغيّر الجواب","3 × 4 = 12 وكذلك 4 × 3 = 12. نفس الجواب.","إذا كان 7 × 5 = 35، فكم يساوي 5 × 7؟",["12","35","30","75"],1,"الترتيب لا يغيّر الجواب.",[["الإبدال","نبدّل مكان العددين والجواب نفسه"]]]],
+ [["9 × 2 = ؟",["16","18","20","11"],1,"9 + 9 = 18."],["8 × 10 = ؟",["18","80","800","108"],1,"نضع صفرًا بعد 8."],["4 × 5 = ؟",["9","20","25","15"],1,"5 + 5 + 5 + 5 = 20."],["في كل علبة 5 أقلام. كم قلمًا في 3 علب؟",["8","15","10","20"],1,"3 × 5 = 15."],["أي عدد ينتمي إلى جدول 5؟",["22","35","47","58"],1,"35 ينتهي بـ 5."]]),
+J('j_frac','math','الكسور: النصف والربع',[
+ ["النصف","النصف يعني أن نقسم الشيء إلى جزأين متساويين ونأخذ جزءًا واحدًا. نكتبه ½.","نصف العدد 10 هو؟",["2","5","10","20"],1,"10 ÷ 2 = 5.",[["½","نصف: جزء من جزأين متساويين"]]],
+ ["الربع","الربع: نقسم إلى 4 أجزاء متساوية ونأخذ جزءًا واحدًا. نكتبه ¼.\nربع البيتزا يعني قطعة من 4 قطع.","قُسمت بيتزا إلى 4 قطع متساوية وأكلتِ قطعة. ماذا أكلتِ؟",["نصفًا","ربعًا","ثلاثة أرباع","كلها"],1,"قطعة من 4 قطع.",[["¼","ربع: جزء من 4 أجزاء متساوية"]]],
+ ["الأجزاء يجب أن تكون متساوية","لا نسمّي الجزء نصفًا إلا إذا كان الجزآن متساويين.","قُسم شريط إلى جزأين، أحدهما كبير والآخر صغير. هل الجزء الكبير نصف؟",["نعم","لا، لأن الجزأين غير متساويين","نعم إذا كان طويلًا","دائمًا نعم"],1,"النصف يحتاج جزأين متساويين.",[["متساوية","بالحجم نفسه"]]]],
+ [["ربع العدد 8 هو؟",["2","4","6","1"],0,"8 ÷ 4 = 2."],["نصف العدد 20 هو؟",["5","10","15","40"],1,"20 ÷ 2 = 10."],["أي كسر أكبر؟",["¼","½","كلاهما متساويان","لا يمكن أن نعرف"],1,"النصف أكبر من الربع."],["كم ربعًا في الشيء الكامل؟",["2","3","4","5"],2,"4 أرباع تكوّن الكامل."]]),
+J('j_shapes','math','الأشكال الهندسية',[
+ ["الأشكال المستوية","المربع: 4 أضلاع متساوية.\nالمستطيل: 4 أضلاع، كل ضلعين متقابلين متساويان.\nالمثلث: 3 أضلاع.\nالدائرة: ليس لها أضلاع.","كم ضلعًا للمثلث؟",["2","3","4","5"],1,"مثلث = ثلاثة.",[["المثلث","3 أضلاع"],["المربع","4 أضلاع متساوية"],["الدائرة","بلا أضلاع"]]],
+ ["المربع والمستطيل","كلاهما له 4 زوايا قائمة. في المربع كل الأضلاع متساوية، وفي المستطيل ضلعان طويلان وضلعان قصيران.","أي شكل أضلاعه الأربعة متساوية؟",["المستطيل","المربع","المثلث","الدائرة"],1,"المربع.",[["زاوية قائمة","زاوية مثل زاوية الدفتر"]]],
+ ["المحيط","المحيط هو مجموع أطوال الأضلاع.\nمربع ضلعه 3 سم: محيطه 3 + 3 + 3 + 3 = 12 سم.","مربع ضلعه 5 سم. ما محيطه؟",["10 سم","20 سم","25 سم","15 سم"],1,"5 + 5 + 5 + 5 = 20.",[["المحيط","طول الطريق حول الشكل"]]]],
+ [["كم زاوية للمستطيل؟",["3","4","5","2"],1,"المستطيل له 4 زوايا."],["أي شكل ليس له أضلاع؟",["المربع","الدائرة","المثلث","المستطيل"],1,"الدائرة."],["مستطيل طوله 4 وعرضه 2. ما محيطه؟",["6","8","12","10"],2,"4 + 2 + 4 + 2 = 12."],["عجلة السيارة تشبه أي شكل؟",["مربعًا","مثلثًا","دائرة","مستطيلًا"],2,"العجلة دائرة."]]),
+J('j_nv','ar','الاسم والفعل',[
+ ["الاسم","الاسم كلمة تدلّ على إنسان أو حيوان أو شيء أو مكان.\nأمثلة: ولد، قطة، كتاب، مدرسة.","أي كلمة اسم؟",["يكتب","كتاب","في","جلس"],1,"كتاب شيء نراه.",[["اسم","إنسان أو حيوان أو شيء أو مكان"]]],
+ ["الفعل","الفعل كلمة تدلّ على عمل يحدث: كتب، يلعب، اشرب.","أي كلمة فعل؟",["حديقة","يقرأ","جميل","ثلاثة"],1,"القراءة عمل.",[["فعل","كلمة تدلّ على عمل"]]],
+ ["اسم وفعل في جملة","في جملة «يلعب الولد» الفعل: يلعب، والاسم: الولد.","في جملة «رسمت سارة وردة» ما الفعل؟",["سارة","رسمت","وردة","لا يوجد"],1,"الرسم عمل.",[["جملة","كلمات تعطي معنى كاملًا"]]]],
+ [["أي كلمة فعل؟",["نجمة","ركض","بحر","أزرق"],1,"الركض عمل."],["أي كلمة اسم؟",["نام","جلس","قمر","أكل"],2,"القمر شيء."],["«تطير العصافير» ما الاسم؟",["تطير","العصافير","في","لا يوجد"],1,"العصافير حيوانات."],["الفعل يدلّ على...",["شيء","عمل","لون","مكان"],1,"الفعل = عمل."]]),
+J('j_num','ar','المفرد والمثنى والجمع',[
+ ["المفرد","المفرد يدلّ على واحد: كتاب، ولد، شجرة.","أي كلمة مفرد؟",["كتابان","كتب","كتاب","كتابين"],2,"كتاب = واحد.",[["مفرد","واحد"]]],
+ ["المثنى","المثنى يدلّ على اثنين. نضيف ـان: كتاب ← كتابان، ولد ← ولدان.","مثنى كلمة «قلم»؟",["أقلام","قلمان","قلم","قلمة"],1,"نضيف ـان.",[["مثنى","اثنان"]]],
+ ["الجمع","الجمع يدلّ على أكثر من اثنين: ولد ← أولاد، كتاب ← كتب، طالب ← طلاب. بعض الجموع نحفظها.","جمع كلمة «ولد»؟",["ولدان","أولاد","ولدين","ولد"],1,"أولاد = كثيرون.",[["جمع","أكثر من اثنين"]]]],
+ [["مثنى «بنت»؟",["بنتان","بنات","بنت","أبناء"],0,"نضيف ـان."],["جمع «كتاب»؟",["كتابان","كتب","كتاب","كاتب"],1,"كتب."],["أي كلمة تدلّ على اثنين؟",["شجرتان","شجرة","أشجار","شجر"],0,"ـان تدلّ على اثنين."],["جمع «طالب»؟",["طالبان","طلاب","طالبة","طالبين"],1,"طلاب."]]),
+J('j_taa','ar','التاء المربوطة والمفتوحة',[
+ ["التاء المربوطة","التاء المربوطة تأتي في آخر كثير من الأسماء المؤنثة، وشكلها ة. مثل: مدرسة، شجرة، معلمة.\nإذا وقفنا عليها نسمع هاءً: مدرسه.","أي كلمة تنتهي بتاء مربوطة؟",["بيت","مدرسة","كتاب","وقت"],1,"مدرسة تنتهي بـ ة.",[["ة","تاء مربوطة، نسمعها هاءً عند الوقوف"]]],
+ ["التاء المفتوحة","التاء المفتوحة شكلها ت. تبقى تاءً عند الوقوف: بيت، وقت، صوت.","أي كلمة تنتهي بتاء مفتوحة؟",["زهرة","بيت","نملة","سيارة"],1,"بيت تنتهي بـ ت.",[["ت","تاء مفتوحة، نسمعها تاءً"]]],
+ ["كيف نفرّق؟","نقول الكلمة ونقف عليها: إن سمعنا هاءً فهي مربوطة (شجرة ← شجره)، وإن سمعنا تاءً فهي مفتوحة (بيت).","«سمكة» تنتهي بـ...",["تاء مربوطة","تاء مفتوحة","هاء","ألف"],0,"سمكه: سمعنا هاءً.",[["نقف","نقول الكلمة ثم نسكت لنسمع آخرها"]]]],
+ [["أي كلمة تنتهي بتاء مفتوحة؟",["وردة","صوت","حقيبة","كرة"],1,"صوت."],["«معلمة» تنتهي بتاء...",["مربوطة","مفتوحة","لا تاء","ألف"],0,"معلمه."],["«بنت» تنتهي بتاء...",["مربوطة","مفتوحة","لا تاء","هاء"],1,"بنت."],["أي كلمة تنتهي بتاء مربوطة؟",["بيت","مدرسة","وقت","صوت"],1,"مدرسة."]]),
+J('j_en1','en','Colors and numbers: الألوان والأعداد',[
+ ["Colors","red = أحمر، blue = أزرق، green = أخضر، yellow = أصفر، black = أسود، white = أبيض.","What does «green» mean?",["أحمر","أخضر","أزرق","أصفر"],1,"green = أخضر.",[["red","أحمر"],["blue","أزرق"],["green","أخضر"],["yellow","أصفر"]]],
+ ["Numbers 1–10","one، two، three، four، five، six، seven، eight، nine، ten.","ما معنى «seven»؟",["6","7","8","9"],1,"seven = 7.",[["one","1"],["five","5"],["ten","10"]]],
+ ["Color + thing","a red apple = تفاحة حمراء.\nفي الإنجليزية نضع اللون قبل الشيء.","كيف نقول «قطة سوداء»؟",["a cat black","a black cat","black a cat","cat a black"],1,"اللون قبل الشيء.",[["a black cat","قطة سوداء"]]]],
+ [["«blue» معناها؟",["أزرق","أحمر","أبيض","أسود"],0,"blue = أزرق."],["«ten» معناها؟",["8","9","10","11"],2,"ten = 10."],["«white» لون...",["أبيض","أصفر","أخضر","أسود"],0,"white = أبيض."],["كيف نقول «تفاحتان حمراوان»؟",["two red apples","red two apples","two apples red","apples two red"],0,"العدد ثم اللون ثم الشيء."]]),
+J('j_en2','en','I am / You are / He is',[
+ ["I am","نقول I am لنعرّف عن أنفسنا.\nI am Judy. I am eight.","I ___ eight.",["am","is","are","be"],0,"مع I نقول am.",[["I am","أنا"]]],
+ ["He is / She is","He is a boy. She is a girl. It is a cat.","She ___ a girl.",["am","is","are","be"],1,"مع he وshe وit نقول is.",[["He is","هو"],["She is","هي"]]],
+ ["We are / You are / They are","You are my friend. We are happy. They are students.","They ___ students.",["am","is","are","be"],2,"مع you وwe وthey نقول are.",[["They are","هم"],["We are","نحن"]]]],
+ [["I ___ happy.",["am","is","are","be"],0,"am."],["He ___ my brother.",["am","is","are","be"],1,"is."],["We ___ friends.",["am","is","are","be"],2,"are."],["You ___ kind.",["am","is","are","be"],2,"are."]]),
+J('j_he1','he','تحيات بالعبرية: שלום',[
+ ["التحيات","שלום (شالوم) = مرحبًا\nבוקר טוב (بوكر توف) = صباح الخير\nערב טוב (عيرڤ توف) = مساء الخير\nלהתראות (لهِتراؤوت) = إلى اللقاء","ما معنى «בוקר טוב»؟",["مساء الخير","صباح الخير","إلى اللقاء","شكرًا"],1,"בוקר = صباح، טוב = جيد.",[["שלום","مرحبًا"],["בוקר טוב","صباح الخير"],["להתראות","إلى اللقاء"]]],
+ ["شكرًا وعفوًا","תודה (تودا) = شكرًا\nבבקשה (بڤاكاشا) = من فضلك أو عفوًا\nסליחה (سليحا) = آسفة أو عن إذنك","ماذا نقول بالعبرية لنشكر؟",["סליחה","תודה","שלום","להתראות"],1,"تودا = شكرًا.",[["תודה","شكرًا"],["בבקשה","من فضلك"],["סליחה","آسفة"]]],
+ ["أعرّف عن نفسي","קוראים לי (كورئيم لي) ג׳ודי = اسمي جودي\nאני בת שמונה (أني بات شمونه) = عمري ثماني سنوات","ماذا تعني «אני בת שמונה»؟",["اسمي جودي","عمري ثماني سنوات","أنا جائعة","أحب المدرسة"],1,"שמונה = ثمانية.",[["קוראים לי","اسمي"],["אני בת","عمري (بنت)"]]]],
+ [["«שלום» تعني؟",["مرحبًا","شكرًا","آسفة","موز"],0,"שלום = مرحبًا."],["«להתראות» تعني؟",["إلى اللقاء","صباح الخير","شكرًا","من فضلك"],0,"نقولها عند الوداع."],["«תודה» تعني؟",["شكرًا","مرحبًا","آسفة","نعم"],0,"תודה = شكرًا."],["«ערב טוב» تعني؟",["صباح الخير","مساء الخير","نعم","لا"],1,"ערב = مساء."]]),
+J('j_he2','he','العائلة بالعبرية: משפחה',[
+ ["الأم والأب","אמא (إيما) = ماما\nאבא (أبا) = بابا","ما معنى «אמא»؟",["بابا","ماما","أخ","جدّة"],1,"אמא = ماما.",[["אמא","ماما"],["אבא","بابا"]]],
+ ["الأخ والأخت","אח (آخ) = أخ\nאחות (أخوت) = أخت","ما معنى «אחות»؟",["أخ","أخت","جدّ","عمّة"],1,"אחות = أخت.",[["אח","أخ"],["אחות","أخت"]]],
+ ["الجدّ والجدّة","סבא (سَبّا) = جدّ\nסבתא (سَبتا) = جدّة\nיש לי אחות (يِش لي أخوت) = عندي أخت","ما معنى «סבתא»؟",["جدّة","جدّ","أخت","أم"],0,"סבתא = جدّة.",[["סבא","جدّ"],["סבתא","جدّة"],["יש לי","عندي"]]]],
+ [["«אבא» تعني؟",["بابا","ماما","أخ","جدّ"],0,"אבא = بابا."],["«אח» تعني؟",["أخت","أخ","جدّ","جدّة"],1,"אח = أخ."],["«סבא» تعني؟",["جدّ","جدّة","أم","أخت"],0,"סבא = جدّ."],["«יש לי אח» تعني؟",["عندي أخ","أنا أخ","أحب أخي","ذهب الأخ"],0,"יש לי = عندي."]]),
+J('j_fr1','fr','Bonjour: التحيات بالفرنسية',[
+ ["Bonjour","Bonjour (بونجور) = صباح الخير أو مرحبًا\nBonsoir (بونسوار) = مساء الخير\nAu revoir (أوروفوار) = إلى اللقاء","ما معنى «Bonjour»؟",["إلى اللقاء","مرحبًا","شكرًا","مساء الخير"],1,"Bon = جيد، jour = يوم.",[["Bonjour","مرحبًا"],["Bonsoir","مساء الخير"],["Au revoir","إلى اللقاء"]]],
+ ["Merci","Merci (مرسي) = شكرًا\nS'il vous plaît (سيل ڤو بلي) = من فضلك\nDe rien (دو ريان) = عفوًا","ماذا نقول لنشكر؟",["Bonjour","Merci","Au revoir","Bonsoir"],1,"Merci = شكرًا.",[["Merci","شكرًا"],["De rien","عفوًا"]]],
+ ["اسمي جودي","Je m'appelle Judy (جو مابّيل جودي) = اسمي جودي.\nJ'ai huit ans (جيه ويت آن) = عمري ثماني سنوات.","ماذا تعني «Je m'appelle Judy»؟",["أنا جائعة","اسمي جودي","أحب فرنسا","مرحبًا"],1,"appelle = اسمي.",[["Je m'appelle","اسمي"],["J'ai huit ans","عمري 8 سنوات"]]]],
+ [["«Au revoir» تعني؟",["إلى اللقاء","شكرًا","مرحبًا","نعم"],0,"نقولها عند الوداع."],["«Merci» تعني؟",["شكرًا","مرحبًا","آسفة","لا"],0,"Merci = شكرًا."],["«Bonsoir» نقولها...",["في الصباح","في المساء","عند الأكل","عند النوم فقط"],1,"soir = مساء."],["«De rien» تعني؟",["عفوًا","مرحبًا","إلى اللقاء","شكرًا"],0,"ردّ على Merci."]]),
+J('j_fr2','fr','Couleurs et nombres: الألوان والأعداد',[
+ ["Les couleurs","rouge (روج) = أحمر\nbleu (بلو) = أزرق\nvert (ڤير) = أخضر\njaune (جون) = أصفر\nnoir (نوار) = أسود\nblanc (بلان) = أبيض","ما معنى «vert»؟",["أحمر","أخضر","أزرق","أبيض"],1,"vert = أخضر.",[["rouge","أحمر"],["bleu","أزرق"],["vert","أخضر"],["jaune","أصفر"]]],
+ ["Les nombres","un (آن) = 1، deux (دو) = 2، trois (تروا) = 3، quatre (كاتر) = 4، cinq (سانك) = 5\nsix = 6، sept = 7، huit = 8، neuf = 9، dix = 10","ما معنى «trois»؟",["2","3","4","5"],1,"trois = 3.",[["un","1"],["deux","2"],["trois","3"],["dix","10"]]],
+ ["اللون بعد الشيء","في الفرنسية نضع اللون غالبًا بعد الشيء: une pomme rouge = تفاحة حمراء.\n(في الإنجليزية نضعه قبله.)","كيف نقول «قطة سوداء» بالفرنسية؟",["un chat noir","noir un chat","un noir chat","chat un noir"],0,"الشيء ثم اللون: chat noir.",[["une pomme rouge","تفاحة حمراء"],["un chat noir","قطة سوداء"]]]],
+ [["«jaune» معناها؟",["أصفر","أزرق","أحمر","أبيض"],0,"jaune = أصفر."],["«cinq» معناها؟",["4","5","6","7"],1,"cinq = 5."],["«blanc» معناها؟",["أبيض","أسود","أخضر","أصفر"],0,"blanc = أبيض."],["«dix» معناها؟",["8","9","10","12"],2,"dix = 10."]]),
+J('j_fr3','fr','La famille: العائلة بالفرنسية',[
+ ["Maman et papa","maman (ماما) = أمي\npapa (بابا) = أبي","ما معنى «maman»؟",["أبي","أمي","أخي","جدّي"],1,"maman = أمي.",[["maman","أمي"],["papa","أبي"]]],
+ ["Frère et sœur","frère (فرير) = أخ\nsœur (سور) = أخت","ما معنى «sœur»؟",["أخ","أخت","جدّة","عمّ"],1,"sœur = أخت.",[["frère","أخ"],["sœur","أخت"]]],
+ ["Grand-père et grand-mère","grand-père (غراں بير) = جدّ\ngrand-mère (غراں مير) = جدّة\nJ'ai une sœur (جيه أون سور) = عندي أخت","ما معنى «grand-mère»؟",["جدّة","جدّ","أخت","أمّ"],0,"grand = كبير، mère = أم.",[["grand-père","جدّ"],["grand-mère","جدّة"],["J'ai une sœur","عندي أخت"]]]],
+ [["«papa» تعني؟",["أبي","أمي","أخي","أختي"],0,"papa = أبي."],["«frère» تعني؟",["أخت","أخ","جدّ","أم"],1,"frère = أخ."],["«grand-père» تعني؟",["جدّ","جدّة","أب","أخ"],0,"grand-père = جدّ."],["«J'ai une sœur» تعني؟",["عندي أخت","أنا أخت","أحب أختي","أختي ذهبت"],0,"J'ai = عندي."]])
+];
+SUBJ.length=0;SUBJ.push({id:'math',n:'الرياضيات',ic:'∑',c:'--s-math'},{id:'ar',n:'العربية',ic:'ع',c:'--s-ar'},{id:'en',n:'الإنجليزية',ic:'En',c:'--s-en'},{id:'he',n:'العبرية',ic:'עב',c:'--s-he'},{id:'fr',n:'الفرنسية',ic:'Fr',c:'--s-hist'});
+T.length=0;T.push(...JT);
+}
+
 const ROLECOL={'فعل':'d','فاعل':'a','مبتدأ':'a','مفعول به':'b','خبر':'e','ناسخ':'d','اسم الناسخ':'a','خبر الناسخ':'e'};
 const CARDS=[
  ['אני','أنا','آني','ضمير'],['אתה','أنتَ','أتا','ضمير'],['את','أنتِ','أت','ضمير'],['הוא','هو','هو','ضمير'],['היא','هي','هي','ضمير'],['אנחנו','نحن','أنَحنو','ضمير'],
@@ -737,18 +818,18 @@ const ORG={
  chloro:['البلاستيدات الخضراء','في النبات فقط. فيها الكلوروفيل، وفيها يحدث البناء الضوئي.']};
 
 /* ============ STATE & STORAGE ============ */
-const LS='yaman_tutor_v4';
+const LS='yaman_tutor_v4'+(PROFILE?'_'+PROFILE:'');const CODEKEY='yaman_tutor_v4_code';
 const blank=()=>({lessons:{},mastery:{},days:[],gen:{},review:{},minutes:{},stars:0,starLog:[],badges:{},claims:[],goalDone:{},settings:{size:'m',motion:'on',rate:0.8,timer:'none',chime:'on',autoread:'off',narrate:'on',predict:'on',voiceStyle:'cartoon',interests:['كرتون سبيس تون المدبلج','الدبلجة والمدبلجون السوريون (مثل عروة الأمين)'],dubMig:1,intAsked:1,stMig:1,calm:'off',focus:'off'}});
 const today=()=>new Intl.DateTimeFormat('en-CA',{timeZone:'Asia/Jerusalem'}).format(new Date());
 let S=blank(), EXAMS=[];
 function adopt(o){if(!o||!o.S)return;S={...blank(),...o.S,settings:{...blank().settings,...(o.S.settings||{})}};EXAMS=Array.isArray(o.E)?o.E:[];migrate()}
-function migrate(){const st=S.settings;if(!st.dubMig){st.dubMig=1;const l=new Set(st.interests||[]);l.add('الدبلجة والمدبلجون السوريون (مثل عروة الأمين)');st.interests=[...l]}if(!st.stMig){st.stMig=1;const l=new Set(st.interests||[]);l.add('كرتون سبيس تون المدبلج');st.interests=[...l];st.intAsked=1}}
+function migrate(){const st=S.settings;if(PROFILE&&!st.jMig){st.jMig=1;st.dubMig=1;st.stMig=1;st.interests=[]}if(!st.dubMig){st.dubMig=1;const l=new Set(st.interests||[]);l.add('الدبلجة والمدبلجون السوريون (مثل عروة الأمين)');st.interests=[...l]}if(!st.stMig){st.stMig=1;const l=new Set(st.interests||[]);l.add('كرتون سبيس تون المدبلج');st.interests=[...l];st.intAsked=1}}
 try{adopt(JSON.parse(localStorage.getItem(LS)||'null'))}catch(e){}
-let CODE='';try{CODE=localStorage.getItem(LS+'_code')||''}catch(e){}
+let CODE='';try{CODE=localStorage.getItem(CODEKEY)||''}catch(e){}
 let ONLINE=false, SAMPLE=null, saving=false, dirty=false, saveTimer=null;
 function saveLocal(){try{localStorage.setItem(LS,JSON.stringify({S,E:EXAMS.slice(-300),t:Date.now()}))}catch(e){}}
 async function api(path,opts={}){
-  const r=await fetch('/api/'+path,{...opts,headers:{'content-type':'application/json','x-family-code':CODE,...(opts.headers||{})}});
+  const r=await fetch('/api/'+path,{...opts,headers:{'content-type':'application/json','x-family-code':CODE,...(PROFILE?{'x-profile':PROFILE}:{}),...(opts.headers||{})}});
   let j=null;try{j=await r.json()}catch(e){}
   if(!r.ok)throw {code:(j&&j.code)||('http_'+r.status),message:j&&j.message};
   return j;
@@ -758,7 +839,7 @@ async function flush(){if(!ONLINE||saving||!dirty)return;saving=true;dirty=false
   try{await api('state',{method:'POST',body:JSON.stringify({S,E:EXAMS.slice(-300)})});chip('محفوظ في السحابة')}
   catch(e){dirty=true;chip(e.code==='auth'?'رمز العائلة تغيّر':'غير متصل – محفوظ على الجهاز')}
   saving=false;if(dirty&&!saveTimer)saveTimer=setTimeout(flush,15000)}
-document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='hidden'&&dirty&&ONLINE){try{fetch('/api/state',{method:'POST',keepalive:true,headers:{'content-type':'application/json','x-family-code':CODE},body:JSON.stringify({S,E:EXAMS.slice(-300)})});dirty=false}catch(e){}}});
+document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='hidden'&&dirty&&ONLINE){try{fetch('/api/state',{method:'POST',keepalive:true,headers:{'content-type':'application/json','x-family-code':CODE,...(PROFILE?{'x-profile':PROFILE}:{})},body:JSON.stringify({S,E:EXAMS.slice(-300)})});dirty=false}catch(e){}}});
 async function saveExam(x){EXAMS.push(x);persist(true)}
 function chip(t){const c=document.getElementById('saveChip');if(c){c.textContent=t;c.dataset.ok=t==='محفوظ في السحابة'?'1':'0'}}
 function markDay(){const d=today();if(!S.days.includes(d)){S.days.push(d);S.days=S.days.slice(-180);setTimeout(()=>{const n=streakDays();if(n>1&&n%3===0)addStars(10,`تعلّمت ${n} أيام متتالية`);checkBadges()},800)}}
@@ -770,10 +851,10 @@ async function connect(){
     if(r.data&&r.data.S&&(!local||!local.t||(r.data.updated||0)>=local.t)){adopt(r.data);saveLocal()}
     else if(local&&local.S){dirty=true;flush()}
     chip('محفوظ في السحابة');applySettings();if(!routeFromHash())render();
-    api('tts').then(x=>{TTS=x&&x.provider;}).catch(()=>{});loadRewards();loadTopics();
+    api('tts').then(x=>{TTS=x&&x.provider;}).catch(()=>{});if(!PROFILE){loadRewards();loadTopics()}
     api('ask').then(x=>{if(x&&x.ai){SAMPLE=makeSample();updateTeacherMode()}}).catch(()=>{});
   }catch(e){
-    if(e.code==='auth'){CODE='';try{localStorage.removeItem(LS+'_code')}catch(_){}askCode('الرمز غير صحيح. جرّب مرة أخرى.');return}
+    if(e.code==='auth'){CODE='';try{localStorage.removeItem(CODEKEY)}catch(_){}askCode('الرمز غير صحيح. جرّب مرة أخرى.');return}
     chip('غير متصل – محفوظ على الجهاز');setTimeout(connect,30000);
   }
 }
@@ -781,7 +862,7 @@ function askCode(err){
   const o=document.getElementById('overlay');o.hidden=false;
   o.innerHTML=`<form class="card" id="codeForm" role="dialog" aria-modal="true"><div class="avatar" aria-hidden="true">س</div><h2>أهلًا يمان</h2><p class="muted" style="margin:0">اكتب رمز العائلة مرة واحدة فقط على هذا الجهاز.</p><input id="codeIn" autocomplete="off" inputmode="text" aria-label="رمز العائلة" style="width:100%;font-size:1.2em;text-align:center;border:1.5px solid var(--line);border-radius:12px;padding:.5em;background:var(--surface)">${err?`<div class="notice warn" style="width:100%">${err}</div>`:''}<button class="btn-p" type="submit" style="width:100%">ادخل</button><button type="button" class="btn-ghost" id="codeSkip">استعمل بدون حفظ في السحابة</button></form>`;
   document.getElementById('codeIn').focus();
-  document.getElementById('codeForm').onsubmit=e=>{e.preventDefault();const v=document.getElementById('codeIn').value.trim();if(!v)return;CODE=v;try{localStorage.setItem(LS+'_code',v)}catch(_){}o.hidden=true;connect()};
+  document.getElementById('codeForm').onsubmit=e=>{e.preventDefault();const v=document.getElementById('codeIn').value.trim();if(!v)return;CODE=v;try{localStorage.setItem(CODEKEY,v)}catch(_){}o.hidden=true;connect()};
   document.getElementById('codeSkip').onclick=()=>{o.hidden=true;chip('محفوظ على هذا الجهاز فقط')};
 }
 function makeSample(){
@@ -935,7 +1016,7 @@ function goalState(){const d=today(),min=S.minutes[d]||0;const learned=Object.va
   return [{n:'20 دقيقة تعلّم',sub:`${min} من 20 دقيقة`,ok:min>=20,p:Math.min(1,min/20)},{n:'درس أو امتحان',sub:learned?'تمّ':'لم يبدأ بعد',ok:learned,p:learned?1:0},{n:'مراجعة اليوم',sub:rev?'تمّت':due?`${due} أسئلة تنتظرك`:'لا توجد أسئلة اليوم',ok:rev||!due,p:rev||!due?1:0}]}
 function checkGoal(){const d=today();S.goalDone=S.goalDone||{};if(S.goalDone[d])return;if(goalState().every(g=>g.ok)){S.goalDone[d]=1;addStars(15,'أكملت هدف اليوم');teacherSay('أكملت هدف اليوم كاملًا يا يمان. عمل رائع. لا تنسَ أن تسجّل المهمة في Hero Family. يمكنك أن ترتاح الآن أو تكمل إذا أحببت.');toast(`<a href="${HERO_URL}" target="_blank" rel="noopener" style="pointer-events:auto;color:inherit">سجّل المهمة في Hero Family ←</a>`,6000);checkBadges()}}
 const ring=p=>{const r=18,c=2*Math.PI*r;return `<svg class="ring" viewBox="0 0 44 44" aria-hidden="true"><circle cx="22" cy="22" r="${r}" style="fill:none;stroke:var(--line)" stroke-width="5"/><circle cx="22" cy="22" r="${r}" style="fill:none;stroke:${p>=1?'var(--good)':'var(--gold)'}" stroke-width="5" stroke-linecap="round" stroke-dasharray="${(c*p).toFixed(1)} ${c.toFixed(1)}" transform="rotate(-90 22 22)"/>${p>=1?'<path d="M15 22l5 5 9-10" style="fill:none;stroke:var(--good)" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round"/>':''}</svg>`};
-function greeting(){const h=+new Intl.DateTimeFormat('en-US',{hour:'numeric',hour12:false,timeZone:'Asia/Jerusalem'}).format(new Date());return h<12?'صباح الخير يا يمان':h<18?'مرحبًا يا يمان':'مساء الخير يا يمان'}
+function greeting(){const nm=KID;const h=+new Intl.DateTimeFormat('en-US',{hour:'numeric',hour12:false,timeZone:'Asia/Jerusalem'}).format(new Date());return h<12?'صباح الخير يا '+nm:h<18?'مرحبًا يا '+nm:'مساء الخير يا '+nm}
 let REWARDS={rewards:[],given:[]};
 async function loadRewards(){if(!ONLINE)return;try{REWARDS=await api('rewards');if(VIEW==='achieve'||VIEW==='home')render()}catch(e){}}
 function vAchieve(v){
@@ -1005,6 +1086,32 @@ function vCalm(v){
   $('cBetter').onclick=()=>{log('better');addStars(2,'اعتنيت بنفسك');$('cMsg').textContent='فخور بك. عرفت كيف تهتم بنفسك.';speak('أحسنت يا يمان')};
   $('cAdult').onclick=()=>{log('adult');$('cMsg').innerHTML='<b>طلب المساعدة شجاعة.</b> اذهب إلى أبيك أو أمك وقل: «أحتاج مساعدة». سيعرف الوالدان أنك طلبت.'};
   $('cBack').onclick=()=>{CALM=null;render()}}
+
+const SYSJ=`أنت "الأستاذ سامر"، معلّم لطيف وصبور لطفلة اسمها جودي، عمرها 8 سنوات، في الصف الثالث في مدرسة عربية في إسرائيل. تتعلّم: الرياضيات، العربية، الإنجليزية، العبرية، الفرنسية.
+
+قواعدك:
+- اكتب بالعربية البسيطة جدًا، بجمل قصيرة (من 5 إلى 8 كلمات). لا تزيد عن 4 جمل في الجواب الواحد.
+- اشرح بمثال من حياة طفلة: ألعاب، حلويات، حيوانات، العائلة، المدرسة.
+- في الإنجليزية والعبرية والفرنسية: اكتب الكلمة بلغتها ثم معناها بالعربية، ثم طريقة نطقها بحروف عربية.
+- لا تستعمل جداول ولا مصطلحات صعبة. لا تكتب أي رسوم برمجية أو كتل viz.
+- شجّعها بجملة قصيرة وصادقة على جهد محدّد قامت به، مثل «أحسنتِ لأنك جرّبتِ مرة ثانية».
+- اختم بسؤال صغير جدًا لها، حتى تجيب وتتأكد أنها فهمت.
+- إذا أخطأت، قل لها: «قريب! لنجرّب معًا» ثم أعطها تلميحًا قبل الجواب.
+- إذا شعرت أنها متعبة أو منزعجة، اقترح استراحة قصيرة أو تنفّسًا هادئًا.
+- خاطبيها بصيغة المؤنث دائمًا.`;
+function vHomeJ(v){
+  const st=totalStars(),li=levelOf(st),nx=LEVELS[li+1],nt=nextTopic(),s0=subj(nt.s)||SUBJ[0],due=dueReviews();
+  const pct=nx?Math.round(100*(st-LEVELS[li][0])/(nx[0]-LEVELS[li][0])):100;
+  v.innerHTML=`<section class="card hero-next" style="text-align:center"><h2 style="font-size:1.5em">${greeting()} 🌟</h2>
+   <div class="lvlbar"><span class="small">مستواك: <b>${LEVELS[li][1]}</b></span><div class="bar" style="--sc:var(--gold);flex:1"><i style="width:${pct}%"></i></div><span class="small muted">${STAR} ${st}</span></div>
+   <button class="btn-p big-start" data-start="${nt.id}" style="width:100%;margin-top:10px;font-size:1.15em">▶ هيا نتعلّم: ${esc(nt.n)}</button></section>
+  ${due.length?`<button class="card link-row" data-review style="border-inline-start:6px solid var(--s-he)"><span style="font-size:1.6em">🔁</span><span style="flex:1"><b>تذكّري ما تعلّمتِ</b><br><span class="muted small">${due.length} أسئلة قصيرة</span></span><span class="muted">←</span></button>`:''}
+  <section class="card"><h3>اختاري مادة</h3><div class="grid" style="grid-template-columns:repeat(2,1fr);gap:10px;margin-top:10px">${SUBJ.map(s=>{const ts=T.filter(t=>t.s===s.id),dn=ts.filter(t=>S.lessons[t.id]?.done).length;return `<button class="plan-row" data-sub="${s.id}" style="--pc:var(${s.c});flex-direction:column;text-align:center;min-height:96px;justify-content:center"><b style="font-size:1.1em">${s.n}</b><span class="muted small">${dn} من ${ts.length}</span></button>`}).join('')}</div></section>
+  <button class="card link-row" data-go="calm" style="border-inline-start:6px solid var(--s-chem)"><span style="font-size:1.6em">🫶</span><span style="flex:1"><b>أنا أشعر…</b><br><span class="muted small">نهدأ معًا</span></span><span class="muted">←</span></button>`;
+  v.querySelectorAll('[data-start]').forEach(b=>b.onclick=()=>startLesson(b.dataset.start));
+  v.querySelectorAll('[data-sub]').forEach(b=>b.onclick=()=>{CUR.sub=b.dataset.sub;go('learn')});
+  v.querySelectorAll('[data-review]').forEach(b=>b.onclick=()=>{location.hash='review'});
+  v.querySelectorAll('[data-go]').forEach(b=>b.onclick=()=>go(b.dataset.go))}
 
 /* ============ SCHOOL, TESTS, OPEN QUESTIONS ============ */
 const daysUntil=d=>Math.round((new Date(d+'T00:00:00')-new Date(today()+'T00:00:00'))/864e5);
@@ -1118,7 +1225,7 @@ window.addEventListener('offline',()=>chip('بدون إنترنت – التعل
 const SPACETOON='كرتون سبيس تون المدبلج';
 const DUB='الدبلجة والمدبلجون السوريون (مثل عروة الأمين)';
 const INTERESTS=[SPACETOON,DUB,'كرة القدم','السيارات','ألعاب الفيديو','الحيوانات','الفضاء','الحاسوب والبرمجة','القطارات','الطبخ','الرسم','الطبيعة','الهواتف والتكنولوجيا','الخرائط والبلدان'];
-const interestLine=()=>{const l=(S.settings.interests||[]).filter(Boolean);return (l.length?`اهتمامات يمان: ${l.join('، ')}. استعمل أمثلة من هذه الاهتمامات عندما يكون ذلك مناسبًا وطبيعيًا.`:'')+(l.includes(SPACETOON)?' يمان يحب الرسوم المتحركة المدبلجة على قناة سبيس تون، ولغتها فصحى. يمكنك أن تصوغ الأمثلة كمشهد من مغامرة كرتونية (فريق أبطال، مهمة، سباق، مباراة، رحلة فضاء) بفصحى واضحة مثل الدبلجة. لا تذكر تفاصيل محدّدة عن مسلسلات بعينها قد تكون غير دقيقة، ولا تجعل القصة تطغى على الفكرة العلمية.':'')+(l.includes(DUB)?' يمان يحب عالم الدبلجة والمدبلجين السوريين، ومعجب بالمدبلج عروة الأمين. استعمل أحيانًا تشبيهات من الاستوديو للتشجيع والشرح: إعادة اللقطة، قراءة مشاعر الشخصية قبل التسجيل، التدريب على النص، تبادل الأدوار في المشهد، المخرج الذي يعطي ملاحظة. يمكنك ذكر عروة الأمين كمثال على مدبلج سوري يحبه يمان، لكن لا تنسب إليه أدوارًا أو أقوالًا أو معلومات محدّدة.':'')};
+const interestLine=()=>{const l=(S.settings.interests||[]).filter(Boolean);return (l.length?`اهتمامات ${KID}: ${l.join('، ')}. استعمل أمثلة من هذه الاهتمامات عندما يكون ذلك مناسبًا وطبيعيًا.`:'')+(l.includes(SPACETOON)?' يمان يحب الرسوم المتحركة المدبلجة على قناة سبيس تون، ولغتها فصحى. يمكنك أن تصوغ الأمثلة كمشهد من مغامرة كرتونية (فريق أبطال، مهمة، سباق، مباراة، رحلة فضاء) بفصحى واضحة مثل الدبلجة. لا تذكر تفاصيل محدّدة عن مسلسلات بعينها قد تكون غير دقيقة، ولا تجعل القصة تطغى على الفكرة العلمية.':'')+(l.includes(DUB)?' يمان يحب عالم الدبلجة والمدبلجين السوريين، ومعجب بالمدبلج عروة الأمين. استعمل أحيانًا تشبيهات من الاستوديو للتشجيع والشرح: إعادة اللقطة، قراءة مشاعر الشخصية قبل التسجيل، التدريب على النص، تبادل الأدوار في المشهد، المخرج الذي يعطي ملاحظة. يمكنك ذكر عروة الأمين كمثال على مدبلج سوري يحبه يمان، لكن لا تنسب إليه أدوارًا أو أقوالًا أو معلومات محدّدة.':'')};
 const ST_ICON={lesson:'📖',practice:'✎',review:'↻',break:'◯',done:'★'};
 const sessionActive=()=>S.session&&S.session.date===today()&&!S.session.ended;
 const curStep=()=>sessionActive()?S.session.steps[S.session.i]:null;
@@ -1223,7 +1330,7 @@ document.querySelectorAll('[data-nav]').forEach(b=>b.onclick=()=>{if(E&&!E.done&
 function render(){
   document.querySelectorAll('[data-nav]').forEach(b=>b.setAttribute('aria-current',(b.dataset.nav===VIEW||(VIEW==='lesson'&&b.dataset.nav==='learn')||(VIEW.startsWith('exam')&&b.dataset.nav==='exam'))?'page':'false'));
   const v=$('view');
-  ({home:vHome,learn:vLearn,lesson:vLesson,exam:vExamSetup,examrun:vExamRun,examres:vExamRes,progress:vProgress,settings:vSettings,achieve:vAchieve,addtopic:vAddTopic,testnew:vTestNew,open:vOpen,sessiondone:vSessionDone,timetable:vTimetable,social:vSocial,story:vStory,recall:vRecall,calm:vCalm}[VIEW]||vHome)(v);
+  ({home:PROFILE?vHomeJ:vHome,learn:vLearn,lesson:vLesson,exam:vExamSetup,examrun:vExamRun,examres:vExamRes,progress:vProgress,settings:vSettings,achieve:vAchieve,addtopic:vAddTopic,testnew:vTestNew,open:vOpen,sessiondone:vSessionDone,timetable:vTimetable,social:vSocial,story:vStory,recall:vRecall,calm:vCalm}[VIEW]||vHome)(v);
   if(['home','lesson','examrun','examres','open','learn'].includes(VIEW)&&sessionActive()){v.insertAdjacentHTML('afterbegin',sessionStrip())}
   bindSession(v);bindInterests(v);v.querySelectorAll('[data-focusbtn]').forEach(b=>b.onclick=()=>setFocus(true));
   updateTeacherMode();updateStarChip();
@@ -1840,7 +1947,7 @@ function vSettings(v){
    <div class="field"><b>أين تُحفظ النتائج؟</b><p class="muted small" style="margin:0">${ONLINE?'النتائج محفوظة في السحابة، وتظهر على كل جهاز تُكتب فيه رمز العائلة. والدك يرى ملخّص التقدّم في صفحة الوالدين.':'النتائج محفوظة في هذا المتصفح فقط.'}</p><button style="align-self:start" id="sCode">${ONLINE?'غيّر رمز العائلة على هذا الجهاز':'ادخل رمز العائلة'}</button></div>
    <div class="field"><b>البدء من جديد</b><p class="muted small" style="margin:0">يمسح كل علامات الدروس والامتحانات. لا يمكن التراجع.</p><button id="sReset" style="align-self:start;color:var(--bad);border-color:var(--bad)">امسح كل التقدّم</button></div></section>`;
   v.querySelectorAll('[data-k]').forEach(b=>b.onclick=()=>{const k=b.dataset.k;st[k]=k==='rate'?+b.dataset.v:b.dataset.v;applySettings();persist();render()});
-  $('sCode').onclick=()=>{CODE='';ONLINE=false;try{localStorage.removeItem(LS+'_code')}catch(e){}askCode()};
+  $('sCode').onclick=()=>{CODE='';ONLINE=false;try{localStorage.removeItem(CODEKEY)}catch(e){}askCode()};
   v.querySelectorAll('[data-intset]').forEach(b=>b.onclick=()=>{const x=b.dataset.intset;const l=new Set(st.interests||[]);l.has(x)?l.delete(x):l.add(x);st.interests=[...l];st.intAsked=1;persist();render()});
   $('sTest').onclick=()=>speak('مرحبًا يا يمان. هكذا أقرأ لك الشرح.');
   $('sReset').onclick=()=>parentGate(()=>confirmBox('هل أنت متأكد؟ ستُمسح كل علامات الدروس والامتحانات.','نعم، امسح','لا، ارجع',async()=>{const keep=S.settings;S={...blank(),settings:keep};EXAMS=[];persist(true);go('home')}));
@@ -2291,7 +2398,7 @@ async function ask(text,kind,img){
   const turns=[];for(const m of hist){const r=m.role==='user'?'user':'assistant';if(!turns.length&&r==='assistant')continue;if(turns.length&&turns.at(-1).role===r)turns.at(-1).content+='\n'+m.text;else turns.push({role:r,content:m.text})}
   const rps=RP&&SCEN.find(x=>x.id===RP.id);if(rps&&text!=='أنهيت التدريب')RP.turns++;if(rps)drawRPBar();
   const final=rps?('ما تعرفه عن يمان: '+(S.tnotes||[]).map(n=>n.t).join('؛ ')+'\n\nكلام يمان في المشهد: '+text):'السياق الآن (للمعلّم، لا تكرّره ليمان):\n'+context()+'\n\nما تعرفه عن يمان (استعمله لتكييف الشرح، لا تقرأه له):\n'+learnerProfile()+(img?'\n\nأرفق يمان صورة تمرين. ابدأ بسطر «في الصورة:» تكتب فيه نص التمرين كما فهمته (حتى يتأكّد أنك قرأته صحيحًا). ثم اشرح الحل خطوة خطوة، ويفضَّل مع رسم steps أو shape أو graph. إذا كانت الصورة غير واضحة، قل ذلك واطلب صورة أوضح.':'')+'\n\nرسالة يمان: '+text;
-  const sysP=rps?RPSYS(rps)+'\n'+interestLine():SYS+'\n'+interestLine();
+  const sysP=PROFILE?SYSJ+'\n'+interestLine():rps?RPSYS(rps)+'\n'+interestLine():SYS+'\n'+interestLine();
   if(turns.length&&turns.at(-1).role==='user')turns.at(-1).content+='\n\n'+final;else turns.push({role:'user',content:final});
   if(img){const last=turns.at(-1);last.content=[{type:'image',source:{type:'base64',media_type:'image/jpeg',data:img}},{type:'text',text:last.content}]}
   try{const r=await SAMPLE(turns,{signal:tAbort.signal,cache:false,role:'teacher',max:1400,system:sysP,onText:({text})=>{CHAT[idx].text=text||'…';drawChat()}});CHAT[idx].text=takeNotes(r.text);lastT=plainTeacher(CHAT[idx].text);drawChat();if(S.settings.autoread==='on')speak(lastT)}
