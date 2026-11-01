@@ -1,6 +1,7 @@
 import { authorized, deny } from './_lib.js';
 
 const MODEL = process.env.ANTHROPIC_MODEL || 'claude-sonnet-5-5';
+const TEACHER_MODEL = process.env.TEACHER_MODEL || MODEL;
 
 export default async function handler(req, res) {
   if (!authorized(req)) return deny(res);
@@ -23,6 +24,8 @@ export default async function handler(req, res) {
     }));
   if (!clean.length || clean[clean.length - 1].role !== 'user') return res.status(400).json({ code: 'bad_request' });
   const max = Math.min(Math.max(Number(body.max) || 900, 100), 8000);
+  const system = typeof body.system === 'string' ? body.system.slice(0, 20000) : undefined;
+  const model = body.role === 'teacher' ? TEACHER_MODEL : MODEL;
 
   try {
     const r = await fetch('https://api.anthropic.com/v1/messages', {
@@ -32,7 +35,7 @@ export default async function handler(req, res) {
         'x-api-key': key,
         'anthropic-version': '2023-06-01',
       },
-      body: JSON.stringify({ model: MODEL, max_tokens: max, messages: clean }),
+      body: JSON.stringify({ model, max_tokens: max, messages: clean, ...(system ? { system } : {}) }),
     });
     const j = await r.json();
     if (!r.ok) {

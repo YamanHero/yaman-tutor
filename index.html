@@ -200,6 +200,15 @@ aside#teacher{position:sticky;top:calc(env(safe-area-inset-top,0px) + 76px);alig
 .chat{overflow-y:auto;display:flex;flex-direction:column;gap:8px;min-height:120px;flex:1;padding-inline-end:4px}
 .msg{padding:10px 12px;border-radius:12px;line-height:1.75;font-size:.95em;max-width:95%;overflow-wrap:anywhere}
 .msg.t{background:var(--surface2);border-inline-start:4px solid var(--accent);align-self:flex-start}
+.tb{border-radius:10px;padding:7px 10px;margin:6px 0;background:var(--surface);border-inline-start:4px solid var(--accent)}
+.tbh{display:block;font-size:.85em;margin-bottom:2px}
+.tb-idea{border-color:#3b82f6}.tb-idea .tbh{color:#3b82f6}
+.tb-pic{border-color:#a855f7}.tb-pic .tbh{color:#a855f7}
+.tb-ex{border-color:#16a34a}.tb-ex .tbh{color:#16a34a}
+.tb-warn{border-color:#f59e0b}.tb-warn .tbh{color:#d97706}
+.tb-q{border-color:#ec4899;background:color-mix(in srgb,#ec4899 8%,var(--surface))}.tb-q .tbh{color:#db2777}
+.mrun{white-space:nowrap;font-family:ui-monospace,Menlo,Consolas,monospace;font-size:.95em}
+.tstep{display:flex;gap:8px;align-items:flex-start;margin:4px 0}.tstep>span{flex:0 0 auto;min-width:1.6em;height:1.6em;border-radius:50%;background:#16a34a;color:#fff;font-size:.8em;display:grid;place-items:center}.tstep>div{min-width:0}
 .msg.u{background:color-mix(in srgb,var(--accent) 12%,var(--surface));align-self:flex-end}
 .quick{display:flex;gap:6px;flex-wrap:wrap}
 .quick button{font-size:.85em;min-height:38px;padding:.3em .8em}
@@ -664,7 +673,7 @@ function askCode(err){
   document.getElementById('codeSkip').onclick=()=>{o.hidden=true;chip('محفوظ على هذا الجهاز فقط')};
 }
 function makeSample(){
-  const f=async(turns,o={})=>{const r=await api('ask',{method:'POST',signal:o.signal,body:JSON.stringify({messages:typeof turns==='string'?[{role:'user',content:turns}]:turns,max:900})});if(o.onText)o.onText({text:r.text});return {text:r.text}};
+  const f=async(turns,o={})=>{const r=await api('ask',{method:'POST',signal:o.signal,body:JSON.stringify({messages:typeof turns==='string'?[{role:'user',content:turns}]:turns,max:o.max||900,system:o.system,role:o.role})});if(o.onText)o.onText({text:r.text});return {text:r.text}};
   f.json=async(prompt)=>{const r=await api('ask',{method:'POST',body:JSON.stringify({messages:[{role:'user',content:prompt+'\n\nأجب بـ JSON فقط، بدون أي نص قبله أو بعده.'}],max:2500})});
     const t=r.text||'';const m=t.match(/```(?:json)?\s*([\s\S]*?)```/);const body=m?m[1]:t.slice(t.indexOf('['),t.lastIndexOf(']')+1);try{return JSON.parse(body)}catch(e){throw {code:'invalid_json'}}};
   return f;
@@ -1691,27 +1700,53 @@ document.addEventListener('keydown',e=>{if(e.key==='Escape'&&!$('overlay').hidde
 /* ============ TEACHER ============ */
 const CHAT=[];let tAbort=null,lastT='';
 function addMsg(role,text){CHAT.push({role,text});drawChat()}
-function fmtMsg(t){return esc(t).replace(/\*\*(.+?)\*\*/g,'<b>$1</b>').replace(/\n/g,'<br>')}
+const TBLK=[['الفكرة','idea'],['صورة في الذهن','pic'],['مثال محلول','ex'],['انتبه','warn'],['سؤال لك','q']];
+const MRUN=/(?:−(?=[0-9A-Za-z(√])|[A-Za-z0-9(√])[A-Za-z0-9.,/²³√₀-₉⁺⁻⁰()=+−×÷·<>≤≥\-]*(?:\s+[A-Za-z0-9.,/²³√₀-₉⁺⁻⁰()=+−×÷·<>≤≥\-]+)*/g;
+function mathRuns(x){let o='',l=0,m;MRUN.lastIndex=0;while((m=MRUN.exec(x))){let w=m[0];const tr=w.match(/[.,]+$/);if(tr)w=w.slice(0,-tr[0].length);o+=esc(x.slice(l,m.index))+`<bdi dir="ltr" class="mrun">${esc(w)}</bdi>`;l=m.index+w.length}return o+esc(x.slice(l))}
+function fmtMsg(t){const inl=x=>mathRuns(x.replace(/^#+\s*/,'')).replace(/\*\*(.+?)\*\*/g,'<b>$1</b>');
+  const out=[];let cur=null;
+  for(const raw of String(t).split('\n')){const ln=raw.replace(/^\s*[-*]\s+/,'• ').replace(/^\s*#+\s*/,'').replace(/\*\*(الفكرة|صورة في الذهن|مثال محلول|انتبه|سؤال لك)\s*(:?)\s*\*\*\s*:?/,'$1:');
+    const hit=TBLK.find(([k])=>ln.trim().startsWith(k+':')||ln.trim().startsWith(k+' :'));
+    if(hit){cur={k:hit[1],h:hit[0],l:[]};out.push(cur);const rest=ln.trim().slice(ln.trim().indexOf(':')+1).trim();if(rest)cur.l.push(rest);continue}
+    if(!cur){cur={k:'',l:[]};out.push(cur)}cur.l.push(ln)}
+  return out.map(b=>{const body=b.l.join('\n').trim().split('\n').map(x=>{const m=x.match(/^\s*(\d+)[.)-]\s*(.*)$/);return m?`<div class="tstep"><span>${m[1]}</span><div>${inl(m[2])}</div></div>`:x.trim()?`<div>${inl(x)}</div>`:''}).join('');
+    return b.k?`<div class="tb tb-${b.k}"><b class="tbh">${b.h}</b>${body}</div>`:body}).join('')}
 function drawChat(){const c=$('chat');c.innerHTML=CHAT.map(m=>`<div class="msg ${m.role==='user'?'u':'t'}">${fmtMsg(m.text)}</div>`).join('');c.scrollTop=c.scrollHeight}
 function teacherSay(t){lastT=t;addMsg('assistant',t)}
 function toastT(t){teacherSay(t)}
 function updateTeacherMode(){const m=$('tMode');if(!m)return;m.textContent=VIEW==='examrun'&&E&&E.mode==='exam'?'أثناء الامتحان: أشرح المفاهيم فقط ولا أعطي إجابات':SAMPLE?'معلّم ذكي: اسألني أي سؤال':'إجابات جاهزة من الدرس (المعلّم الذكي غير مفعّل)'}
 function context(){
-  if(VIEW==='lesson'&&L&&!L.finished){const t=topic(L.tid),st=t.steps[L.step];return `يمان الآن في درس "${t.n}" (مادة ${subj(t.s).n})، الخطوة ${L.step+1}: "${st.t}".\nالشرح في الخطوة: ${st.x}\nسؤال التمرين: ${st.q}\nالخيارات: ${st.o.join(' / ')}\nللمعلّم فقط: الإجابة الصحيحة "${st.o[st.c]}". لا تكشفها مباشرة؛ أعطِ تلميحًا أولًا. اكشفها فقط إذا طلب يمان الحل صراحة بعد أن حاول.`}
+  if(VIEW==='lesson'&&L&&!L.finished){const t=topic(L.tid),st=t.steps[L.step];return `يمان الآن في درس "${t.n}" (مادة ${subj(t.s).n})، الخطوة ${L.step+1}: "${st.t}".\nالشرح في الخطوة: ${st.x}${st.w?'\nمثال من الدرس: '+st.w:''}${st.h?'\nتلميح من الدرس: '+st.h:''}\nسؤال التمرين: ${st.q}\nالخيارات: ${st.o.join(' / ')}\nللمعلّم فقط: الإجابة الصحيحة "${st.o[st.c]}". لا تكشفها مباشرة؛ أعطِ تلميحًا أولًا. اكشفها فقط إذا طلب يمان الحل صراحة بعد أن حاول.`}
   if(VIEW==='examrun'&&E){const q=E.qs[E.i],t=topic(q.tid);return E.mode==='exam'?`يمان الآن في امتحان تجريبي في موضوع "${t.n}". ممنوع أن تعطي الإجابة أو تلميحًا يكشفها. يمكنك فقط تهدئته وشرح المفهوم العام بكلمات عامة.`:`يمان يتدرّب على سؤال في موضوع "${t.n}": ${q.q} (الخيارات: ${q.o.join(' / ')}). للمعلّم فقط: الصحيحة "${q.o[q.c]}". أعطِ تلميحًا أولًا ولا تكشف الحل إلا إذا طلبه بعد محاولة.`}
   const ut=upcomingTests().map(x=>`امتحان ${subj(x.sub)?.n||''} في ${x.date} (المواضيع: ${x.ids.map(id=>topic(id)?.n).filter(Boolean).join('، ')})`).join('؛ ');const sc=((S.school||{})[today()]||[]).map(id=>topic(id)?.n).filter(Boolean).join('، ');
   return 'يمان في الصفحة الرئيسية للتطبيق. المواد: '+SUBJ.map(s=>s.n).join('، ')+'.'+(todaySubs().length?' حصص اليوم في المدرسة: '+todaySubs().map(id=>subj(id).n).join('، ')+'.':'')+(tomorrowSubs().length?' حصص الغد: '+tomorrowSubs().map(id=>subj(id).n).join('، ')+'.':'')+(sc?' تعلّم اليوم في المدرسة: '+sc+'.':'')+(ut?' امتحانات قادمة: '+ut+'.':'');
 }
-const SYS=`أنت "الأستاذ سامر"، معلّم صبور وهادئ لطالب اسمه يمان، في الصف العاشر أو الحادي عشر في مدرسة عربية في إسرائيل. يمان على طيف التوحّد.
-قواعد الكتابة:
-- اكتب بالعربية الفصحى البسيطة. جمل قصيرة وواضحة وحرفية. لا تعابير مجازية ولا سخرية ولا مبالغة.
-- قسّم الشرح إلى خطوات مرقّمة قصيرة (من 2 إلى 5 خطوات).
-- استعمل أمثلة ملموسة من الحياة اليومية.
-- ابدأ بما يعرفه يمان، ثم أضف فكرة جديدة واحدة فقط في كل مرة.
-- عند الخطأ: قل أن الخطأ طبيعي، ثم وضّح الخطوة التالية.
-- لا تكتب أكثر من 120 كلمة إلا إذا طلب يمان شرحًا أطول.
-- الرياضيات والرموز اكتبها بشكل بسيط مثل x² و 3x + 2 = 8.
-- إذا كان يمان متعبًا أو متوتّرًا، اقترح استراحة قصيرة بلطف.
+const SYS=`أنت "الأستاذ سامر"، معلّم ماهر وصبور وهادئ لطالب اسمه يمان، في الصف العاشر أو الحادي عشر في مدرسة عربية في إسرائيل (منهاج وزارة التربية، ومستوى البجروت). يمان على طيف التوحّد: يفهم جيدًا عندما يكون الشرح حرفيًا ومنظّمًا ومتوقّعًا، ويتعب من النص الطويل والكلام العام.
+
+هدفك: أن يفهم يمان الفكرة فعلًا، لا أن تقرأ له الشرح مرة أخرى.
+
+شكل الجواب (التزم به في كل شرح، كل جزء يبدأ في سطر جديد بهذه الكلمات بالضبط):
+الفكرة: جملة واحدة أو جملتان فقط، تقول ما هو الشيء ولماذا نحتاجه.
+صورة في الذهن: تشبيه ملموس واحد من الحياة اليومية أو من عالم يمان، يساعد على رؤية الفكرة. تخطّاه إذا لم يكن مفيدًا فعلًا.
+مثال محلول:
+1. خطوة واحدة في كل سطر، بأرقام حقيقية، ومع سبب قصير بعد «لأن».
+2. ...
+انتبه: الخطأ الأكثر شيوعًا في هذا الموضوع، وكيف نتجنّبه. سطر واحد.
+سؤال لك: سؤال قصير واحد بأرقام مختلفة، ليتأكّد يمان أنه فهم. لا تكتب حلّه.
+
+قواعد مهمّة:
+- اشرح الموضوع نفسه بدقّة. لا تكتب كلامًا عامًا مثل «هذا موضوع مهم» أو «ركّز جيدًا».
+- استعمل المصطلحات التي تُستعمل في الكتب المدرسية العربية في إسرائيل، واكتب المصطلح بالإنجليزية أو العبرية بين قوسين عند الحاجة.
+- تأكّد من الحساب في كل خطوة قبل أن تكتبها. إذا لم تكن متأكدًا، قل ذلك بوضوح.
+- العربية الفصحى البسيطة، جمل قصيرة وحرفية. لا مجاز غامض، ولا سخرية، ولا مبالغة، ولا علامات تعجّب كثيرة.
+- الرموز بشكل بسيط: x² و 3x + 2 = 8 و √9 = 3. ضع كل معادلة في سطر وحدها.
+- إذا قال يمان «مش فاهم» أو طلب شرحًا أبسط: لا تكرّر نفس الشرح. اشرح بطريقة أخرى: رسم بالكلمات، أو أرقام أصغر، أو خطوات أصغر.
+- إذا أجاب يمان عن «سؤال لك»: قل أولًا هل الجواب صحيح. إذا كان خطأ، أشر إلى الخطوة التي فيها الخطأ بالضبط، ثم أعطه فرصة ثانية.
+- إذا طلب تلميحًا: أعطِ تلميحًا واحدًا صغيرًا فقط (سطران)، بدون الحل، وبدون شكل الجواب الكامل.
+- إذا سأل سؤالًا قصيرًا أو بسيطًا (معنى كلمة، نعم أو لا): أجب باختصار، بدون شكل الجواب الكامل.
+- الطول: حتى 200 كلمة تقريبًا. إذا كان الموضوع كبيرًا، اشرح الجزء الأول فقط، واسأله: «نكمل الجزء الثاني؟»
+- يمان قد يكتب بالعامية أو مع أخطاء إملائية. افهم قصده ولا تصحّح إملاءه.
+- إذا كان متعبًا أو متوتّرًا، اقترح استراحة قصيرة بلطف.
 - إذا سأل عن شيء خارج الدراسة، أجب باختصار ولطف ثم أرجعه للدرس.`;
 function offline(kind){
   const st=VIEW==='lesson'&&L&&!L.finished?topic(L.tid).steps[L.step]:null;
@@ -1727,9 +1762,9 @@ async function ask(text,kind){
   CHAT.push({role:'assistant',text:'…'});drawChat();const idx=CHAT.length-1;
   const hist=CHAT.slice(0,idx-1).filter(m=>m.text&&m.text!=='…').slice(-8);
   const turns=[];for(const m of hist){const r=m.role==='user'?'user':'assistant';if(!turns.length&&r==='assistant')continue;if(turns.length&&turns.at(-1).role===r)turns.at(-1).content+='\n'+m.text;else turns.push({role:r,content:m.text})}
-  const final=SYS+'\n'+interestLine()+'\n\nالسياق الآن:\n'+context()+'\n\nرسالة يمان: '+text;
+  const final='السياق الآن (للمعلّم، لا تكرّره ليمان):\n'+context()+'\n\nرسالة يمان: '+text;
   if(turns.length&&turns.at(-1).role==='user')turns.at(-1).content+='\n\n'+final;else turns.push({role:'user',content:final});
-  try{const r=await SAMPLE(turns,{signal:tAbort.signal,cache:false,modelTier:'default',onText:({text})=>{CHAT[idx].text=text||'…';drawChat()}});CHAT[idx].text=r.text;lastT=r.text;drawChat();if(S.settings.autoread==='on')speak(r.text)}
+  try{const r=await SAMPLE(turns,{signal:tAbort.signal,cache:false,role:'teacher',max:1400,system:SYS+'\n'+interestLine(),onText:({text})=>{CHAT[idx].text=text||'…';drawChat()}});CHAT[idx].text=r.text;lastT=r.text;drawChat();if(S.settings.autoread==='on')speak(r.text)}
   catch(e){if(e&&(e.code==='aborted'||e.name==='AbortError'))return;CHAT[idx].text=e&&e.code==='rate_limited'?'أسئلة كثيرة الآن. انتظر قليلًا ثم اسأل مرة أخرى.':e&&e.code==='not_granted'?'لم يُسمح لي بالإجابة الذكية هنا. هذا جواب من الدرس:\n'+offline(kind):'لم أستطع الإجابة الآن. هذا جواب من الدرس:\n'+offline(kind);drawChat()}
 }
 document.querySelectorAll('[data-q]').forEach(b=>b.onclick=()=>{const k=b.dataset.q;if(k==='break'){openBreak();return}ask({simple:'اشرح لي هذه الخطوة ببساطة أكثر.',hint:'أعطني تلميحًا صغيرًا بدون الحل.',example:'أعطني مثالًا آخر مشابهًا.'}[k],k)});
