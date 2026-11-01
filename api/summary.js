@@ -1,11 +1,11 @@
-import { authorized, loadState, deny } from './_lib.js';
+import { authorized, loadState, deny, profileOf } from './_lib.js';
 
 // Short daily summary for other family apps (for example Hero Family).
 // GET /api/summary?code=FAMILY_CODE
 export default async function handler(req, res) {
   if (!authorized(req)) return deny(res);
   try {
-    const data = await loadState();
+    const data = await loadState(profileOf(req));
     const S = data?.S || {}, E = data?.E || [];
     const tz = 'Asia/Jerusalem';
     const day = d => new Intl.DateTimeFormat('en-CA', { timeZone: tz }).format(new Date(d));
