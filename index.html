@@ -922,6 +922,7 @@ const BADGES=[
  {id:'studio',n:'نجم الاستوديو',d:'أكمل 3 مشاهد في استوديو المهارات الاجتماعية.',ic:'🎬',t:()=>(S.rpDone||0)>=3},
  {id:'friend',n:'صديق رائع',d:'أنهِ كل دروس المهارات الاجتماعية.',ic:'🤝',t:()=>subjProgress('soc').pct===100},
  {id:'challenger',n:'بطل التحدّيات',d:'أنجز 3 تحدّيات أسبوعية.',ic:'🎯',t:()=>Object.values(S.chall||{}).filter(c=>c.done).length>=3},
+ {id:'recall7',n:'ذاكرة بطل',d:'أكمل «شو تعلمت اليوم؟» 7 أيام.',ic:'🧠',t:()=>Object.keys(S.recallDays||{}).length>=7},
  {id:'explorer',n:'مستكشف',d:'جرّب الصور التفاعلية 30 مرة.',ic:'⚗',t:()=>(S.labActs||0)>=30}];
 let audioCtx=null;
 function chime(){if(S.settings.chime==='off'||S.settings.calm==='on')return;try{audioCtx=audioCtx||new (window.AudioContext||window.webkitAudioContext)();const t0=audioCtx.currentTime;[[880,0],[1318.5,.12]].forEach(([f,d])=>{const o=audioCtx.createOscillator(),g=audioCtx.createGain();o.type='sine';o.frequency.value=f;g.gain.setValueAtTime(0,t0+d);g.gain.linearRampToValueAtTime(.08,t0+d+.02);g.gain.exponentialRampToValueAtTime(.0001,t0+d+.45);o.connect(g).connect(audioCtx.destination);o.start(t0+d);o.stop(t0+d+.5)})}catch(e){}}
@@ -964,6 +965,7 @@ function routeFromHash(){
   if(r==='review'){const due=dueReviews();if(due.length)startExam({pool:due.slice(0,12).map(r=>r.q),n:Math.min(12,due.length),mode:'practice',timer:'none',review:true,ids:[]});else go('home');return true}
   if(r==='test'){go('testnew');return true}
   if(r==='social'){go('social');return true}
+  if(r==='recall'){setTimeout(startRecall,600);return true}
   if(r==='story'){STY=null;go('story');return true}
   if(r==='rp'&&SCEN.find(x=>x.id===arg)){go('social');setTimeout(()=>{if(SAMPLE)startRP(arg)},800);return true}
   if(r==='timetable'){go('timetable');return true}
@@ -1190,7 +1192,7 @@ document.querySelectorAll('[data-nav]').forEach(b=>b.onclick=()=>{if(E&&!E.done&
 function render(){
   document.querySelectorAll('[data-nav]').forEach(b=>b.setAttribute('aria-current',(b.dataset.nav===VIEW||(VIEW==='lesson'&&b.dataset.nav==='learn')||(VIEW.startsWith('exam')&&b.dataset.nav==='exam'))?'page':'false'));
   const v=$('view');
-  ({home:vHome,learn:vLearn,lesson:vLesson,exam:vExamSetup,examrun:vExamRun,examres:vExamRes,progress:vProgress,settings:vSettings,achieve:vAchieve,addtopic:vAddTopic,testnew:vTestNew,open:vOpen,sessiondone:vSessionDone,timetable:vTimetable,social:vSocial,story:vStory}[VIEW]||vHome)(v);
+  ({home:vHome,learn:vLearn,lesson:vLesson,exam:vExamSetup,examrun:vExamRun,examres:vExamRes,progress:vProgress,settings:vSettings,achieve:vAchieve,addtopic:vAddTopic,testnew:vTestNew,open:vOpen,sessiondone:vSessionDone,timetable:vTimetable,social:vSocial,story:vStory,recall:vRecall}[VIEW]||vHome)(v);
   if(['home','lesson','examrun','examres','open','learn'].includes(VIEW)&&sessionActive()){v.insertAdjacentHTML('afterbegin',sessionStrip())}
   bindSession(v);bindInterests(v);v.querySelectorAll('[data-focusbtn]').forEach(b=>b.onclick=()=>setFocus(true));
   updateTeacherMode();updateStarChip();
@@ -1217,6 +1219,8 @@ function vHome(v){
    <ol class="mini-plan" aria-label="خطة الجلسة">${plan.map((x,i)=>`<li class="${i===nowI?'now':''}"><span>${i+1}</span>${x.t.replace(/<[^>]+>/g,'')}</li>`).join('')}</ol>
    <button class="btn-p big-start" data-startsess>${sessionActive()?'▶ تابع الجلسة: '+esc(stepLabel(curStep())):S.session&&S.session.date===today()?'▶ ابدأ جلسة أخرى':'▶ ابدأ جلسة اليوم'}</button>
   </section>
+  ${recallCard()}
+  ${eveningCard()}
   ${homeExtras()}
   <button class="card link-row" data-go="social" style="border-inline-start:6px solid var(--s-soc)"><span style="font-size:1.6em">🎬</span><span style="flex:1"><b>استوديو المهارات الاجتماعية</b><br><span class="muted small">تدرّب على محادثة حقيقية مع الأستاذ سامر. 5 نجوم لكل مشهد.</span></span><span class="go-arrow" aria-hidden="true">←</span></button>
   ${challCard()}
@@ -1233,7 +1237,7 @@ function vHome(v){
   const qk=v.querySelector('[data-quick]');if(qk)qk.onclick=e=>{const id=e.currentTarget.dataset.quick;const ids=id?[id]:T.filter(t=>S.lessons[t.id]?.done).map(t=>t.id);startExam({ids:ids.length?ids:[nextTopic().id],n:5,mode:'practice',timer:'none'})};
   v.querySelectorAll('[data-sub]').forEach(b=>b.onclick=()=>{CUR.sub=b.dataset.sub;go('learn')});
   v.querySelectorAll('[data-go]').forEach(b=>b.onclick=()=>go(b.dataset.go));
-  bindHomeExtras(v);bindChall(v);
+  bindHomeExtras(v);bindChall(v);bindRecallCards(v);
   const sq=v.querySelector('[data-sayq]');if(sq)sq.onclick=()=>{speak(q[0]+'. المعنى: '+q[2])};
 }
 
@@ -1363,7 +1367,7 @@ function finishLesson(t){
   const n=t.steps.length;let sum=0;const missed=[];
   for(let i=0;i<n;i++){const k=L.tries[i]||1;sum+=k===1?100:k===2?70:40;if(k>1){missed.push(i);const st=t.steps[i];addReview({q:st.q,o:st.o,c:st.c,w:st.w||st.h,tid:t.id})}}
   const score=Math.round(sum/n);const prev=S.lessons[t.id];
-  S.lessons[t.id]={done:true,score:Math.max(score,prev?.score||0),last:score,missed,ts:Date.now()};
+  S.lessons[t.id]={done:true,score:Math.max(score,prev?.score||0),last:score,missed,ts:Date.now()};schedRecall(t.id,'app');
   markDay();L.finished={score,missed};advance('lesson');addStars(prev?5:10,prev?'أعدت درس «'+t.n+'»':'أنهيت درس «'+t.n+'»');checkBadges();checkGoal();render();
 }
 function vLessonDone(v,t,s){
@@ -2034,6 +2038,102 @@ ${interestLine()}
       const st={title:String(j.title||q).slice(0,80),when,d:today(),q,pages:j.pages.slice(0,10).map(p=>({ic:String(p.ic||'📖').slice(0,4),t:String(p.t||'').slice(0,400)})).filter(p=>p.t),phrases:(j.phrases||[]).slice(0,6).map(x=>String(x).slice(0,160)),calm:(j.calm||[]).slice(0,4).map(x=>String(x).slice(0,160))};
       S.stories.push(st);S.stories=S.stories.slice(-20);persist(true);STY={view:S.stories.length-1,page:0};render();window.scrollTo(0,0)}
     catch(e){STY={q,when,msg:e&&e.code==='daily_limit'?'الأستاذ سامر أنهى عمله لهذا اليوم. نكتب القصة غدًا.':'لم أستطع كتابة القصة الآن. جرّب مرة أخرى بعد قليل.'};render()}}}
+
+/* ============ «شو تعلمت اليوم؟» DAILY RECALL ============ */
+const TID={
+ linear:{ex:'3x + 5 = 20',sign:'مجهول واحد x بدون أس (x¹)، وإشارة =',use:'عندما نبحث عن عدد مجهول واحد، مثل: كم ثمن قلم إذا…'},
+ linfunc:{ex:'y = 2x + 1',sign:'y = mx + b: الرسم خط مستقيم، و m هو الميل',use:'عندما شيء يتغيّر بنفس المقدار كل مرة، مثل أجرة سيارة لكل كيلومتر'},
+ quadratic:{ex:'x² − 5x + 6 = 0',sign:'يوجد x² (أعلى أس هو 2)، وقد يكون لها حلّان',use:'عندما يوجد تربيع، مثل مساحة مربع أو مسار كرة مقذوفة'},
+ probability:{ex:'P(6) = 1/6 عند رمي مكعّب',sign:'عدد النتائج المطلوبة ÷ عدد كل النتائج، والجواب بين 0 و 1',use:'عندما نسأل: ما فرصة أن يحدث شيء؟'},
+ motion:{ex:'v = d ÷ t = 100 ÷ 20 = 5 m/s',sign:'المسافة ÷ الزمن، والسرعة ثابتة',use:'عندما نحسب كم يقطع شيء يتحرّك بسرعة ثابتة'},
+ newton:{ex:'F = m · a = 2 · 3 = 6 N',sign:'القوة = الكتلة × التسارع',use:'عندما نريد أن نعرف كيف تغيّر القوة حركة جسم'},
+ atom:{ex:'الكربون: 6 بروتونات، 6 إلكترونات',sign:'بروتونات ونيوترونات في النواة، وإلكترونات حولها',use:'عندما نصف ممّا تتكوّن المادة ونقرأ الجدول الدوري'},
+ ph:{ex:'الليمون pH = 2، الصابون pH = 10',sign:'سلّم من 0 إلى 14: أقل من 7 حمضي، 7 متعادل، أكثر من 7 قاعدي',use:'عندما نصنّف مادة: حمضية أم قاعدية'},
+ cell:{ex:'النواة، الميتوكوندريا، الغشاء',sign:'عضيّات داخل الخلية، لكل عضيّة وظيفة',use:'عندما نشرح كيف يعيش الكائن الحي ويعمل'},
+ sentence:{ex:'«الطالبُ مجتهدٌ» / «نجحَ الطالبُ»',sign:'الاسمية تبدأ باسم (مبتدأ وخبر)، والفعلية تبدأ بفعل',use:'عندما نعرب جملة أو نكتب جملًا صحيحة'},
+ kana:{ex:'«كان الجوُّ جميلًا» / «إنّ العلمَ نورٌ»',sign:'كان ترفع الاسم وتنصب الخبر، وإنّ تنصب الاسم وترفع الخبر',use:'عندما تدخل كان أو إنّ على جملة اسمية'},
+ he_basic:{ex:'אני לומד בבית ספר',sign:'ضمير + فعل، والفعل يتغيّر للمذكّر والمؤنّث',use:'عندما نعرّف عن أنفسنا ونقول ماذا نفعل بالعبرية'},
+ he_past:{ex:'אני למדתי / הוא למד',sign:'نهايات الماضي: תי للمتكلّم، بدون نهاية لـ הוא',use:'عندما نحكي عن شيء حدث في الماضي بالعبرية'},
+ en_present:{ex:'She plays football every day.',sign:'نضيف s للفعل مع he / she / it، وكلمات مثل every day',use:'عندما نتكلّم عن عادة أو شيء يحدث دائمًا'},
+ en_past:{ex:'I played yesterday. / I went home.',sign:'نضيف ed للفعل المنتظم، وكلمات مثل yesterday',use:'عندما نحكي عن شيء انتهى في الماضي'},
+ soc_start:{ex:'«مرحبًا يا سامي، كيف كان يومك؟»',sign:'تحية + سؤال مفتوح عن الشخص',use:'عندما أريد أن أبدأ كلامًا مع زميل'},
+ soc_turns:{ex:'3 جمل عن الكرتون، ثم: «وأنت؟»',sign:'قاعدة الجمل الثلاث وإعطاء الدور',use:'عندما أتكلّم عن موضوع أحبّه كثيرًا'},
+ soc_feel:{ex:'«حسنًا…» بصوت منخفض ووجه حزين',sign:'نقرأ الوجه والصوت والجسم، لا الكلمة فقط',use:'عندما أريد أن أفهم شعور شخص'},
+ soc_end:{ex:'«قاطعتك، أنا آسف، سأنتظر دوري.»',sign:'الاعتذار له 3 أجزاء: ماذا حدث، آسف، ماذا سأفعل',use:'عندما أخطئ مع شخص أو أريد أن أُنهي محادثة بلطف'},
+ soc_team:{ex:'«فكرتك جيدة، وعندي فكرة أخرى.»',sign:'احترام فكرة الآخر ثم إضافة فكرتي',use:'عندما أعمل مع مجموعة أو لا أوافق'}};
+const RLV={ind:['يتذكّر وحده','✅'],help:['يتذكّر بمساعدة','🤝'],rev:['يحتاج مراجعة','🔁']};
+const dayStr=t=>dayOf(t);const addDays=(d,n)=>{const x=new Date(d+'T12:00:00');x.setDate(x.getDate()+n);return x.toISOString().slice(0,10)};
+function schedRecall(tid,src){if(!topic(tid))return;S.recall=S.recall||{};const r=S.recall[tid];const t0=today();
+  if(!r)S.recall[tid]={learned:t0,stage:0,due:t0,log:[],src:src||'app'};else if(r.done){r.done=0;r.stage=0;r.due=t0;r.learned=t0}}
+function recallToday(){S.recall=S.recall||{};const t0=today();const learned=new Set([...Object.entries(S.lessons||{}).filter(([id,v])=>v.ts&&dayOf(v.ts)===t0).map(([id])=>id),...(((S.school||{})[t0])||[])]);
+  learned.forEach(id=>schedRecall(id));
+  const doneToday=new Set(Object.entries(S.recall).filter(([,r])=>(r.log||[]).some(l=>l.d===t0)).map(([id])=>id));
+  const fresh=[...learned].filter(id=>topic(id)&&!doneToday.has(id));
+  const due=Object.entries(S.recall).filter(([id,r])=>!r.done&&r.due<=t0&&!learned.has(id)&&!doneToday.has(id)&&topic(id)).sort((a,b)=>a[1].due.localeCompare(b[1].due)).map(([id])=>id);
+  return {fresh,due,list:[...fresh,...due].slice(0,3),doneToday:doneToday.size}}
+let RC=null;
+function shuffleArr(a){return a.map(x=>[Math.random(),x]).sort((p,q)=>p[0]-q[0]).map(x=>x[1])}
+function mkRecallQs(tid){const t=topic(tid),d=TID[tid]||(S.tidGen||{})[tid],same=T.filter(x=>x.s===t.s&&x.id!==tid),others=(same.length>=2?same:T.filter(x=>x.id!==tid));const qs=[];
+  if(d&&d.ex){const o=shuffleArr([t.n,...shuffleArr(others).slice(0,3).map(x=>x.n)]);qs.push({k:'name',ic:'🔎',h:'من المثال، ما اسم الدرس؟',q:d.ex,o,c:o.indexOf(t.n),w:`هذا من درس «${t.n}».`})}
+  if(d&&d.sign){const sig=shuffleArr(others.map(x=>(TID[x.id]||(S.tidGen||{})[x.id]||{}).sign).filter(Boolean)).slice(0,2);if(sig.length>=1){const o=shuffleArr([d.sign,...sig]);qs.push({k:'sign',ic:'🏷️',h:`ما العلامة التي تميّز «${t.n}»؟`,q:'اختر العلامة الصحيحة:',o,c:o.indexOf(d.sign),w:'متى نستعمله؟ '+d.use})}}
+  const pool=poolFor(tid);if(pool.length){const p=pool[Math.floor(Math.random()*pool.length)];qs.push({k:'ex',ic:'✏️',h:'تمرين تطبيقي واحد',q:p.q,o:p.o,c:p.c,w:p.w||''})}
+  return qs}
+async function ensureTid(ids){if(!SAMPLE)return;const need=ids.filter(id=>!TID[id]&&!(S.tidGen||{})[id]);if(!need.length)return;
+  try{const j=await askJSON(`لكل موضوع دراسي من هذه المواضيع، اكتب بالعربية البسيطة: ex = مثال قصير جدًا يميّز الموضوع (معادلة أو جملة)، sign = العلامة التي تميّز هذا الموضوع عن غيره (جملة قصيرة)، use = متى نستعمله (جملة قصيرة من الحياة).
+المواضيع: ${need.map(id=>`${id}: «${topic(id).n}» (${subj(topic(id).s).n})`).join('؛ ')}
+أعد JSON فقط: {"<id>":{"ex":"…","sign":"…","use":"…"}}`,1200);S.tidGen=S.tidGen||{};for(const id of need)if(j&&j[id]&&j[id].sign)S.tidGen[id]={ex:String(j[id].ex||'').slice(0,120),sign:String(j[id].sign).slice(0,160),use:String(j[id].use||'').slice(0,160)};persist()}catch(e){}}
+async function startRecall(){const r=recallToday();if(!r.list.length){toastT('لا يوجد شيء للتذكّر الآن. أحسنت!');return}
+  RC={ids:r.list,ti:0,qi:0,qs:null,ans:{},right:{},phase:'q',text:'',fb:'',busy:false,rate:{}};go('recall');await ensureTid(r.list);RC.qs=Object.fromEntries(RC.ids.map(id=>[id,mkRecallQs(id)]));render()}
+function vRecall(v){if(!RC){go('home');return}if(!RC.qs){v.innerHTML='<section class="card"><p>لحظة… الأستاذ سامر يجهّز التذكّر.</p></section>';return}
+  const id=RC.ids[Math.min(RC.ti,RC.ids.length-1)],t=topic(id),s=subj(t.s),qs=RC.ti<RC.ids.length?(RC.qs[id]||[]):[],total=RC.ids.reduce((a,x)=>a+(RC.qs[x]||[]).length,0),done=RC.ids.slice(0,RC.ti).reduce((a,x)=>a+(RC.qs[x]||[]).length,0)+RC.qi;
+  const bar=`<div class="bar" style="--sc:var(--s-soc);margin:6px 0 2px"><i style="width:${Math.round(100*Math.min(done,total)/Math.max(1,total))}%"></i></div>`;
+  if(RC.phase==='q'&&RC.qi<qs.length){const q=qs[RC.qi],a=RC.ans[id+':'+RC.qi];
+    v.innerHTML=`<section class="card" style="--sc:var(${s.c})"><div class="row between"><h2>🧠 شو تعلمت اليوم؟</h2><span class="muted small">${RC.ti+1} من ${RC.ids.length} مواضيع</span></div>${bar}<span class="chip">${s.n}${q.k==='name'?'':' · '+esc(t.n)}</span></section>
+     <section class="card" style="--sc:var(${s.c})"><h3>${q.ic} ${esc(q.h)}</h3><p class="qtext" style="margin:10px 0">${hl(q.q,t)}</p>
+      <div class="opts">${q.o.map((o,i)=>{let cls='';if(a!=null){if(i===q.c)cls='right';else if(i===a)cls='wrong'}return `<button class="opt ${cls}" data-ra="${i}" ${a!=null?'disabled':''}><span class="k">${AR[i]}</span><bdi>${esc(o)}</bdi></button>`}).join('')}</div>
+      ${a!=null?`<div class="notice ${a===q.c?'good':'warn'}" style="margin-top:10px"><b>${a===q.c?'صحيح!':'ليس بعد، ولا بأس.'}</b> ${esc(q.w)}</div><div class="row" style="margin-top:10px"><button class="btn-p" id="rNext">التالي ←</button></div>`:`<div class="row" style="margin-top:10px"><button class="btn-ghost" data-ra="-1">لا أتذكّر — أرني</button></div>`}</section>`;
+    v.querySelectorAll('[data-ra]').forEach(b=>b.onclick=()=>{const i=+b.dataset.ra;RC.ans[id+':'+RC.qi]=i<0?-1:i;const ok=i===q.c;RC.right[id]=(RC.right[id]||0)+(ok?1:0);if(ok){addStars(1,'تذكّرت');chime()}render()});
+    const n=$('rNext');if(n){n.onclick=()=>{RC.qi++;if(RC.qi>=qs.length){RC.ti++;RC.qi=0;if(RC.ti>=RC.ids.length)RC.phase='say'}render();window.scrollTo(0,0)};n.focus({preventScroll:true})}return}
+  if(RC.phase==='q'){RC.ti++;RC.qi=0;if(RC.ti>=RC.ids.length)RC.phase='say';return vRecall(v)}
+  if(RC.phase==='say'){v.innerHTML=`<section class="card" style="--sc:var(--s-soc)"><h2>💬 شو تعلمت اليوم؟</h2>${bar}<p class="muted" style="margin:.4em 0">قل بكلماتك، جملة أو جملتين: ما الفكرة؟ ومتى نستعملها؟ ليس مهمًا أن تكون كاملة.</p>
+     <p class="small" style="margin:0">المواضيع: ${RC.ids.map(x=>'«'+esc(topic(x).n)+'»').join('، ')}</p>
+     <textarea id="rSay" rows="4" style="width:100%;margin-top:10px;border:1.5px solid var(--line);border-radius:12px;padding:.6em;background:var(--surface);font:inherit" placeholder="مثلًا: تعلّمت المعادلة التربيعية. نعرفها لأن فيها x². نستعملها عندما…">${esc(RC.text)}</textarea>
+     ${RC.fb?`<div class="tb tb-tip" style="margin-top:8px"><b class="tbh">الأستاذ سامر</b>${fmtMsg(RC.fb,'rc')}</div>`:''}
+     <div class="row" style="margin-top:10px">${RC.fb?'<button class="btn-p" id="rGo">التالي ←</button>':`<button class="btn-p" id="rSend" ${RC.busy?'disabled':''}>${RC.busy?'الأستاذ سامر يقرأ…':'أرسل'}</button><button class="btn-ghost" id="rSkip">تخطَّ</button>`}</div></section>`;
+    const sd=$('rSend');if(sd)sd.onclick=async()=>{RC.text=$('rSay').value.trim();if(!RC.text){$('rSay').focus();return}if(!SAMPLE){RC.fb='أحسنت! كتبت ما تعلّمته بكلماتك، وهذا يساعد الدماغ على التذكّر.';render();return}RC.busy=true;render();
+      try{const r=await SAMPLE([{role:'user',content:`يمان كتب ماذا تعلّم في: ${RC.ids.map(x=>{const d=TID[x]||(S.tidGen||{})[x]||{};return `«${topic(x).n}» (العلامة: ${d.sign||'—'}؛ متى نستعمله: ${d.use||'—'})`}).join('، ')}.
+ما كتبه يمان: «${RC.text}»
+أعطه ردًّا قصيرًا (3 أسطر على الأكثر) بالعربية البسيطة: ابدأ بشيء محدّد صحيح قاله. إذا نقصته العلامة المميّزة أو «متى نستعمله»، أكمله بجملة واحدة بلطف. بدون ضغط وبدون علامات، ويمكن تشجيع من عالم الدبلجة. لا تستعمل عناوين.`}],{role:'teacher',max:400,system:SYS+'\n'+interestLine()});RC.fb=r.text||'أحسنت!'}catch(e){RC.fb=e&&e.code==='daily_limit'?'الأستاذ سامر استراح اليوم، لكن ما كتبته رائع ومحفوظ.':'أحسنت! كتبت ما تعلّمته بكلماتك.'}
+      RC.busy=false;S.recallNotes=[...(S.recallNotes||[]),{d:today(),ids:RC.ids,t:RC.text.slice(0,400)}].slice(-60);addStars(2,'كتبت ماذا تعلّمت');persist();render()};
+    const sk=$('rSkip');if(sk)sk.onclick=()=>{RC.phase='rate';render()};const g=$('rGo');if(g)g.onclick=()=>{RC.phase='rate';render()};return}
+  if(RC.phase==='rate'){const allSet=RC.ids.every(x=>RC.rate[x]);
+    v.innerHTML=`<section class="card" style="--sc:var(--s-soc)"><h2>كيف كان التذكّر؟</h2><p class="muted" style="margin:.3em 0 0">اختر بصدق. لا يوجد جواب خطأ هنا، وهذا يساعدنا نعرف متى نراجع.</p></section>
+     ${RC.ids.map(x=>{const tq=(RC.qs[x]||[]).length,rt=RC.right[x]||0;return `<section class="card"><b>${esc(topic(x).n)}</b> <span class="muted small">(${rt} من ${tq} صحيحة)</span><div class="seg" style="margin-top:8px;flex-wrap:wrap">${Object.entries(RLV).map(([k,[l,ic]])=>`<button data-rt="${x}|${k}" aria-pressed="${RC.rate[x]===k}">${ic} ${l}</button>`).join('')}</div></section>`}).join('')}
+     <div class="row"><button class="btn-p" id="rDone" ${allSet?'':'disabled'}>احفظ وأنهِ ✓</button></div>`;
+    v.querySelectorAll('[data-rt]').forEach(b=>b.onclick=()=>{const [x,k]=b.dataset.rt.split('|');RC.rate[x]=k;render()});
+    $('rDone').onclick=()=>{const t0=today();for(const x of RC.ids){const r=S.recall[x]||(schedRecall(x),S.recall[x]);const lv=RC.rate[x],tq=(RC.qs[x]||[]).length,rt=RC.right[x]||0;
+        r.log=[...(r.log||[]),{d:t0,lv,rt,tq,name:RC.ans[x+':0']===((RC.qs[x]||[])[0]||{}).c?1:0}].slice(-30);
+        if(lv==='ind'){r.stage=(r.stage||0)+1;if(r.stage>GAPS.length){r.done=1;r.due='9999'}else r.due=addDays(t0,GAPS[Math.min(r.stage,GAPS.length)-1])}
+        else if(lv==='help'){r.due=addDays(t0,Math.max(1,GAPS[Math.max(0,(r.stage||0)-1)]||1))}
+        else{r.stage=0;r.due=addDays(t0,1);(RC.qs[x]||[]).filter(q=>q.k==='ex').forEach(q=>addReview({q:q.q,o:q.o,c:q.c,w:q.w,tid:x}))}}
+      S.recallDays={...(S.recallDays||{}),[t0]:1};addStars(5,'«شو تعلمت اليوم؟»');checkBadges();persist(true);RC.phase='end';render()};return}
+  v.innerHTML=`<section class="card" style="--sc:var(--s-soc);text-align:center"><div style="font-size:3em">🎬</div><h2>لقطة ممتازة يا يمان!</h2><p>راجعت ${RC.ids.length} ${RC.ids.length===1?'موضوعًا':'مواضيع'}. سنذكّرك بها مرة أخرى بعد أيام، حتى تبقى في ذاكرتك.</p>
+   <ul class="small" style="text-align:start">${RC.ids.map(x=>{const r=S.recall[x];return `<li>${RLV[RC.rate[x]][1]} ${esc(topic(x).n)} — المراجعة القادمة: ${r.done?'أتقنته 🌟':r.due===addDays(today(),1)?'غدًا':esc(r.due)}</li>`}).join('')}</ul>
+   <button class="btn-p" data-gohome>الرئيسية</button></section>`;v.querySelector('[data-gohome]').onclick=()=>{RC=null;go('home')}}
+function recallCard(){const r=recallToday(),h=new Date().getHours(),t0=today();
+  if(!r.list.length){if((S.recallDays||{})[t0])return `<section class="card chall done"><b>🧠 شو تعلمت اليوم؟</b> <span class="chip good">أنجزته اليوم ✓</span></section>`;return ''}
+  const label=r.fresh.length?(h>=14?'وقت «شو تعلمت اليوم؟»':'بعد المدرسة: «شو تعلمت اليوم؟»'):'مراجعة لتبقى في الذاكرة';
+  return `<section class="card chall"><div class="row between"><h3>🧠 ${label}</h3><span class="chip">10–20 دقيقة</span></div>
+   <p class="small" style="margin:6px 0 10px">${r.list.map(id=>{const rr=(S.recall||{})[id];return `<span class="chip" style="margin:2px">${r.fresh.includes(id)?'جديد':'↻ '+(rr&&rr.stage?'مراجعة '+(rr.stage+1):'مراجعة')} · ${esc(topic(id).n)}</span>`}).join('')}</p>
+   <button class="btn-p" data-recall style="width:100%">ابدأ التذكّر ←</button></section>`}
+function eveningCard(){const h=new Date().getHours(),t0=today();if(h<19)return '';S.eve=S.eve||{};const ids=Object.entries(S.recall||{}).filter(([id,r])=>r.learned===t0||(r.log||[]).some(l=>l.d===t0)).map(([id])=>id).filter(id=>topic(id));if(!ids.length)return '';
+  const e=S.eve[t0];if(e&&e.done)return `<section class="card"><b>🌙 سؤال المساء</b> <span class="chip good">${e.ok?'تذكّرت ✓':'راجعناه معًا ✓'}</span> <span class="muted small">تصبح على خير يا بطل.</span></section>`;
+  if(!e){const id=ids[Math.floor(Math.random()*ids.length)],d=TID[id]||(S.tidGen||{})[id];if(!d)return '';S.eve[t0]={id};persist()}
+  const id=S.eve[t0].id,d=TID[id]||(S.tidGen||{})[id]||{};
+  return `<section class="card" style="border-inline-start:6px solid #6366f1"><h3>🌙 سؤال المساء — خفيف وبدون ضغط</h3><p class="qtext" style="margin:8px 0">متى نستعمل «${esc(topic(id).n)}»؟</p>
+   <details><summary class="btn-ghost" style="display:inline-block;cursor:pointer;padding:.4em 1em;border-radius:12px">فكّر قليلًا، ثم اضغط لترى الجواب</summary><p style="margin:8px 0">${esc(d.use||'')}<br><span class="muted small">العلامة: ${esc(d.sign||'')}</span></p>
+   <div class="row"><button class="btn-p" data-eve="1">تذكّرتها ✓</button><button class="btn-ghost" data-eve="0">لم أتذكّر، والآن عرفت</button></div></details></section>`}
+function bindRecallCards(v){const b=v.querySelector('[data-recall]');if(b)b.onclick=startRecall;v.querySelectorAll('[data-eve]').forEach(x=>x.onclick=()=>{const t0=today();S.eve[t0]={...S.eve[t0],done:1,ok:x.dataset.eve==='1'};addStars(2,'سؤال المساء');persist(true);render()})}
 
 /* ============ TEACHER ============ */
 const CHAT=[];let tAbort=null,lastT='';

@@ -22,6 +22,13 @@ export default async function handler(req, res) {
       starsTotal: S.stars || 0,
       upcomingTests: (S.tests || []).filter(x => x.date >= today).map(x => ({ date: x.date, subject: x.sub, title: x.title || '' })),
       reviewDoneToday: E.some(x => x.review && day(x.ts) === today),
+      recall: {
+        doneToday: !!(S.recallDays || {})[today],
+        due: Object.entries(S.recall || {}).filter(([, r]) => !r.done && r.due <= today).map(([id, r]) => ({ id, stage: r.stage || 0 })),
+        learnedToday: Object.entries(S.recall || {}).filter(([, r]) => r.learned === today).map(([id]) => id),
+        lastLevels: Object.fromEntries(Object.entries(S.recall || {}).map(([id, r]) => [id, (r.log || []).slice(-1)[0]?.lv || null])),
+        whatILearned: (S.recallNotes || []).filter(n => n.d === today).map(n => n.t),
+      },
       lastActivity: data?.updated || null,
     });
   } catch (e) {
