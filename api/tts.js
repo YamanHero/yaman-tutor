@@ -15,6 +15,7 @@ const STYLE = {
   ar: 'تكلّم بالعربية بصوت معلّم هادئ ولطيف ودافئ، بلهجة شامية فلسطينية خفيفة وواضحة. تكلّم ببطء قليلًا وبوضوح، مع وقفات قصيرة بين الجمل، كأنك تشرح لطالب في الصف العاشر.',
   he: 'Speak Hebrew clearly and slowly, like a friendly teacher pronouncing words for a learner.',
   en: 'Speak English clearly and slowly, like a friendly teacher pronouncing words for a learner.',
+  fr: 'Parle en français standard de France, avec une prononciation très précise, lentement et clairement, comme une professeure qui fait répéter un mot à une enfant de huit ans. Fais les liaisons et les voyelles nasales correctement.',
 };
 
 async function synthElevenLabs(text) {
@@ -57,7 +58,7 @@ export default async function handler(req, res) {
 
   const body = typeof req.body === 'string' ? JSON.parse(req.body) : req.body;
   const text = String(body?.text || '').trim().slice(0, 1200);
-  const lang = ['ar', 'he', 'en'].includes(body?.lang) ? body.lang : 'ar';
+  const lang = ['ar', 'he', 'en', 'fr'].includes(body?.lang) ? body.lang : 'ar';
   const style = body?.style === 'cartoon' ? 'cartoon' : 'teacher';
   if (!text) return res.status(400).json({ code: 'bad_request' });
 
