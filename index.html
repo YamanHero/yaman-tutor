@@ -718,6 +718,7 @@ for(let i=T.length-1;i>=0;i--)if(T[i].s==='phys')T.splice(i,1); /* Yaman does no
 const PROFILE=(()=>{let u='';try{u=new URLSearchParams(location.search).get('u')||''}catch(e){}return (u==='judy'||/^\/judy\/?$/.test(location.pathname))?'judy':''})();
 if(PROFILE){try{const m=document.querySelector('link[rel=manifest]');if(m)m.href='/manifest-judy.json'}catch(e){}}
 /* ============ JUDY PROFILE (grade 3) ============ */
+try{if('serviceWorker' in navigator&&!localStorage.getItem('sw_reset_2')){localStorage.setItem('sw_reset_2','1');navigator.serviceWorker.getRegistrations().then(rs=>Promise.all(rs.map(r=>r.unregister()))).then(()=>caches.keys()).then(ks=>Promise.all(ks.map(k=>caches.delete(k)))).then(()=>location.reload()).catch(()=>{})}}catch(e){}
 const KID=PROFILE==='judy'?'جودي':'يمان';
 const FEM=[['اختر','اختاري'],['احتجت','احتجتِ'],['أحسنت','أحسنتِ'],['ممتاز','ممتازة'],['رائع','رائعة'],['أنهيت','أنهيتِ'],['أكملت','أكملتِ'],['حاولت','حاولتِ'],['جرّب','جرّبي'],['تعلّمت','تعلّمتِ'],['اضغط','اضغطي'],['ابدأ','ابدئي'],['تابع','تابعي'],['أجبت','أجبتِ'],['نجحت','نجحتِ'],['فهمت','فهمتِ'],['أخطأت','أخطأتِ'],['قرأت','قرأتِ'],['وصلت','وصلتِ'],['كتبت','كتبتِ']];
 const fy=s=>{if(!PROFILE||typeof s!=='string')return s;let o=s.replace(/يمان/g,KID);for(const [a,b] of FEM)o=o.replace(new RegExp('(?<![\\u0600-\\u06FF])'+a+'(?![\\u0600-\\u06FF])','g'),b);return o};
@@ -1112,7 +1113,8 @@ function vHomeJ(v){
    <button class="btn-p big-start" data-start="${nt.id}" style="width:100%;margin-top:10px;font-size:1.15em">▶ هيا نتعلّم: ${esc(nt.n)}</button></section>
   ${due.length?`<button class="card link-row" data-review style="border-inline-start:6px solid var(--s-he)"><span style="font-size:1.6em">🔁</span><span style="flex:1"><b>تذكّري ما تعلّمتِ</b><br><span class="muted small">${due.length} أسئلة قصيرة</span></span><span class="muted">←</span></button>`:''}
   <section class="card"><h3>اختاري مادة</h3><div class="grid" style="grid-template-columns:repeat(2,1fr);gap:10px;margin-top:10px">${SUBJ.map(s=>{const ts=T.filter(t=>t.s===s.id),dn=ts.filter(t=>S.lessons[t.id]?.done).length;return `<button class="plan-row" data-sub="${s.id}" style="--pc:var(${s.c});flex-direction:column;text-align:center;min-height:96px;justify-content:center"><b style="font-size:1.1em">${s.n}</b><span class="muted small">${dn} من ${ts.length}</span></button>`}).join('')}</div></section>
-  <button class="card link-row" data-go="calm" style="border-inline-start:6px solid var(--s-chem)"><span style="font-size:1.6em">🫶</span><span style="flex:1"><b>أنا أشعر…</b><br><span class="muted small">نهدأ معًا</span></span><span class="muted">←</span></button>`;
+  <button class="card link-row" data-go="calm" style="border-inline-start:6px solid var(--s-chem)"><span style="font-size:1.6em">🫶</span><span style="flex:1"><b>أنا أشعر…</b><br><span class="muted small">نهدأ معًا</span></span><span class="muted">←</span></button>
+  <div class="muted small" style="text-align:center">رقم النسخة: <bdi dir=\"ltr\">${esc(BOOTV||'…')}</bdi></div>`;
   v.querySelectorAll('[data-jm]').forEach(b=>b.onclick=()=>{S.moods=S.moods||{};S.moods[today()]=b.dataset.jm;persist(true);render()});
   v.querySelectorAll('[data-start]').forEach(b=>b.onclick=()=>startLesson(b.dataset.start));
   v.querySelectorAll('[data-sub]').forEach(b=>b.onclick=()=>{CUR.sub=b.dataset.sub;go('learn')});
