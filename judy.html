@@ -10,7 +10,7 @@
 <link rel="manifest" href="/manifest-judy.json">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="mobile-web-app-capable" content="yes">
-<meta name="apple-mobile-web-app-title" content="أتعلم">
+<meta name="apple-mobile-web-app-title" content="جودي">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Readex+Pro:wght@300;400;500;600;700&family=Reem+Kufi:wght@500;700&family=Noto+Sans+Hebrew:wght@400;600&display=swap">
@@ -417,7 +417,7 @@ html[data-motion="off"] *{animation:none!important;transition:none!important}
 </head>
 <body>
 <header class="top"><div class="top-in">
-  <div class="brand"><img src="/icons/logo.svg" alt="" width="38" height="38" style="align-self:center;border-radius:10px"><b>أتعلم بطريقتي</b><small class="muted">مع الأستاذ سامر</small></div>
+  <div class="brand"><img src="/icons/judy.svg" alt="" width="38" height="38" style="align-self:center;border-radius:10px"><b>جودي تتعلّم</b><small class="muted">مع الأستاذ سامر</small></div>
   <button class="star-chip" id="starChip" aria-label="نجومي وإنجازاتي"></button>
   <span class="save-chip" id="saveChip">محفوظ على هذا الجهاز</span>
   <nav class="nav" aria-label="الأقسام">
@@ -716,7 +716,7 @@ T.push(
  {q:'لماذا ينجح فريق الأبطال في الكرتون؟',o:['لأن واحدًا يعمل وحده','لأن لكل واحد دورًا ويتعاونون','لأنهم لا يتكلّمون','بالصدفة'],c:1,w:'الأدوار والتعاون.'}]});
 for(let i=T.length-1;i>=0;i--)if(T[i].s==='phys')T.splice(i,1); /* Yaman does not study physics */
 const PROFILE=(()=>{let u='';try{u=new URLSearchParams(location.search).get('u')||''}catch(e){}return (u==='judy'||/^\/judy(\.html)?\/?$/.test(location.pathname))?'judy':''})();
-if(PROFILE){try{const m=document.querySelector('link[rel=manifest]');if(m)m.href='/manifest-judy.json';const ai=document.querySelector('link[rel=apple-touch-icon]');if(ai)ai.href='/icons/judy-180.png';const ic=document.querySelector('link[rel=icon]');if(ic){ic.href='/icons/judy.svg'}const tc=document.querySelector('meta[name=theme-color]');if(tc)tc.content='#C447A8';document.title='جودي تتعلّم'}catch(e){}}
+if(PROFILE){try{const m=document.querySelector('link[rel=manifest]');if(m)m.href='/manifest-judy.json';const ai=document.querySelector('link[rel=apple-touch-icon]');if(ai)ai.href='/icons/judy-180.png';const ic=document.querySelector('link[rel=icon]');if(ic){ic.href='/icons/judy.svg'}const tc=document.querySelector('meta[name=theme-color]');if(tc)tc.content='#C447A8';document.title='جودي تتعلّم';const am=document.querySelector('meta[name=apple-mobile-web-app-title]');if(am)am.content='جودي';document.addEventListener('DOMContentLoaded',()=>{const bi=document.querySelector('.brand img');if(bi)bi.src='/icons/judy.svg';const bb=document.querySelector('.brand b');if(bb)bb.textContent='جودي تتعلّم'})}catch(e){}}
 /* ============ JUDY PROFILE (grade 3) ============ */
 try{if('serviceWorker' in navigator&&!localStorage.getItem('sw_reset_2')){localStorage.setItem('sw_reset_2','1');navigator.serviceWorker.getRegistrations().then(rs=>Promise.all(rs.map(r=>r.unregister()))).then(()=>caches.keys()).then(ks=>Promise.all(ks.map(k=>caches.delete(k)))).then(()=>location.reload()).catch(()=>{})}}catch(e){}
 const KID=PROFILE==='judy'?'جودي':'يمان';
