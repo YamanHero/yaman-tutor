@@ -211,6 +211,9 @@ aside#teacher{position:sticky;top:calc(env(safe-area-inset-top,0px) + 76px);alig
 .tb-warn{border-color:#f59e0b}.tb-warn .tbh{color:#d97706}
 .tb-q{border-color:#ec4899;background:color-mix(in srgb,#ec4899 8%,var(--surface))}.tb-q .tbh{color:#db2777}
 .mrun{white-space:nowrap;font-family:ui-monospace,Menlo,Consolas,monospace;font-size:.95em}
+.ob{position:relative;display:inline-block;font-size:1.9em;margin:2px;line-height:1.2}.ob i{position:absolute;bottom:-3px;inset-inline-end:-3px;background:#16a34a;color:#fff;font:700 .42em/1 system-ui,sans-serif;border-radius:10px;padding:3px 5px}.ob-x{opacity:.28;filter:grayscale(1)}.ob-op{font-size:1.8em;font-weight:700;margin:0 6px;align-self:center}.ob-row{display:flex;flex-wrap:wrap;justify-content:center;align-items:center}.ob-grid{display:flex;flex-direction:column;gap:2px;align-items:center}
+.bk-row{display:flex;flex-wrap:wrap;gap:6px;justify-content:center;align-items:center;margin:8px 0}.bk{display:inline-flex;align-items:flex-end;gap:3px;flex-wrap:wrap;max-width:48%}.bk .t{display:inline-block;width:12px;height:56px;border-radius:3px;background:#2563eb}.bk .o{display:inline-block;width:12px;height:12px;border-radius:3px;background:#f59e0b}
+.cd-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(104px,1fr));gap:8px}.cd{display:flex;flex-direction:column;align-items:center;gap:2px;padding:10px 6px;border-radius:14px;border:2px solid var(--line);background:var(--surface2);cursor:pointer;min-height:96px}.cd .cd-e{font-size:2.2em;line-height:1.1}.cd b{font-size:1.1em}.cd small{color:var(--muted,#667);font-size:.78em}.cd.on{border-color:#f59e0b;background:color-mix(in srgb,#f59e0b 14%,var(--surface))}
 .viz{margin:8px 0;padding:8px;border-radius:12px;background:var(--surface);border:1.5px solid var(--line)}
 .vz-h{font-weight:700;font-size:.9em;margin-bottom:4px}
 .vz-svg{width:100%;height:auto;display:block;background:var(--surface2);border-radius:10px}
@@ -797,6 +800,7 @@ J('j_fr3','fr','La famille: العائلة بالفرنسية',[
  ["Grand-père et grand-mère","grand-père (غران بير) = جدّ\ngrand-mère (غران مير) = جدّة\nJ'ai une sœur (جيه أون سُور) = عندي أخت","ما معنى «grand-mère»؟",["جدّة","جدّ","أخت","أمّ"],0,"grand = كبير، mère = أم.",[["grand-père","جدّ"],["grand-mère","جدّة"],["J'ai une sœur","عندي أخت"]]]],
  [["«papa» تعني؟",["أبي","أمي","أخي","أختي"],0,"papa = أبي."],["«frère» تعني؟",["أخت","أخ","جدّ","أم"],1,"frère = أخ."],["«grand-père» تعني؟",["جدّ","جدّة","أب","أخ"],0,"grand-père = جدّ."],["«J'ai une sœur» تعني؟",["عندي أخت","أنا أخت","أحب أختي","أختي ذهبت"],0,"J'ai = عندي."]])
 ];
+const JPIC={"j_add":[{"type":"blocks","a":23,"b":14,"op":"+"},{"type":"blocks","a":18,"b":15,"op":"+"},{"type":"blocks","a":45,"b":20,"op":"−"}],"j_mult":[{"type":"objects","e":"🍎","a":3,"b":2,"op":"×","title":"3 مجموعات، في كل مجموعة تفاحتان"},{"type":"objects","e":"⭐","a":6,"b":5,"op":"×","title":"6 صفوف، في كل صف 5 نجوم"},{"type":"objects","e":"🍪","a":3,"b":4,"op":"×","title":"3 × 4 = 12، وإذا قلبناها 4 × 3 = 12 أيضًا"}],"j_frac":[{"type":"fraction","n":1,"d":2,"title":"النصف: قطعة من قطعتين"},{"type":"fraction","n":1,"d":4,"title":"الربع: قطعة من 4 قطع"},{"type":"cards","l":"ar","items":[["🍕✅","جزآن متساويان","هذا نصف"],["🍕❌","جزآن غير متساويين","ليس نصفًا"]],"title":"اضغطي لتسمعي"}],"j_shapes":[{"type":"cards","l":"ar","items":[["🟦","مربع","4 أضلاع متساوية"],["▬","مستطيل","4 أضلاع، كل ضلعين متقابلين متساويان"],["🔺","مثلث","3 أضلاع"],["⚪","دائرة","ليس لها أضلاع"]]},{"type":"cards","l":"ar","items":[["🟦","مربع","كل الأضلاع متساوية"],["📺","مستطيل","ضلعان طويلان وضلعان قصيران"]]},{"type":"steps","lines":["3 + 3 + 3 + 3","= 12 سم"],"why":["نجمع أطوال الأضلاع الأربعة"]}],"j_nv":[{"type":"cards","l":"ar","items":[["🧒","ولد","اسم إنسان"],["🐱","قطة","اسم حيوان"],["📖","كتاب","اسم شيء"],["🏫","مدرسة","اسم مكان"]]},{"type":"cards","l":"ar","items":[["✍️","كتب","عمل"],["⚽","يلعب","عمل"],["🥛","اشرب","عمل"]]},{"type":"cards","l":"ar","items":[["⚽","يلعب","فعل"],["👦","الولد","اسم"]],"title":"يلعب الولد"}],"j_num":[{"type":"cards","l":"ar","items":[["📖","كتاب","واحد"],["🌳","شجرة","واحدة"],["👦","ولد","واحد"]]},{"type":"cards","l":"ar","items":[["📖📖","كتابان","اثنان"],["👦👦","ولدان","اثنان"]]},{"type":"cards","l":"ar","items":[["📚","كتب","أكثر من اثنين"],["👦👦👦","أولاد","أكثر من اثنين"],["🧑‍🎓🧑‍🎓🧑‍🎓","طلاب","أكثر من اثنين"]]}],"j_taa":[{"type":"cards","l":"ar","items":[["🏫","مدرسة","ة مربوطة: نسمع هاءً"],["🌳","شجرة","ة مربوطة"],["👩‍🏫","معلمة","ة مربوطة"]]},{"type":"cards","l":"ar","items":[["🏠","بيت","ت مفتوحة: نسمع تاءً"],["⏰","وقت","ت مفتوحة"],["🔊","صوت","ت مفتوحة"]]},{"type":"choice","q":"نقف على كلمة «شجرة». ماذا نسمع في آخرها؟","o":["تاء","هاء"],"c":1,"w":"نسمع «شجره»، إذن هي تاء مربوطة."}],"j_en1":[{"type":"cards","l":"en","items":[["🔴","red","أحمر"],["🔵","blue","أزرق"],["🟢","green","أخضر"],["🟡","yellow","أصفر"],["⚫","black","أسود"],["⚪","white","أبيض"]]},{"type":"cards","l":"en","items":[["1️⃣","one","1"],["2️⃣","two","2"],["3️⃣","three","3"],["4️⃣","four","4"],["5️⃣","five","5"],["6️⃣","six","6"],["7️⃣","seven","7"],["8️⃣","eight","8"],["9️⃣","nine","9"],["🔟","ten","10"]]},{"type":"cards","l":"en","items":[["🍎","a red apple","تفاحة حمراء"],["🚗","a blue car","سيارة زرقاء"],["🐸","a green frog","ضفدع أخضر"]]}],"j_en2":[{"type":"cards","l":"en","items":[["👧","I am Judy","أنا جودي"],["🎂","I am eight","عمري ثماني سنوات"]]},{"type":"cards","l":"en","items":[["👦","He is a boy","هو ولد"],["👧","She is a girl","هي بنت"],["🐱","It is a cat","هذه قطة"]]},{"type":"cards","l":"en","items":[["🤝","You are my friend","أنتِ صديقتي"],["😊","We are happy","نحن سعداء"],["🎓","They are students","هم طلاب"]]}],"j_he1":[{"type":"cards","l":"he","items":[["👋","שלום","مرحبًا"],["🌅","בוקר טוב","صباح الخير"],["🌙","ערב טוב","مساء الخير"],["🙋","להתראות","إلى اللقاء"]]},{"type":"cards","l":"he","items":[["🙏","תודה","شكرًا"],["🎁","בבקשה","من فضلك / عفوًا"],["🙇","סליחה","آسفة / عن إذنك"]]},{"type":"cards","l":"he","items":[["👧","קוראים לי ג׳ודי","اسمي جودي"],["🎂","אני בת שמונה","عمري ثماني سنوات"]]}],"j_he2":[{"type":"cards","l":"he","items":[["👩","אמא","ماما"],["👨","אבא","بابا"]]},{"type":"cards","l":"he","items":[["👦","אח","أخ"],["👧","אחות","أخت"]]},{"type":"cards","l":"he","items":[["👴","סבא","جدّ"],["👵","סבתא","جدّة"],["👧","יש לי אחות","عندي أخت"]]}],"j_fr1":[{"type":"cards","l":"fr","items":[["👋","Bonjour","صباح الخير / مرحبًا"],["🌙","Bonsoir","مساء الخير"],["🙋","Au revoir","إلى اللقاء"]]},{"type":"cards","l":"fr","items":[["🙏","Merci","شكرًا"],["🎁","S'il vous plaît","من فضلك"],["😊","De rien","عفوًا"]]},{"type":"cards","l":"fr","items":[["👧","Je m'appelle Judy","اسمي جودي"],["🎂","J'ai huit ans","عمري ثماني سنوات"]]}],"j_fr2":[{"type":"cards","l":"fr","items":[["🔴","rouge","أحمر"],["🔵","bleu","أزرق"],["🟢","vert","أخضر"],["🟡","jaune","أصفر"],["⚫","noir","أسود"],["⚪","blanc","أبيض"]]},{"type":"cards","l":"fr","items":[["1️⃣","un","1"],["2️⃣","deux","2"],["3️⃣","trois","3"],["4️⃣","quatre","4"],["5️⃣","cinq","5"],["6️⃣","six","6"],["7️⃣","sept","7"],["8️⃣","huit","8"],["9️⃣","neuf","9"],["🔟","dix","10"]]},{"type":"cards","l":"fr","items":[["🍎","une pomme rouge","تفاحة حمراء"],["🐱","un chat noir","قط أسود"]],"title":"الشيء ثم اللون"}],"j_fr3":[{"type":"cards","l":"fr","items":[["👩","maman","أمي"],["👨","papa","أبي"]]},{"type":"cards","l":"fr","items":[["👦","frère","أخ"],["👧","sœur","أخت"]]},{"type":"cards","l":"fr","items":[["👴","grand-père","جدّ"],["👵","grand-mère","جدّة"],["👧","J'ai une sœur","عندي أخت"]]}]};JT.forEach(t=>(JPIC[t.id]||[]).forEach((p,i)=>{if(t.steps[i]&&p)t.steps[i].pic=p}));
 SUBJ.length=0;SUBJ.push({id:'math',n:'الرياضيات',ic:'∑',c:'--s-math'},{id:'ar',n:'العربية',ic:'ع',c:'--s-ar'},{id:'en',n:'الإنجليزية',ic:'En',c:'--s-en'},{id:'he',n:'العبرية',ic:'עב',c:'--s-he'},{id:'fr',n:'الفرنسية',ic:'Fr',c:'--s-hist'});
 T.length=0;T.push(...JT);
 }
@@ -1111,7 +1115,22 @@ const SYSJ=`أنت "الأستاذ سامر"، معلّم لطيف وصبور ل
 - اكتب بالعربية البسيطة جدًا، بجمل قصيرة (من 5 إلى 8 كلمات). لا تزيد عن 4 جمل في الجواب الواحد.
 - اشرح بمثال من حياة طفلة: ألعاب، حلويات، حيوانات، العائلة، المدرسة.
 - في الإنجليزية والعبرية والفرنسية: اكتب الكلمة بلغتها ثم معناها بالعربية، ثم طريقة نطقها بحروف عربية.
-- لا تستعمل جداول ولا مصطلحات صعبة. لا تكتب أي رسوم برمجية أو كتل viz.
+- لا تستعمل جداول ولا مصطلحات صعبة.
+- جودي ذكية جدًا وخيالها واسع وتفهم بالصور. اشرحي دائمًا بالصورة أولًا ثم بالكلام: في كل شرح أضف رسمًا واحدًا داخل كتلة كود من نوع viz بصيغة JSON صحيحة فقط، يحرّكه التطبيق لها. اكتب قبل الرسم جملة قصيرة تقول لها ماذا تضغط وماذا تلاحظ. وخيّليها: «تخيّلي أن…» ثم مثال خيالي ممتع من عالم الحيوانات أو الحلوى أو الفضاء أو الأميرات.
+الأنواع المتاحة (استعمل إيموجي مناسبًا):
+1) أشياء تُعدّ للجمع والطرح والضرب (عدد كل منها حتى 20): \`\`\`viz
+{"type":"objects","e":"🍪","a":3,"b":4,"op":"+"}
+\`\`\`
+op هو + أو − أو × (في الضرب a صفوف وفي كل صف b).
+2) عشرات وآحاد للأعداد الكبيرة: {"type":"blocks","a":27,"b":15,"op":"+"} (op هو + أو −).
+3) بطاقات بصورة وكلمة تنطقها بصوت عالٍ عند الضغط، للمفردات في أي لغة: \`\`\`viz
+{"type":"cards","l":"fr","items":[["🍎","pomme","تفاحة"],["🐱","chat","قطة"]]}
+\`\`\`
+l هو ar أو en أو he أو fr. كل عنصر: [إيموجي، الكلمة بلغتها، معناها بالعربية]. حتى 8 بطاقات.
+4) كسر كقطع دائرة وشريط: {"type":"fraction","n":1,"d":4}
+5) خطوات تظهر واحدة بعد واحدة: {"type":"steps","lines":["12 + 5","= 17"],"why":["نضيف 5 إلى 12"]}
+6) سؤال بخيارات تضغط عليها: {"type":"choice","q":"…","o":["…","…"],"c":0,"w":"لماذا هذا صحيح"} (c رقم الخيار الصحيح من 0).
+لا تضع أكثر من رسم واحد في الجواب.
 - شجّعها بجملة قصيرة وصادقة على جهد محدّد قامت به، مثل «أحسنتِ لأنك جرّبتِ مرة ثانية».
 - اختم بسؤال صغير جدًا لها، حتى تجيب وتتأكد أنها فهمت.
 - إذا أخطأت، قل لها: «قريب! لنجرّب معًا» ثم أعطها تلميحًا قبل الجواب.
@@ -1626,6 +1645,7 @@ function vLesson(v){
    <div class="stepper" style="margin-top:12px">${t.steps.map((_,i)=>`<i class="${i<L.step?'done':i===L.step?'now':''}"></i>`).join('')}</div></div>
    <div class="lesson-body">
    <div class="lesson-title"><span class="ic">${s.ic}</span><h2>${esc(st.t)}</h2></div>
+   ${st.pic?`<div class="viz" data-vk="lp_${esc(t.id)}_${L.step}"></div>`:''}
    ${st.v?`<div class="formula-wrap"><div class="formula ${/[\u0590-\u05FF\u0600-\u06FF]/.test(st.v)&&!t.auto?'rtl':''}">${paint(st.v,t)}</div>${legend(st.v,t)}</div>`:''}
    <div class="learn-grid">
     <div style="display:flex;flex-direction:column;gap:10px;min-width:0">${bubbles(st.x,t)}
@@ -1643,7 +1663,7 @@ function vLesson(v){
    <div class="sticky-cta row between" style="margin-top:14px"><button id="lPrev" ${L.step===0?'disabled':''}>السابق</button>
    <div class="row"><button id="lCheck" hidden ${L.ok||L.sel===null?'disabled':''}>تحقّق</button><button id="lNext" class="btn-p" ${L.ok?'':'disabled'}>${L.step===n-1?'أنهِ الدرس':'الخطوة التالية'}</button></div></div>
   </section>`;
-  renderLab();
+  renderLab();if(st.pic){VZS['lp_'+t.id+'_'+L.step]=st.pic;mountViz(v)}
   v.querySelectorAll('[data-help]').forEach(b=>b.onclick=()=>helpMenu('lesson'));
   $('lSpeak').onclick=()=>speak(st.t+'. '+st.x.replace(/\n/g,'. '));$('lStop').onclick=stopSpeak;
   $('lHint').onclick=()=>{L.hint=!L.hint;render()};
@@ -2206,8 +2226,27 @@ function vzFraction(el,sp,st){if(!st.v)st.v={n:Math.max(0,Number(sp.n)||1),d:Mat
     const bw=150/d;for(let i=0;i<d;i++)g+=`<rect x="${140+i*bw}" y="55" width="${bw}" height="34" fill="${i<Math.min(n,d)?'#16a34a':'var(--surface)'}" stroke="var(--ink,#333)" stroke-width="1.2"/>`;
     el.querySelector('svg').innerHTML=g;el.querySelector('.vz-f').innerHTML=`<bdi dir="ltr" class="mrun">${n}/${d} = ${vzN(n/d)} = ${vzN(n/d*100)}%</bdi>${n>d?' <span class="muted small">(أكبر من واحد صحيح)</span>':''}`};
   el.querySelectorAll('input[type=range]').forEach(r=>r.oninput=()=>{st.v[r.dataset.k]=Number(r.value);el.querySelector(`[data-o="${r.dataset.k}"]`).textContent=r.value;draw()});draw()}
+
+function vzObjects(el,sp,st){const e=sp.e||'🍎',a=Math.max(0,Math.min(+sp.a||3,20)),b=Math.max(0,Math.min(+sp.b||2,20)),op=sp.op||'+';
+  const g=(n,x)=>Array.from({length:n},(_,i)=>`<span class="ob${x&&i>=n-x?' ob-x':''}">${esc(e)}</span>`).join('');
+  const res=op==='×'?a*b:op==='−'?Math.max(0,a-b):a+b;
+  const body=op==='×'?`<div class="ob-grid">${Array.from({length:a},()=>`<div class="ob-row">${g(b)}</div>`).join('')}</div>`
+   :op==='−'?`<div class="ob-row">${g(a,b)}</div>`:`<div class="ob-row">${g(a)}<span class="ob-op">+</span>${g(b)}</div>`;
+  el.innerHTML=`<div class="vz-h">${esc(sp.title||'عدّي معي')}</div>${body}<div class="vz-f" id="obF" style="min-height:1.6em"></div><div class="row" style="justify-content:center"><button type="button" class="btn-ghost" data-c>🔢 عدّي معي</button></div>`;
+  const f=el.querySelector('.vz-f');
+  el.querySelector('[data-c]').onclick=()=>{const live=[...el.querySelectorAll('.ob:not(.ob-x)')];el.querySelectorAll('.ob i').forEach(x=>x.remove());f.textContent='';let n=0;
+    const t=setInterval(()=>{if(!el.isConnected){clearInterval(t);return}const o=live[n++];if(!o){clearInterval(t);f.innerHTML=`<bdi dir="ltr" class="mrun">${op==='×'?`${a} × ${b}`:`${a} ${op} ${b}`} = ${res}</bdi>`;return}o.insertAdjacentHTML('beforeend',`<i>${n}</i>`)},sp.slow?700:380)}}
+function vzBlocks(el,sp,st){const a=Math.max(0,+sp.a||0),b=Math.max(0,+sp.b||0),op=sp.op||'+';
+  const bk=n=>`<span class="bk">${'<b class="t"></b>'.repeat(Math.floor(n/10))}${'<b class="o"></b>'.repeat(n%10)}</span>`;
+  const res=op==='−'?Math.max(0,a-b):a+b;
+  const note=op==='+'&&(a%10)+(b%10)>=10?'الآحاد صارت أكثر من 9، فجمعنا 10 منها في عشرة جديدة 🎁':op==='−'?'أخذنا العشرات والآحاد التي طلبها الطرح':'جمعنا العشرات مع العشرات والآحاد مع الآحاد';
+  el.innerHTML=`<div class="vz-h">${esc(sp.title||'العشرات (الأعمدة الزرقاء) والآحاد (المربعات البرتقالية)')}</div><div class="bk-row">${bk(a)}<span class="ob-op">${op}</span>${bk(b)}</div><div class="vz-f"></div><div class="row" style="justify-content:center"><button type="button" class="btn-ghost" data-r>✨ أرِني الجواب</button></div>`;
+  el.querySelector('[data-r]').onclick=()=>{el.querySelector('.vz-f').innerHTML=`<div class="bk-row">${bk(res)}</div><bdi dir="ltr" class="mrun">${a} ${op} ${b} = ${res}</bdi><div class="muted small" style="margin-top:4px">${note}</div>`}}
+function vzCards(el,sp,st){const l=sp.l||'ar',items=Array.isArray(sp.items)?sp.items.slice(0,12):[];
+  el.innerHTML=`<div class="vz-h">${esc(sp.title||'اضغطي على كل بطاقة لتسمعي الكلمة')}</div><div class="cd-grid">${items.map((it,i)=>`<button type="button" class="cd" data-i="${i}"><span class="cd-e">${esc(it[0])}</span><b dir="${l==='ar'||l==='he'?'rtl':'ltr'}">${esc(it[1])}</b><small>${esc(it[2]||'')}</small></button>`).join('')}</div>`;
+  el.querySelectorAll('.cd').forEach(b=>b.onclick=()=>{el.querySelectorAll('.cd.on').forEach(x=>x.classList.remove('on'));b.classList.add('on');speak(items[+b.dataset.i][1],l)})}
 function mountViz(root){root.querySelectorAll('.viz[data-vk]').forEach(el=>{const k=el.dataset.vk,sp=VZS[k];if(!sp)return;const st=VZS[k+'_st']||(VZS[k+'_st']={});
-  try{({shape:vzShape,graph:vzGraph,steps:vzSteps,choice:vzChoice,fraction:vzFraction,replies:vzReplies}[sp.type]||(()=>{el.remove()}))(el,sp,st)}catch(e){el.remove()}})}
+  try{({shape:vzShape,graph:vzGraph,steps:vzSteps,choice:vzChoice,fraction:vzFraction,replies:vzReplies,objects:vzObjects,blocks:vzBlocks,cards:vzCards}[sp.type]||(()=>{el.remove()}))(el,sp,st)}catch(e){el.remove()}})}
 
 /* ============ SOCIAL: ROLE-PLAY STUDIO ============ */
 const SCEN=[
