@@ -1203,11 +1203,19 @@ function vSpell(v){
     const words=spShow(l,it);
     v.innerHTML=head+`<section class="card" style="text-align:center"><div class="row" style="justify-content:center;gap:8px"><button class="btn-p" id="spSay" style="min-height:56px;font-size:1.1em">🔊 اسمعي الجملة</button><button class="btn-ghost" id="spSlow" style="min-height:56px">🐢 كلمة كلمة</button></div>
      <textarea id="spIn" dir="${cfg.dir}" lang="${l==='ar'?'ar':l==='he'?'he':l}" rows="2" autocapitalize="off" autocorrect="off" spellcheck="false" style="width:100%;margin-top:12px;padding:12px;border-radius:12px;border:2px solid var(--line);background:var(--surface);font-size:1.3em" placeholder="اكتبي ما سمعتِ هنا">${esc(SP.val||'')}</textarea>
+     ${SP.out?'':`<div style="margin-top:8px"><button type="button" class="btn-ghost" id="spPhotoBtn" style="min-height:48px">📷 كتبتُ في الدفتر. صوّري ما كتبتِ</button><input type="file" id="spPhoto" accept="image/*" capture="environment" hidden><div id="spPhotoMsg" class="muted small" style="margin-top:6px"></div></div>`}
      ${SP.out?`<div id="spRes">${spWords(SP.out.ops,cfg.dir,false)}<p style="margin:10px 0 0"><b>${SP.out.bad?'قريب! الكلمات الحمراء فيها خطأ. الجواب الصحيح مكتوب فيها.':'ممتاز! كل الكلمات صحيحة 🎉'}</b></p></div>`:''}
      <div class="row" style="justify-content:center;gap:8px;margin-top:12px">${!SP.out?`<button class="btn-p" id="spChk">تحقّقي ✓</button>`:SP.out.bad?`<button class="btn-p" id="spRetry">جرّبي مرة ثانية</button><button class="btn-ghost" id="spNext">${last?'انتهينا':'التالي ←'}</button>`:`<button class="btn-p" id="spNext">${last?'انتهينا':'التالي ←'}</button>`}</div></section>
      <button class="btn-ghost" id="spQuit">خروج</button>`;
     $('spSay').onclick=()=>speak(it,l);$('spSlow').onclick=()=>speak(words.join('. ')+'.',l);
     $('spIn').oninput=e=>{SP.val=e.target.value};
+    if($('spPhotoBtn')){$('spPhotoBtn').onclick=()=>$('spPhoto').click();
+      $('spPhoto').onchange=async e=>{const f=e.target.files&&e.target.files[0];e.target.value='';if(!f)return;const msg=$('spPhotoMsg'),btn=$('spPhotoBtn');msg.textContent='أقرأ خطّك…';btn.disabled=true;
+        try{const data=await resizeImage(f);const r=await askJSON([{type:'image',source:{type:'base64',media_type:'image/jpeg',data}},{type:'text',text:`هذه صورة لما كتبته طفلة عمرها 8 سنوات بخط يدها في دفتر، وهو إملاء بلغة ${cfg.n}. انسخ ما هو مكتوب بالضبط كما كتبته هي، بما في ذلك أخطاؤها الإملائية. لا تصحّح أي كلمة ولا تكمل كلمة ناقصة ولا تضف شيئًا. أعد JSON فقط بالشكل: {"text":"النص المكتوب"}. إن لم تجد كتابة واضحة أعد {"text":""}.`}],600);
+          const t=String((r&&r.text)||'').trim().slice(0,300);if(!t){msg.textContent='لم أستطع قراءة الخط. صوّري أقرب وبإضاءة أوضح، أو اكتبي بالأزرار.'}
+          else{SP.val=t;$('spIn').value=t;msg.innerHTML='قرأتُ من الصورة: «'+esc(t)+'». إن أخطأتُ في القراءة عدّلي النص ثم اضغطي «تحقّقي».'}}
+        catch(err){msg.textContent='تعذّر قراءة الصورة الآن. تأكدي من الإنترنت وجرّبي مرة ثانية.'}
+        btn.disabled=false}}
     if($('spChk'))$('spChk').onclick=()=>{const val=($('spIn').value||'').trim();if(!val){toastT('اكتبي ما سمعتِ أولًا.');return}SP.val=val;
       const tg=spStrip(l,it).split(' '),ws=spStrip(l,val).split(' ').filter(Boolean);const ops=spAlign(tg,ws,(a,b)=>a===b);
       let ti=0;ops.forEach(o=>{if(o.t!=='extra'){o.show=words[ti]||o.a;ti++}});
