@@ -862,7 +862,7 @@ async function connect(){
     if(r.data&&r.data.S&&(!local||!local.t||(r.data.updated||0)>=local.t)){adopt(r.data);saveLocal()}
     else if(local&&local.S){dirty=true;flush()}
     chip('محفوظ في السحابة');applySettings();if(!routeFromHash())render();
-    api('tts').then(x=>{TTS=x&&x.provider;}).catch(()=>{});loadRewards();if(!PROFILE)loadTopics()
+    api('tts').then(x=>{TTS=x&&x.provider;}).catch(()=>{});loadRewards();loadTopics()
     api('ask').then(x=>{if(x&&x.ai){SAMPLE=makeSample();updateTeacherMode()}}).catch(()=>{});
   }catch(e){
     if(e.code==='auth'){CODE='';try{localStorage.removeItem(CODEKEY)}catch(_){}askCode('الرمز غير صحيح. جرّب مرة أخرى.');return}
@@ -1583,16 +1583,53 @@ function vLearn(v){
 let ADD=null;
 function normTopic(t){const auto=SCI.includes(t.s);return {...t,custom:1,lab:'concepts',auto:auto?1:0,leg:auto?MATHLEG:{},steps:t.steps.map(st=>({...st,p:{k:st.k||[]}})),bank:t.bank||[]}}
 async function loadTopics(){if(!ONLINE)return;try{const r=await api('topics');for(const t of (r.topics||[])){const i=T.findIndex(x=>x.id===t.id);const nt=normTopic(t);if(i>=0)T[i]=nt;else T.push(nt)}if(['home','learn','exam','progress'].includes(VIEW))render()}catch(e){}}
+const PICOK=['objects','blocks','cards','fraction','geo','steps','choice'];
+function validPic(p){if(!p||typeof p!=='object'||!PICOK.includes(p.type))return undefined;try{if(JSON.stringify(p).length>1800)return undefined}catch(e){return undefined}
+  if(p.type==='cards'){p.l=['ar','en','he','fr'].includes(p.l)?p.l:'ar';p.items=(Array.isArray(p.items)?p.items:[]).filter(x=>Array.isArray(x)&&x.length>=2).slice(0,8).map(x=>x.slice(0,3).map(y=>String(y).slice(0,60)));if(!p.items.length)return undefined}
+  if(p.type==='objects'){p.e=String(p.e||'🍎').slice(0,8);p.a=Math.max(0,Math.min(20,+p.a||0));p.b=Math.max(0,Math.min(20,+p.b||0));p.op=['+','−','×'].includes(p.op)?p.op:'+'}
+  if(p.type==='blocks'){p.a=Math.max(0,Math.min(99,+p.a||0));p.b=Math.max(0,Math.min(99,+p.b||0));p.op=p.op==='−'?'−':'+'}
+  if(p.type==='fraction'){p.n=Math.max(0,Math.min(12,+p.n||1));p.d=Math.max(1,Math.min(12,+p.d||2))}
+  if(p.type==='geo'){const ok=['square','rectangle','triangle','rhombus','pentagon','hexagon','circle'];if(!ok.includes(p.shape))return undefined}
+  if(p.type==='steps'){p.lines=(Array.isArray(p.lines)?p.lines:[]).slice(0,6).map(x=>String(x).slice(0,80));p.why=(Array.isArray(p.why)?p.why:[]).slice(0,6).map(x=>String(x).slice(0,80));if(p.lines.length<2)return undefined}
+  if(p.type==='choice'){if(!Array.isArray(p.o)||p.o.length<2||!Number.isInteger(p.c))return undefined;p.q=String(p.q||'').slice(0,160);p.o=p.o.slice(0,4).map(x=>String(x).slice(0,60));p.w=String(p.w||'').slice(0,160)}
+  return p}
 function validTopic(o,sub){if(!o||typeof o!=='object'||!Array.isArray(o.steps))return null;
   const okQ=q=>q&&typeof q.q==='string'&&Array.isArray(q.o)&&q.o.length===4&&q.o.every(x=>typeof x==='string'&&x.trim())&&Number.isInteger(q.c)&&q.c>=0&&q.c<4;
-  const steps=o.steps.filter(st=>st&&typeof st.t==='string'&&typeof st.x==='string'&&okQ(st)).slice(0,6).map(st=>({t:st.t.slice(0,120),v:String(st.v||'').slice(0,160),x:st.x.slice(0,900),q:st.q.slice(0,300),o:st.o.map(x=>x.slice(0,140)),c:st.c,h:String(st.h||'').slice(0,240),w:String(st.w||'').slice(0,300),k:(Array.isArray(st.k)?st.k:[]).filter(p=>Array.isArray(p)&&p.length>=2).slice(0,6).map(p=>[String(p[0]).slice(0,60),String(p[1]).slice(0,160)])}));
+  const steps=o.steps.filter(st=>st&&typeof st.t==='string'&&typeof st.x==='string'&&okQ(st)).slice(0,6).map(st=>({t:st.t.slice(0,120),v:String(st.v||'').slice(0,160),x:st.x.slice(0,900),q:st.q.slice(0,300),o:st.o.map(x=>x.slice(0,140)),c:st.c,h:String(st.h||'').slice(0,240),w:String(st.w||'').slice(0,300),k:(Array.isArray(st.k)?st.k:[]).filter(p=>Array.isArray(p)&&p.length>=2).slice(0,6).map(p=>[String(p[0]).slice(0,60),String(p[1]).slice(0,160)]),pic:PROFILE?validPic(st.pic):undefined}));
   if(steps.length<2)return null;
   const bank=(Array.isArray(o.bank)?o.bank:[]).filter(okQ).slice(0,15).map(q=>({q:q.q.slice(0,300),o:q.o.map(x=>x.slice(0,140)),c:q.c,w:String(q.w||'').slice(0,300)}));
   return {id:'c_'+Date.now().toString(36),s:sub,n:String(o.n||'موضوع جديد').slice(0,80),steps,bank}}
 function resizeImage(file){return new Promise((res,rej)=>{const img=new Image();const url=URL.createObjectURL(file);img.onload=()=>{const m=1400,sc=Math.min(1,m/Math.max(img.width,img.height));const c=document.createElement('canvas');c.width=Math.round(img.width*sc);c.height=Math.round(img.height*sc);c.getContext('2d').drawImage(img,0,0,c.width,c.height);URL.revokeObjectURL(url);res(c.toDataURL('image/jpeg',.72).split(',')[1])};img.onerror=rej;img.src=url})}
+const JSUG={
+ math:[['🍬','القسمة: توزيع بالتساوي','نوزّع الحلوى على الأصدقاء بالتساوي'],['🕒','قراءة الساعة','نعرف الوقت من الساعة'],['💰','النقود: الشيكل والأغورة','نشتري ونحسب الباقي'],['📏','القياس: السنتيمتر والمتر','نقيس الأشياء بالمسطرة'],['🐊','المقارنة: أكبر وأصغر','التمساح يأكل العدد الأكبر'],['🔢','جدول الضرب 3 و4','نكتشف أسرار الجدول'],['🦋','التماثل في الأشكال','نطوي الشكل ونرى النصفين'],['📊','قراءة الأعمدة','نقرأ رسمًا بسيطًا']],
+ ar:[['🧸','المذكّر والمؤنّث','من هو «ولد» ومن هي «بنت»؟'],['☀️','اللام الشمسية والقمرية','كلمات تخفي اللام وكلمات تُظهرها'],['↔️','الأضداد','كبير ضدّه صغير'],['🤝','المترادفات','كلمات مختلفة بمعنى واحد'],['❓','أدوات الاستفهام: من؟ ماذا؟ أين؟','نسأل مثل المحقّقين'],['✏️','علامات الترقيم','النقطة والفاصلة وعلامة السؤال'],['📖','قصة قصيرة: ماذا حدث؟','نرتّب أحداث القصة'],['🔠','الهمزة في أول الكلمة','أَ أم إِ؟']],
+ en:[['🐶','Animals','الحيوانات'],['🍎','Fruits and food','الفواكه والطعام'],['🧍','Body parts','أعضاء الجسم'],['👕','Clothes','الملابس'],['🏫','School things','أدوات المدرسة'],['📅','Days of the week','أيام الأسبوع'],['🌦️','Weather','الطقس'],['🏠','My house','بيتي']],
+ he:[['🐶','חיות','الحيوانات'],['🍎','אוכל ופירות','الطعام والفواكه'],['🧍','חלקי הגוף','أعضاء الجسم'],['🌦️','מזג אוויר','الطقس'],['📅','ימות השבוע','أيام الأسبوع'],['🏫','בכיתה','في الصف'],['🔢','מספרים','الأعداد'],['👕','בגדים','الملابس']],
+ fr:[['🐶','Les animaux','الحيوانات'],['🍎','Les fruits','الفواكه'],['🧍','Le corps','الجسم'],['📅','Les jours','أيام الأسبوع'],['🏠','La maison','البيت'],['🌦️','Le temps','الطقس'],['👕','Les vêtements','الملابس'],['🍽️','À table','على المائدة']]};
+const PICDOC=`رسم تفاعلي لكل خطوة في الحقل pic (JSON). الأنواع:
+{"type":"objects","e":"🍪","a":3,"b":4,"op":"+"} (أشياء تُعدّ؛ op هو + أو − أو ×؛ الأعداد حتى 20)
+{"type":"blocks","a":27,"b":15,"op":"+"} (عشرات وآحاد)
+{"type":"cards","l":"fr","items":[["🍎","pomme","تفاحة"]]} (بطاقات صورة وكلمة تُنطق بصوت عالٍ عند الضغط؛ l هو ar أو en أو he أو fr؛ حتى 8 بطاقات؛ كل عنصر: [إيموجي، الكلمة بلغتها، معناها بالعربية])
+{"type":"fraction","n":1,"d":4}
+{"type":"geo","shape":"square"} (square وrectangle وtriangle وrhombus وpentagon وhexagon وcircle)
+{"type":"steps","lines":["12 + 5","= 17"],"why":["نضيف 5"]}
+{"type":"choice","q":"…","o":["…","…"],"c":0,"w":"…"}`;
 async function generateTopic(){
-  const sub=subj(ADD.sub);ADD.busy=true;ADD.msg='الأستاذ سامر يكتب الدرس… قد يستغرق ذلك دقيقة أو دقيقتين.';render();
-  const prompt=`أنت معلّم خبير يكتب درسًا لطالب اسمه يمان في الصف العاشر أو الحادي عشر في مدرسة عربية في إسرائيل. يمان على طيف التوحّد.
+  const sub=subj(ADD.sub);ADD.busy=true;ADD.msg=PROFILE?'الأستاذ سامر يرسم لك الدرس 🎨 ويلوّنه… انتظري دقيقة واحدة.':'الأستاذ سامر يكتب الدرس… قد يستغرق ذلك دقيقة أو دقيقتين.';render();
+  const jp=PROFILE?`أنت معلّمة مبدعة وحنونة تكتب درسًا ممتعًا لطفلة اسمها جودي، عمرها 8 سنوات، في الصف الثالث في مدرسة عربية في إسرائيل. جودي ذكية جدًا وخيالها غني وتفهم بالصور.
+المادة: ${sub.n}
+الموضوع: ${ADD.name||'(استخرج الموضوع من الصور المرفقة)'}
+${ADD.goal?'الهدف: '+ADD.goal:''}
+${ADD.notes?'ملاحظات من الأهل: '+ADD.notes:''}
+${ADD.imgs.length?'مرفقة صور من كتاب جودي. ابنِ الدرس على محتواها بدقة.':''}
+قواعد الكتابة: عربية بسيطة جدًا مناسبة لعمر 8 سنوات، جمل قصيرة (من 5 إلى 8 كلمات)، خاطبي جودي بصيغة المؤنث. اجعلي الدرس قصة ومغامرة قصيرة بشخصية لطيفة (أرنب، قطة، أميرة، رائد فضاء…) تظهر في كل خطوة، مع أمثلة من حياة طفلة: حلويات وألعاب وحيوانات والعائلة. كل المعلومات صحيحة بدقة. في الإنجليزية والعبرية والفرنسية اكتبي الكلمة بلغتها ثم معناها بالعربية ثم نطقها بحروف عربية بين قوسين.
+الخطوة الأولى دائمًا بعنوان «هدفنا اليوم 🎯»: تشرح بجملتين ممتعتين ماذا سنتعلّم ولماذا هو مفيد أو مضحك، ورسمها pic من نوع cards بإيموجي يعبّر عن الهدف.
+${PICDOC}
+كل خطوة يجب أن يكون لها pic مناسب يشرح الفكرة بالصورة، وكل عنوان خطوة يبدأ بإيموجي.
+اكتبي كائن JSON واحدًا فقط بهذا الشكل:
+{"n":"اسم الموضوع القصير","steps":[{"t":"عنوان الخطوة","v":"","x":"الشرح: من 3 إلى 4 أسطر قصيرة، يفصل بينها \n","pic":{"type":"cards","l":"ar","items":[["🐰","أرنب","…"]]},"k":[["مصطلح","معناه"]],"q":"سؤال تمرين بسيط","o":["خيار","خيار","خيار","خيار"],"c":0,"h":"تلميح لا يكشف الإجابة","w":"لماذا الإجابة صحيحة"}],"bank":[{"q":"سؤال","o":["","","",""],"c":0,"w":"شرح قصير"}]}
+المطلوب: من 4 إلى 5 خطوات، في كل خطوة 1 إلى 3 مصطلحات في k، و 8 أسئلة في bank سهلة ومتدرّجة. c هو رقم الخيار الصحيح من 0 إلى 3، وغيّري موضعه بين الأسئلة.`:null;
+  const prompt=jp||`أنت معلّم خبير يكتب درسًا لطالب اسمه يمان في الصف العاشر أو الحادي عشر في مدرسة عربية في إسرائيل. يمان على طيف التوحّد.
 المادة: ${sub.n}
 الموضوع: ${ADD.name||'(استخرج الموضوع من الصور المرفقة)'}
 ${ADD.notes?'ملاحظات من الأهل: '+ADD.notes:''}
@@ -1629,8 +1666,17 @@ function vAddTopic(v){
     <div class="field"><b>المادة</b>${subjSel}</div>
     ${[['mName','اسم الموضوع','مثال: الكسور العشرية'],['mExp','شرح قصير (كل سطر فكرة واحدة)',''],['mQ','سؤال تمرين',''],['mC','الإجابة الصحيحة',''],['mW1','إجابة خاطئة 1',''],['mW2','إجابة خاطئة 2',''],['mW3','إجابة خاطئة 3','']].map(([id,l,ph])=>`<div class="field"><b>${l}</b>${id==='mExp'?`<textarea id="${id}" rows="4" style="border:1.5px solid var(--line);border-radius:12px;padding:.55em .8em;background:var(--surface)"></textarea>`:`<input id="${id}" placeholder="${ph}" style="border:1.5px solid var(--line);border-radius:12px;padding:.55em .8em;background:var(--surface)">`}</div>`).join('')}
     <div class="row"><button class="btn-p" id="mSave">احفظ الموضوع</button><button class="btn-ghost" id="aAi">ارجع للكتابة بالذكاء الاصطناعي</button></div></section>`}
+  let sugH='';
+  if(PROFILE&&!A.draft&&A.mode==='ai'){const em={math:'🔢',ar:'📖',en:'🔤',he:'🇮🇱',fr:'🥐'};
+    const list=(JSUG[A.sub]||[]).filter(x=>!T.some(t=>t.s===A.sub&&t.n===x[1]));
+    sugH=`<section class="card"><h3>🌈 ماذا نتعلّم اليوم؟</h3><p class="muted small" style="margin:.2em 0 8px">مواضيع مناسبة لعمرك (الصف الثالث). اضغطي على واحد وسيرسمه لك الأستاذ سامر.</p>
+     <div class="row" style="gap:6px;flex-wrap:wrap;margin-bottom:10px">${SUBJ.map(x=>`<button type="button" class="${x.id===A.sub?'btn-p':'btn-ghost'}" data-asub="${x.id}" style="min-height:44px">${em[x.id]||''} ${x.n}</button>`).join('')}</div>
+     ${list.length?`<div class="grid" style="grid-template-columns:repeat(2,1fr);gap:10px">${list.map((x,i)=>`<button type="button" class="jtile" data-sug="${i}" ${A.busy?'disabled':''} style="--pc:var(${s.c});min-height:130px"><span class="jt-e">${x[0]}</span><b style="font-size:1em">${esc(x[1])}</b><span class="muted small">${esc(x[2])}</span></button>`).join('')}</div>`:'<p class="muted">أنهيتِ كل المقترحات لهذه المادة! اكتبي موضوعًا آخر بالأسفل.</p>'}</section>`;
+    A._list=list;body=sugH+`<details style="margin-top:4px"><summary style="cursor:pointer;padding:8px"><b>＋ موضوع آخر (للأهل)</b></summary>${body}</details>`}
   v.innerHTML=`<section class="card"><h2>إضافة موضوع جديد</h2><p class="muted" style="margin:.3em 0 0">الموضوع الجديد يظهر في قائمة الدروس وفي الامتحانات، ويُحفظ لكل الأجهزة.</p></section>${A.msg?`<div class="notice ${A.busy?'':'warn'}">${esc(A.msg)}</div>`:''}${body}`;
   const sel=$('aSub');if(sel)sel.onchange=()=>{A.sub=sel.value};
+  v.querySelectorAll('[data-asub]').forEach(b=>b.onclick=()=>{A.sub=b.dataset.asub;render()});
+  v.querySelectorAll('[data-sug]').forEach(b=>b.onclick=()=>{const x=A._list[+b.dataset.sug];if(!x||A.busy)return;A.name=x[1];A.goal=x[2];A.notes='';A.imgs=[];generateTopic()});
   const nm=$('aName');if(nm)nm.oninput=()=>{A.name=nm.value};const nt=$('aNotes');if(nt)nt.oninput=()=>{A.notes=nt.value};
   const im=$('aImg');if(im)im.onchange=async()=>{const fs=[...im.files].slice(0,4-A.imgs.length);for(const f of fs){try{A.imgs.push(await resizeImage(f))}catch(e){}}render()};
   if($('aClr'))$('aClr').onclick=()=>{A.imgs=[];render()};
