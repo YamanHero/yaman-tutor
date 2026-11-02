@@ -1,6 +1,6 @@
 // Offline support: app pages load from network first, then from cache when offline.
 const C = 'yaman-tutor-v2';
-const CORE = ['/', '/parent', '/manifest.json', '/icons/logo.svg', '/icons/icon-192.png', '/icons/icon-180.png'];
+const CORE = ['/', '/judy', '/parent', '/manifest.json', '/icons/logo.svg', '/icons/icon-192.png', '/icons/icon-180.png'];
 self.addEventListener('install', e => { e.waitUntil(caches.open(C).then(c => c.addAll(CORE)).then(() => self.skipWaiting())); });
 self.addEventListener('activate', e => { e.waitUntil(caches.keys().then(ks => Promise.all(ks.filter(k => k !== C).map(k => caches.delete(k)))).then(() => self.clients.claim())); });
 self.addEventListener('fetch', e => {
