@@ -1,0 +1,13 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><defs><linearGradient id="g" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#FF7AB0"/><stop offset=".55" stop-color="#C447A8"/><stop offset="1" stop-color="#6C3FC2"/></linearGradient></defs><rect width="512" height="512" rx="116" fill="url(#g)"/><circle cx="256" cy="262" r="190" fill="#fff" opacity=".12"/>
+<path d="M70 318c64-30 128-28 186 14v150c-58-40-122-42-186-12z" fill="#FFFFFF"/>
+<path d="M442 318c-64-30-128-28-186 14v150c58-40 122-42 186-12z" fill="#FFE3F0"/>
+<g fill="none" stroke-linecap="round" stroke-width="14">
+<path d="M104 372c32-10 66-8 98 8" stroke="#FF6FA8"/><path d="M104 414c32-10 66-8 98 8" stroke="#F5B800"/>
+<path d="M408 372c-32-10-66-8-98 8" stroke="#7B4DD6"/><path d="M408 414c-32-10-66-8-98 8" stroke="#2BB3A3"/></g>
+<path d="M256.0,77.0 L293.6,153.2 L377.7,165.4 L316.9,224.8 L331.2,308.6 L256.0,269.0 L180.8,308.6 L195.1,224.8 L134.3,165.4 L218.4,153.2Z" fill="#FFD43B" stroke="#FFFFFF" stroke-width="12" stroke-linejoin="round"/>
+<ellipse cx="226" cy="204" rx="11" ry="14" fill="#3B1D4F"/><ellipse cx="286" cy="204" rx="11" ry="14" fill="#3B1D4F"/>
+<circle cx="230" cy="199" r="4" fill="#fff"/><circle cx="290" cy="199" r="4" fill="#fff"/>
+<circle cx="206" cy="232" r="13" fill="#FF8FB5" opacity=".75"/><circle cx="306" cy="232" r="13" fill="#FF8FB5" opacity=".75"/>
+<path d="M238 230q18 20 36 0" fill="none" stroke="#3B1D4F" stroke-width="7" stroke-linecap="round"/>
+<g transform="translate(256 82)"><path d="M0 0 L-52 -30 Q-62 0 -52 30Z" fill="#FF4F8B" stroke="#fff" stroke-width="6" stroke-linejoin="round"/><path d="M0 0 L52 -30 Q62 0 52 30Z" fill="#FF4F8B" stroke="#fff" stroke-width="6" stroke-linejoin="round"/><circle r="14" fill="#FF2F76" stroke="#fff" stroke-width="6"/></g>
+<path d="M82,98 Q82,120 104,120 Q82,120 82,142 Q82,120 60,120 Q82,120 82,98Z" fill="#fff" opacity="1"/><path d="M440,132 Q440,150 458,150 Q440,150 440,168 Q440,150 422,150 Q440,150 440,132Z" fill="#fff" opacity="0.9"/><path d="M404,60 Q404,72 416,72 Q404,72 404,84 Q404,72 392,72 Q404,72 404,60Z" fill="#fff" opacity="0.8"/><path d="M60,224 Q60,236 72,236 Q60,236 60,248 Q60,236 48,236 Q60,236 60,224Z" fill="#fff" opacity="0.8"/><path d="M450,272.8 C430.8,259.6 442.8,248.8 450,258.4 C457.2,248.8 469.2,259.6 450,272.8Z" fill="#FFD1E4"/><path d="M70,180.1 C55.6,170.2 64.6,162.1 70,169.3 C75.4,162.1 84.4,170.2 70,180.1Z" fill="#FFD1E4"/></svg>
