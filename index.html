@@ -915,6 +915,7 @@ function hl(text,t){
   if(t.auto)re=/(?:−(?=[0-9A-Za-z(])|[A-Za-z0-9(])[A-Za-z0-9.,/²₀-₉⁺⁻⁰()=+−×÷<>≤\-]*(?:\s+[A-Za-z0-9.,/²₀-₉⁺⁻⁰()=+−×÷<>≤\-]+)*/g;
   else if(sid==='he')re=/([\u0590-\u05FF]+(?:\s[\u0590-\u05FF]+)*)/g;
   else if(sid==='en')re=/([A-Za-z][A-Za-z'’]*(?:\s[A-Za-z][A-Za-z'’]*)*)/g;
+  else if(sid==='fr')re=/([A-Za-zÀ-ÿŒœ][A-Za-zÀ-ÿŒœ'’\-]*(?:\s[A-Za-zÀ-ÿŒœ][A-Za-zÀ-ÿŒœ'’\-]*)*)/g;
   else if(sid==='ar'){const keys=Object.keys(TERMS).sort((a,b)=>b.length-a.length).map(k=>k.replace(/[.*+?^${}()|[\]\\]/g,'\\$&'));re=new RegExp('(?<![\\u0621-\\u064A])('+keys.join('|')+')(?![\\u0621-\\u064A])','g')}
   else re=/([A-Za-z]{1,4}[0-9]*)/g;
   let out='',last=0,m;
@@ -922,6 +923,7 @@ function hl(text,t){
     if(t.auto){let tr='';while(/[.,،]$/.test(w)&&w.length>1){tr=w.slice(-1)+tr;w=w.slice(0,-1)}out+=`<span class="ltr" dir="ltr" style="white-space:${w.length>12?'normal':'nowrap'}">${paint(w,{auto:1})}</span>${esc(tr)}`;last=m.index+m[0].length;continue}
     else if(sid==='he')out+=`<span class="fw he">${esc(w)}</span>`;
     else if(sid==='en')out+=`<span class="fw ltr">${esc(w)}</span>`;
+    else if(sid==='fr')out+=`<span class="fw ltr" dir="ltr">${esc(w)}</span>`;
     else if(sid==='ar')out+=`<span class="term r-${TERMS[w]}">${esc(w)}</span>`;
     else out+=`<span class="fw ltr">${esc(w)}</span>`;
     last=m.index+w.length}
