@@ -28,6 +28,7 @@ export default async function handler(req, res) {
   const max = Math.min(Math.max(Number(body.max) || 900, 100), 8000);
   const system = typeof body.system === 'string' ? body.system.slice(0, 20000) : undefined;
   const model = body.role === 'teacher' ? TEACHER_MODEL : MODEL;
+  const stream = body.stream === true;
 
   const usage = await readUsage();
   if ((usage.n || 0) >= dailyLimit()) return res.status(429).json({ code: 'daily_limit', message: 'daily limit reached' });
@@ -44,14 +45,38 @@ export default async function handler(req, res) {
           'x-api-key': key,
           'anthropic-version': '2023-06-01',
         },
-        body: JSON.stringify({ model: m, max_tokens: max, messages: clean, ...(system ? { system } : {}) }),
+        body: JSON.stringify({ model: m, max_tokens: max, messages: clean, ...(stream ? { stream: true } : {}), ...(system ? { system: [{ type: 'text', text: system, cache_control: { type: 'ephemeral' } }] } : {}) }),
       });
+      if (stream && r.ok) break;
       j = await r.json();
       if (r.status === 404 || (r.status === 400 && /model/i.test(j?.error?.message || ''))) {
         console.error('anthropic model unavailable:', JSON.stringify(m), '-', j?.error?.message);
         continue;
       }
       break;
+    }
+    if (stream && r.ok) {
+      res.status(200);
+      res.setHeader('content-type', 'text/plain; charset=utf-8');
+      res.setHeader('cache-control', 'no-cache, no-transform');
+      res.setHeader('x-accel-buffering', 'no');
+      const dec = new TextDecoder();
+      let buf = '';
+      try {
+        for await (const chunk of r.body) {
+          buf += dec.decode(chunk, { stream: true });
+          let i;
+          while ((i = buf.indexOf('\n')) >= 0) {
+            const line = buf.slice(0, i).trim(); buf = buf.slice(i + 1);
+            if (!line.startsWith('data:')) continue;
+            try {
+              const ev = JSON.parse(line.slice(5));
+              if (ev.type === 'content_block_delta' && ev.delta?.type === 'text_delta') res.write(ev.delta.text);
+            } catch {}
+          }
+        }
+      } catch (e) { console.error('stream error', e); }
+      return res.end();
     }
     if (!r.ok) {
       console.error('anthropic error', r.status, j?.error?.type, used, j?.error?.message);

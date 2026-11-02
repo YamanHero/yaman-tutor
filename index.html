@@ -875,7 +875,14 @@ function askCode(err){
   document.getElementById('codeSkip').onclick=()=>{o.hidden=true;chip('محفوظ على هذا الجهاز فقط')};
 }
 function makeSample(){
-  const f=async(turns,o={})=>{const r=await api('ask',{method:'POST',signal:o.signal,body:JSON.stringify({messages:typeof turns==='string'?[{role:'user',content:turns}]:turns,max:o.max||900,system:o.system,role:o.role})});if(o.onText)o.onText({text:r.text});return {text:r.text}};
+  const f=async(turns,o={})=>{
+    if(o.onText&&typeof ReadableStream!=='undefined'){
+      const resp=await fetch('/api/ask',{method:'POST',signal:o.signal,headers:{'content-type':'application/json','x-family-code':CODE,...(PROFILE?{'x-profile':PROFILE}:{})},body:JSON.stringify({messages:typeof turns==='string'?[{role:'user',content:turns}]:turns,max:o.max||900,system:o.system,role:o.role,stream:true})});
+      if(!resp.ok){let j=null;try{j=await resp.json()}catch(e){}throw {code:(j&&j.code)||('http_'+resp.status),message:j&&j.message}}
+      const rd=resp.body.getReader(),dc=new TextDecoder();let acc='',last=0;
+      for(;;){const {value,done}=await rd.read();if(done)break;acc+=dc.decode(value,{stream:true});const now=Date.now();if(now-last>70){last=now;o.onText({text:acc.replace(/```\s*(?:viz|note)(?:(?!```)[\s\S])*$/,'')})}}
+      acc+=dc.decode();o.onText({text:acc});return {text:acc}}
+    const r=await api('ask',{method:'POST',signal:o.signal,body:JSON.stringify({messages:typeof turns==='string'?[{role:'user',content:turns}]:turns,max:o.max||900,system:o.system,role:o.role})});if(o.onText)o.onText({text:r.text});return {text:r.text}};
   f.json=async(prompt)=>{const r=await api('ask',{method:'POST',body:JSON.stringify({messages:[{role:'user',content:prompt+'\n\nأجب بـ JSON فقط، بدون أي نص قبله أو بعده.'}],max:2500})});
     const t=r.text||'';const m=t.match(/```(?:json)?\s*([\s\S]*?)```/);const body=m?m[1]:t.slice(t.indexOf('['),t.lastIndexOf(']')+1);try{return JSON.parse(body)}catch(e){throw {code:'invalid_json'}}};
   return f;
@@ -1113,7 +1120,7 @@ const SYSJ=`أنت "الأستاذ سامر"، معلّم لطيف وصبور ل
 
 قواعدك:
 - اكتب بالعربية البسيطة جدًا، بجمل قصيرة (من 5 إلى 8 كلمات). لا تزيد عن 4 جمل في الجواب الواحد.
-- اشرح بمثال من حياة طفلة: ألعاب، حلويات، حيوانات، العائلة، المدرسة.
+- اشرح بمثال من حياة طفلة: ألعاب، حلويات، حيوانات، العائلة، المدرسة. كوني مبدعة: اجعلي كل شرح قصة صغيرة أو مغامرة قصيرة بشخصيات (أرنب يعدّ الجزر، أميرة تقسم الكعكة…) وغيّري الأمثلة كل مرة. ادخلي في الموضوع فورًا دون مقدّمات.
 - في الإنجليزية والعبرية والفرنسية: اكتب الكلمة بلغتها ثم معناها بالعربية، ثم طريقة نطقها بحروف عربية.
 - لا تستعمل جداول ولا مصطلحات صعبة.
 - جودي ذكية جدًا وخيالها واسع وتفهم بالصور. اشرحي دائمًا بالصورة أولًا ثم بالكلام: في كل شرح أضف رسمًا واحدًا داخل كتلة كود من نوع viz بصيغة JSON صحيحة فقط، يحرّكه التطبيق لها. اكتب قبل الرسم جملة قصيرة تقول لها ماذا تضغط وماذا تلاحظ. وخيّليها: «تخيّلي أن…» ثم مثال خيالي ممتع من عالم الحيوانات أو الحلوى أو الفضاء أو الأميرات.
@@ -2517,6 +2524,7 @@ $('tImg').onchange=async e=>{const f=e.target.files&&e.target.files[0];e.target.
 const SYS=`أنت "الأستاذ سامر"، معلّم ماهر وصبور وهادئ لطالب اسمه يمان، في الصف العاشر أو الحادي عشر في مدرسة عربية في إسرائيل (منهاج وزارة التربية، ومستوى البجروت). يمان على طيف التوحّد: يفهم جيدًا عندما يكون الشرح حرفيًا ومنظّمًا ومتوقّعًا، ويتعب من النص الطويل والكلام العام.
 
 هدفك: أن يفهم يمان الفكرة فعلًا، لا أن تقرأ له الشرح مرة أخرى.
+كن مبدعًا وحيًّا: ابدأ كل شرح بتشبيه أو مشهد قصير من عالم يمان واهتماماته (الدبلجة، الرسوم المتحرّكة، القصص) يجعل الفكرة تُرى بالعين، ثم انتقل إلى القاعدة. اجعل الأمثلة طازجة ومختلفة في كل مرة، وكن مباشرًا وسريعًا: لا مقدّمات ولا تكرار.
 
 شكل الجواب (التزم به في كل شرح، كل جزء يبدأ في سطر جديد بهذه الكلمات بالضبط):
 الفكرة: جملة واحدة أو جملتان فقط، تقول ما هو الشيء ولماذا نحتاجه.
@@ -2593,7 +2601,7 @@ async function ask(text,kind,img){
   const sysP=PROFILE?SYSJ+'\n'+interestLine():rps?RPSYS(rps)+'\n'+interestLine():SYS+'\n'+interestLine();
   if(turns.length&&turns.at(-1).role==='user')turns.at(-1).content+='\n\n'+final;else turns.push({role:'user',content:final});
   if(img){const last=turns.at(-1);last.content=[{type:'image',source:{type:'base64',media_type:'image/jpeg',data:img}},{type:'text',text:last.content}]}
-  try{const r=await SAMPLE(turns,{signal:tAbort.signal,cache:false,role:'teacher',max:1400,system:sysP,onText:({text})=>{CHAT[idx].text=text||'…';drawChat()}});CHAT[idx].text=takeNotes(r.text);lastT=plainTeacher(CHAT[idx].text);drawChat();if(S.settings.autoread==='on')speak(lastT)}
+  try{const r=await SAMPLE(turns,{signal:tAbort.signal,cache:false,role:'teacher',max:PROFILE?800:1400,system:sysP,onText:({text})=>{CHAT[idx].text=text||'…';drawChat()}});CHAT[idx].text=takeNotes(r.text);lastT=plainTeacher(CHAT[idx].text);drawChat();if(S.settings.autoread==='on')speak(lastT)}
   catch(e){if(e&&(e.code==='aborted'||e.name==='AbortError'))return;CHAT[idx].text=e&&e.code==='daily_limit'?'الأستاذ سامر أنهى عمله لهذا اليوم 🌙 نكمل غدًا! الآن يمكنك أن تراجع الدروس وتحلّ الامتحانات.':e&&e.code==='rate_limited'?'أسئلة كثيرة الآن. انتظر قليلًا ثم اسأل مرة أخرى.':e&&e.code==='not_granted'?'لم يُسمح لي بالإجابة الذكية هنا. هذا جواب من الدرس:\n'+offline(kind):'لم أستطع الإجابة الآن. هذا جواب من الدرس:\n'+offline(kind);drawChat()}
 }
 document.querySelectorAll('[data-q]').forEach(b=>b.onclick=()=>{const k=b.dataset.q;if(k==='break'){openBreak();return}ask({simple:'اشرح لي هذه الخطوة ببساطة أكثر.',hint:'أعطني تلميحًا صغيرًا بدون الحل.',example:'أعطني مثالًا آخر مشابهًا.'}[k],k)});
