@@ -926,6 +926,7 @@ const paras=x=>esc(x).split('\n').map(l=>`<p>${l}</p>`).join('');
 const TERMS={'مبتدأ':'a','فاعل':'a','الفاعل':'a','اسم كان':'a','اسم إنّ':'a','خبر':'e','الخبر':'e','خبر كان':'e','خبر إنّ':'e','مفعول به':'b','المفعول به':'b','فعل':'d','الضمّة':'a','الفتحة':'b','مرفوع':'a','مرفوعة':'a','منصوب':'b','ترفع':'a','تنصب':'b','للمذكّر':'a','للمؤنّث':'f','المذكّر':'a','المؤنّث':'f'};
 function hl(text,t){
   const sid=t.s;let re;
+  if(PROFILE&&sid==='math'&&!t.auto)return mathRuns(text);
   if(t.auto)re=/(?:−(?=[0-9A-Za-z(])|[A-Za-z0-9(])[A-Za-z0-9.,/²₀-₉⁺⁻⁰()=+−×÷<>≤\-]*(?:\s+[A-Za-z0-9.,/²₀-₉⁺⁻⁰()=+−×÷<>≤\-]+)*/g;
   else if(sid==='he')re=/([\u0590-\u05FF]+(?:\s[\u0590-\u05FF]+)*)/g;
   else if(sid==='en')re=/([A-Za-z][A-Za-z'’]*(?:\s[A-Za-z][A-Za-z'’]*)*)/g;
@@ -1718,7 +1719,7 @@ function vLesson(v){
    ${L.hint?`<div class="notice warn" style="margin-top:10px">${esc(st.h)}</div>`:''}
    ${L.step===n-1?`<div class="notice small" style="margin-top:10px">هذه آخر خطوة في الدرس. بعدها: ${curStep()&&curStep().type==='lesson'&&S.session.steps[S.session.i+1]?esc(stepLabel(S.session.steps[S.session.i+1])):'ملخّص الدرس'}.</div>`:''}
    <p class="qtext" style="margin:12px 0">${hl(st.q,t)}</p>
-   <div class="opts">${st.o.map((o,i)=>{let cls='';if(L.checked&&L.sel===i)cls=L.ok?'right':'wrong';return `<button class="opt ${cls}" data-o="${i}" aria-pressed="${L.sel===i}" ${L.ok?'disabled':''}><span class="k">${AR[i]}</span><bdi>${esc(o)}</bdi></button>`}).join('')}</div>
+   <div class="opts">${st.o.map((o,i)=>{let cls='';if(L.checked&&L.sel===i)cls=L.ok?'right':'wrong';return `<button class="opt ${cls}" data-o="${i}" aria-pressed="${L.sel===i}" ${L.ok?'disabled':''}><span class="k">${AR[i]}</span><bdi>${PROFILE?mathRuns(o):esc(o)}</bdi></button>`}).join('')}</div>
    <div aria-live="polite" style="margin-top:12px">${L.checked?(L.ok?`<div class="notice good"><b>إجابة صحيحة.</b> ${esc(st.w||'')}</div>`:`<div class="notice warn"><b>ليست هذه الإجابة.</b> لا بأس، الخطأ جزء من التعلّم. جرّب مرة أخرى أو خذ تلميحًا.</div>`):''}</div>
    <div class="sticky-cta row between" style="margin-top:14px"><button id="lPrev" ${L.step===0?'disabled':''}>السابق</button>
    <div class="row"><button id="lCheck" hidden ${L.ok||L.sel===null?'disabled':''}>تحقّق</button><button id="lNext" class="btn-p" ${L.ok?'':'disabled'}>${L.step===n-1?'أنهِ الدرس':'الخطوة التالية'}</button></div></div>
@@ -1759,7 +1760,7 @@ function vLessonDone(v,t,s){
 function narr(t){if(S.settings.narrate!=='off')speak(t)}
 function predHtml(){const P=LAB&&LAB.pred;if(!P)return '';
   return `<div class="pred popin"><div class="row between"><b>توقّع أولًا: ${esc(P.q)}</b>${P.chosen===null?'<button class="btn-ghost small" data-predskip style="min-height:32px">تخطَّ</button>':''}</div>
-   <div class="row" style="margin-top:8px">${P.o.map((o,i)=>`<button data-pred="${i}" class="${P.chosen===i?(P.done?(i===P.c?'right':'wrong'):'chosen'):(P.done&&i===P.c?'right':'')}" ${P.chosen!==null?'disabled':''}><bdi>${esc(o)}</bdi></button>`).join('')}</div>
+   <div class="row" style="margin-top:8px">${P.o.map((o,i)=>`<button data-pred="${i}" class="${P.chosen===i?(P.done?(i===P.c?'right':'wrong'):'chosen'):(P.done&&i===P.c?'right':'')}" ${P.chosen!==null?'disabled':''}><bdi>${PROFILE?mathRuns(o):esc(o)}</bdi></button>`).join('')}</div>
    ${P.chosen!==null&&!P.done?'<div class="muted small" style="margin-top:6px">شاهد الآن الصورة… هل كان توقّعك صحيحًا؟</div>':''}
    ${P.done?`<div class="notice ${P.chosen===P.c?'good':'warn'}" style="margin-top:8px"><b>${P.chosen===P.c?'توقّعك صحيح!':'توقّع جيد، لكن الإجابة الصحيحة: '+esc(P.o[P.c])}</b> ${esc(P.why||'')}</div>`:''}</div>`}
 function updPred(){const el=$('labPred');if(el)el.innerHTML=predHtml()}
@@ -2093,7 +2094,7 @@ function vExamRun(v){
    <div class="row between"><span class="chip">السؤال ${E.i+1} من ${n} · ${esc(t.n)}</span><button class="btn-ghost" id="xFlag">${E.flag[E.i]?'أزل علامة المراجعة':'علّم للمراجعة لاحقًا'}</button></div>
    ${E.i===n-1?`<div class="notice small" style="margin-top:10px">هذا آخر سؤال. بعده: ${E.mode==='exam'?'تسلّم وترى النتيجة':'ترى النتيجة'}${curStep()&&S.session.steps[S.session.i+1]?'، ثم '+esc(stepLabel(S.session.steps[S.session.i+1])):''}.</div>`:''}
    <p class="qtext" style="margin:16px 0">${hl(q.q,t)}</p>
-   <div class="opts">${q.o.map((o,i)=>{let cls='';if(practiceShown){if(i===q.c)cls='right';else if(i===E.ans[E.i])cls='wrong'}return `<button class="opt ${cls}" data-a="${i}" aria-pressed="${E.ans[E.i]===i}" ${practiceShown?'disabled':''}><span class="k">${AR[i]}</span><bdi>${esc(o)}</bdi></button>`}).join('')}</div>
+   <div class="opts">${q.o.map((o,i)=>{let cls='';if(practiceShown){if(i===q.c)cls='right';else if(i===E.ans[E.i])cls='wrong'}return `<button class="opt ${cls}" data-a="${i}" aria-pressed="${E.ans[E.i]===i}" ${practiceShown?'disabled':''}><span class="k">${AR[i]}</span><bdi>${PROFILE?mathRuns(o):esc(o)}</bdi></button>`}).join('')}</div>
    ${practiceShown?`<div class="notice ${E.ans[E.i]===q.c?'good':'warn'}" style="margin-top:12px"><b>${E.ans[E.i]===q.c?'صحيح.':'الإجابة الصحيحة: '+esc(q.o[q.c])}</b> ${esc(q.w||'')}</div>`:''}
    <div id="timeNote"></div>
    <div class="sticky-cta row between" style="margin-top:16px"><button id="xPrev" ${E.i===0?'disabled':''}>السابق</button>
@@ -2521,7 +2522,7 @@ function vRecall(v){if(!RC){go('home');return}if(!RC.qs){v.innerHTML='<section c
   if(RC.phase==='q'&&RC.qi<qs.length){const q=qs[RC.qi],a=RC.ans[id+':'+RC.qi];
     v.innerHTML=`<section class="card" style="--sc:var(${s.c})"><div class="row between"><h2>🧠 شو تعلمت اليوم؟</h2><span class="muted small">${RC.ti+1} من ${RC.ids.length} مواضيع</span></div>${bar}<span class="chip">${s.n}${q.k==='name'?'':' · '+esc(t.n)}</span></section>
      <section class="card" style="--sc:var(${s.c})"><h3>${q.ic} ${esc(q.h)}</h3><p class="qtext" style="margin:10px 0">${hl(q.q,t)}</p>
-      <div class="opts">${q.o.map((o,i)=>{let cls='';if(a!=null){if(i===q.c)cls='right';else if(i===a)cls='wrong'}return `<button class="opt ${cls}" data-ra="${i}" ${a!=null?'disabled':''}><span class="k">${AR[i]}</span><bdi>${esc(o)}</bdi></button>`}).join('')}</div>
+      <div class="opts">${q.o.map((o,i)=>{let cls='';if(a!=null){if(i===q.c)cls='right';else if(i===a)cls='wrong'}return `<button class="opt ${cls}" data-ra="${i}" ${a!=null?'disabled':''}><span class="k">${AR[i]}</span><bdi>${PROFILE?mathRuns(o):esc(o)}</bdi></button>`}).join('')}</div>
       ${a!=null?`<div class="notice ${a===q.c?'good':'warn'}" style="margin-top:10px"><b>${a===q.c?'صحيح!':'ليس بعد، ولا بأس.'}</b> ${esc(q.w)}</div><div class="row" style="margin-top:10px"><button class="btn-p" id="rNext">التالي ←</button></div>`:`<div class="row" style="margin-top:10px"><button class="btn-ghost" data-ra="-1">لا أتذكّر — أرني</button></div>`}</section>`;
     v.querySelectorAll('[data-ra]').forEach(b=>b.onclick=()=>{const i=+b.dataset.ra;RC.ans[id+':'+RC.qi]=i<0?-1:i;const ok=i===q.c;RC.right[id]=(RC.right[id]||0)+(ok?1:0);if(ok){addStars(1,'تذكّرت');chime()}render()});
     const n=$('rNext');if(n){n.onclick=()=>{RC.qi++;if(RC.qi>=qs.length){RC.ti++;RC.qi=0;if(RC.ti>=RC.ids.length)RC.phase='say'}render();window.scrollTo(0,0)};n.focus({preventScroll:true})}return}
@@ -2570,7 +2571,7 @@ function bindRecallCards(v){const b=v.querySelector('[data-recall]');if(b)b.oncl
 const CHAT=[];let tAbort=null,lastT='';
 function addMsg(role,text,img){CHAT.push({role,text,img});drawChat()}
 const TBLK=[['الشخصية','role'],['نصيحة','tip'],['ملخّص','sum'],['في الصورة','pic'],['الفكرة','idea'],['صورة في الذهن','pic'],['مثال محلول','ex'],['انتبه','warn'],['سؤال لك','q']];
-const MRUN=/(?:−(?=[0-9A-Za-z(√])|[A-Za-z0-9(√])[A-Za-z0-9.,/²³√₀-₉⁺⁻⁰()=+−×÷·<>≤≥\-]*(?:\s+[A-Za-z0-9.,/²³√₀-₉⁺⁻⁰()=+−×÷·<>≤≥\-]+)*/g;
+const MRUN=/(?:−(?=[0-9A-Za-z(√])|[A-Za-z0-9(√])[A-Za-z0-9.,/²³√₀-₉⁺⁻⁰()=+−×÷·<>≤≥\-]*(?:\s+[A-Za-z0-9.,/²³√₀-₉⁺⁻⁰()=+−×÷·<>≤≥\-]+)*(?:(?<==)\s*[؟?])?/g;
 function mathRuns(x){let o='',l=0,m;MRUN.lastIndex=0;while((m=MRUN.exec(x))){let w=m[0];const tr=w.match(/[.,]+$/);if(tr)w=w.slice(0,-tr[0].length);o+=esc(x.slice(l,m.index))+`<bdi dir="ltr" class="mrun">${esc(w)}</bdi>`;l=m.index+w.length}return o+esc(x.slice(l))}
 function fmtMsg(t,mi){const vx=vzExtract(t);vx.specs.forEach((sp,j)=>{VZS[mi+'_'+j]=sp});t=vx.txt;const inl=x=>mathRuns(x.replace(/^#+\s*/,'')).replace(/\*\*(.+?)\*\*/g,'<b>$1</b>');
   const out=[];let cur=null;
