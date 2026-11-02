@@ -78,6 +78,7 @@ main{min-width:0;display:flex;flex-direction:column;gap:16px}
 .row{display:flex;gap:10px;align-items:center;flex-wrap:wrap}
 .between{justify-content:space-between}
 .grid{display:grid;gap:12px}
+.spw{display:inline-flex;flex-direction:column;align-items:center;padding:6px 12px;border-radius:12px;font-weight:700;font-size:1.15em;border:2px solid transparent;background:none}.spw small{font-weight:400;font-size:.62em;opacity:.85}.spw.ok{background:rgba(46,160,90,.16);border-color:rgba(46,160,90,.55)}.spw.bad{background:rgba(220,60,60,.14);border-color:rgba(220,60,60,.55)}.spw.extra{background:rgba(150,150,150,.14);border-color:rgba(150,150,150,.4)}
 .chip{display:inline-flex;align-items:center;gap:6px;padding:2px 12px;border-radius:30px;font-size:.82em;background:var(--surface2);border:1px solid var(--line);white-space:nowrap}
 .chip.good{background:var(--good-bg);color:var(--good);border-color:transparent}
 .chip.warn{background:var(--warn-bg);color:var(--warn);border-color:transparent}
@@ -947,7 +948,7 @@ async function ttsUrl(text,lang){const vs=S.settings.voiceStyle||'cartoon';const
   audioCache.set(k,pr);pr.catch(()=>audioCache.delete(k));return pr}
 function bestVoice(lang){const vs=speechSynthesis.getVoices().filter(v=>v.lang.toLowerCase().startsWith(lang));const score=v=>(/natural|neural|online|premium|enhanced|siri/i.test(v.name)?10:0)+(/google/i.test(v.name)?5:0)+(v.localService?0:2);return vs.sort((a,b)=>score(b)-score(a))[0]}
 async function speak(text,lang='ar'){text=fy(text);
-  stopSpeak();const my=++speakToken;const l=lang.startsWith('he')?'he':lang.startsWith('en')?'en':'ar';const t=speechText(text,l);if(!t)return;
+  stopSpeak();const my=++speakToken;const l=lang.startsWith('he')?'he':lang.startsWith('en')?'en':lang.startsWith('fr')?'fr':'ar';const t=speechText(text,l);if(!t)return;
   const segs=splitLangs(t,l);
   if(TTS&&ONLINE){
     try{const cs=[];segs.forEach(g=>chunks(g.t).forEach(c=>cs.push({t:c,l:g.l})));let next=ttsUrl(cs[0].t,cs[0].l);
@@ -1064,6 +1065,7 @@ function routeFromHash(){
   if(r==='social'){go('social');return true}
   if(r==='recall'){setTimeout(startRecall,600);return true}
   if(r==='calm'){CALM=null;go('calm');return true}
+  if(r==='spell'){SP=null;go('spell');return true}
   if(r==='story'){STY=null;go('story');return true}
   if(r==='rp'&&SCEN.find(x=>x.id===arg)){go('social');setTimeout(()=>{if(SAMPLE)startRP(arg)},800);return true}
   if(r==='timetable'){go('timetable');return true}
@@ -1125,6 +1127,7 @@ function vHomeJ(v){
    <button class="btn-p big-start" data-start="${nt.id}" style="width:100%;margin-top:10px;font-size:1.15em">▶ هيا نتعلّم: ${esc(nt.n)}</button></section>
   ${due.length?`<button class="card link-row" data-review style="border-inline-start:6px solid var(--s-he)"><span style="font-size:1.6em">🔁</span><span style="flex:1"><b>تذكّري ما تعلّمتِ</b><br><span class="muted small">${due.length} أسئلة قصيرة</span></span><span class="muted">←</span></button>`:''}
   <section class="card"><h3>اختاري مادة</h3><div class="grid" style="grid-template-columns:repeat(2,1fr);gap:10px;margin-top:10px">${SUBJ.map(s=>{const ts=T.filter(t=>t.s===s.id),dn=ts.filter(t=>S.lessons[t.id]?.done).length;return `<button class="plan-row" data-sub="${s.id}" style="--pc:var(${s.c});flex-direction:column;text-align:center;min-height:96px;justify-content:center"><b style="font-size:1.1em">${s.n}</b><span class="muted small">${dn} من ${ts.length}</span></button>`}).join('')}</div></section>
+  <button class="card link-row" data-go="spell" style="border-inline-start:6px solid var(--s-ar)"><span style="font-size:1.6em">✍️</span><span style="flex:1"><b>الإملاء والقراءة</b><br><span class="muted small">أكتب ما أسمع، وأقرأ بصوتي</span></span><span class="muted">←</span></button>
   <button class="card link-row" data-go="calm" style="border-inline-start:6px solid var(--s-chem)"><span style="font-size:1.6em">🫶</span><span style="flex:1"><b>أنا أشعر…</b><br><span class="muted small">نهدأ معًا</span></span><span class="muted">←</span></button>
   <div class="muted small" style="text-align:center">رقم النسخة: <bdi dir=\"ltr\">${esc(BOOTV||'…')}</bdi></div>`;
   v.querySelectorAll('[data-jm]').forEach(b=>b.onclick=()=>{S.moods=S.moods||{};S.moods[today()]=b.dataset.jm;persist(true);render()});
@@ -1132,6 +1135,118 @@ function vHomeJ(v){
   v.querySelectorAll('[data-sub]').forEach(b=>b.onclick=()=>{CUR.sub=b.dataset.sub;go('learn')});
   v.querySelectorAll('[data-review]').forEach(b=>b.onclick=()=>{location.hash='review'});
   v.querySelectorAll('[data-go]').forEach(b=>b.onclick=()=>go(b.dataset.go))}
+
+/* ============ SPELLING (إملاء) & READING (قراءة) ============ */
+const SPL={
+ ar:{n:'العربية',dir:'rtl',sr:'ar-SA',s:['أمي تحب الزهور','ذهبت إلى المدرسة','القطة الصغيرة تشرب الحليب','الشمس مشرقة في السماء','أنا أحب أختي وأخي','يلعب الأولاد في الحديقة','هذه حقيبتي الجديدة','في الربيع تتفتح الأزهار']},
+ en:{n:'English',dir:'ltr',sr:'en-US',s:['I have a red apple.','The cat is on the bed.','My name is Judy.','I like to read books.','We play in the park.','She has a blue bag.','The sun is hot.','This is my family.']},
+ he:{n:'עברית',dir:'rtl',sr:'he-IL',s:['אמא אוהבת אותי.','יש לי כלב קטן.','אני הולכת לבית הספר.','השמש זורחת בשמיים.','אבא קורא ספר.','החתול שותה חלב.','זה הבית שלי.','אני אוהבת לצייר.']},
+ fr:{n:'Français',dir:'ltr',sr:'fr-FR',s:["Bonjour, je m'appelle Judy.","J'ai huit ans.","J'ai une sœur.","Le chat est noir.","Merci beaucoup.","J'aime la pomme rouge.","Au revoir, à demain.","Maman et papa sont là."]}};
+let SP=null;const SPLN=['ar','en','he','fr'];
+const spPunct=/[.,!?؟،;:"«»()\[\]…\-–—]/g;
+const spStrip=(l,s)=>{s=String(s).normalize('NFC').replace(/[ً-ٰٟـ֑-ׇ]/g,'').replace(/[’‘`´]/g,"'").replace(spPunct,' ');if(l==='en'||l==='fr')s=s.toLowerCase();return s.replace(/\s+/g,' ').trim()};
+const spLoose=(l,s)=>{s=spStrip(l,s);if(l==='ar')s=s.replace(/[أإآٱ]/g,'ا').replace(/ة/g,'ه').replace(/ى/g,'ي').replace(/ؤ/g,'و').replace(/ئ/g,'ي');if(l==='fr')s=s.normalize('NFD').replace(/[̀-ͯ]/g,'').replace(/œ/g,'oe');if(l==='he')s=s.replace(/[ךםןףץ]/g,c=>({'ך':'כ','ם':'מ','ן':'נ','ף':'פ','ץ':'צ'}[c]));return s.replace(/'/g,'')};
+const spShow=(l,s)=>String(s).normalize('NFC').replace(/[’‘`´]/g,"'").replace(spPunct,' ').replace(/\s+/g,' ').trim().split(' ').filter(Boolean);
+const spLev=(a,b)=>{const m=a.length,n=b.length;if(!m)return n;if(!n)return m;let p=Array.from({length:n+1},(_,j)=>j);for(let i=1;i<=m;i++){const c=[i];for(let j=1;j<=n;j++)c[j]=Math.min(p[j]+1,c[j-1]+1,p[j-1]+(a[i-1]===b[j-1]?0:1));p=c}return p[n]};
+function spAlign(a,b,eq){const n=a.length,m=b.length,D=Array.from({length:n+1},()=>Array(m+1).fill(0));
+  for(let i=1;i<=n;i++)for(let j=1;j<=m;j++)D[i][j]=eq(a[i-1],b[j-1])?D[i-1][j-1]+1:Math.max(D[i-1][j],D[i][j-1]);
+  let i=n,j=m;const ops=[];
+  while(i>0||j>0){if(i>0&&j>0&&eq(a[i-1],b[j-1])&&D[i][j]===D[i-1][j-1]+1){ops.push({t:'ok',a:a[i-1],b:b[j-1]});i--;j--}
+    else if(j>0&&(i===0||D[i][j-1]>=D[i-1][j])){ops.push({t:'ins',b:b[j-1]});j--}else{ops.push({t:'del',a:a[i-1]});i--}}
+  ops.reverse();const out=[];
+  for(let k=0;k<ops.length;k++){const o=ops[k];
+    if(o.t==='ok'){out.push(o);continue}
+    const dl=[],ins=[];while(k<ops.length&&ops[k].t!=='ok'){ops[k].t==='del'?dl.push(ops[k].a):ins.push(ops[k].b);k++}k--;
+    const p=Math.min(dl.length,ins.length);
+    for(let x=0;x<dl.length;x++)out.push(x<p?{t:'bad',a:dl[x],b:ins[x]}:{t:'miss',a:dl[x]});
+    for(let x=p;x<ins.length;x++)out.push({t:'extra',b:ins[x]})}
+  return out}
+const spSplitText=t=>String(t).split(/(?<=[.!؟?])\s+|\n+/).map(x=>x.trim()).filter(x=>x.length>1).map(x=>x.slice(0,200));
+function spItems(mode,l){const custom=(S.spellCustom||[]).filter(x=>x.l===l);
+  if(mode==='dict'){const c=shuffle(custom.flatMap(x=>spSplitText(x.t))).slice(0,5);const b=shuffle(SPL[l].s).slice(0,Math.max(0,5-c.length));return [...c,...b]}
+  const texts=custom.map(x=>x.t.slice(0,400));const b=shuffle(SPL[l].s);const pairs=[];for(let i=0;i+1<b.length;i+=2)pairs.push(b[i]+' '+b[i+1]);
+  return [...shuffle(texts).slice(0,2),...shuffle(pairs)].slice(0,3)}
+function spLog(k,ok,tot){S.spellLog=[...(S.spellLog||[]),{d:today(),t:Date.now(),k,l:SP.lang,ok,tot}].slice(-120);persist(true)}
+function spWords(res,dir,hear){return `<div class="row" dir="${dir}" style="justify-content:flex-start;gap:4px;margin-top:8px;flex-wrap:wrap">${res.map((o,i)=>{
+  if(o.t==='ok')return `<span class="spw ok">${esc(o.show)}</span>`;
+  if(o.t==='extra')return `<span class="spw extra">${esc(o.b)}<small>زيادة</small></span>`;
+  return `<${hear?'button type="button" data-w="'+i+'"':'span'} class="spw bad">${esc(o.show||o.a)}<small>${o.t==='bad'?(hear?'سمعتُ: ':'كتبتِ: ')+esc(o.b):(hear?'لم أسمعها':'ناقصة')}</small></${hear?'button':'span'}>`}).join('')}</div>`}
+function vSpell(v){
+  if(!SP)SP={step:'menu',lang:'ar'};
+  const l=SP.lang,cfg=SPL[l];
+  if(SP.step==='menu'){
+    const cs=(S.spellCustom||[]).filter(x=>x.l===l);
+    v.innerHTML=`<section class="card"><h2>✍️ الإملاء والقراءة</h2><p class="muted" style="margin:.3em 0 0">أسمع جملة وأكتبها، أو أقرأ نصًّا بصوتي ويصحّح الأستاذ سامر.</p></section>
+    <section class="card"><h3>اختاري اللغة</h3><div class="row" style="margin-top:8px;gap:8px">${SPLN.map(k=>`<button class="${k===l?'btn-p':'btn-ghost'}" data-lang="${k}" style="min-height:48px">${SPL[k].n}</button>`).join('')}</div></section>
+    <button class="card link-row" data-mode="dict" style="border-inline-start:6px solid var(--s-ar)"><span style="font-size:1.8em">✍️</span><span style="flex:1"><b>إملاء</b><br><span class="muted small">أسمع جملة وأكتبها</span></span><span class="muted">←</span></button>
+    <button class="card link-row" data-mode="read" style="border-inline-start:6px solid var(--s-en)"><span style="font-size:1.8em">📖</span><span style="flex:1"><b>قراءة</b><br><span class="muted small">أقرأ بصوتي ويصحّح لي</span></span><span class="muted">←</span></button>
+    <details class="card"><summary style="cursor:pointer"><b>＋ نص من كتاب المدرسة</b> <span class="muted small">(لغة: ${cfg.n})</span></summary>
+      <textarea id="spTxt" dir="${cfg.dir}" rows="4" style="width:100%;margin-top:8px;padding:10px;border-radius:12px;border:1px solid var(--line);background:var(--surface)" placeholder="اكتبوا هنا جملة أو فقرة قصيرة من الكتاب"></textarea>
+      <button class="btn-p" id="spAdd" style="margin-top:8px">احفظ النص</button>
+      ${cs.length?`<div style="margin-top:10px">${cs.map(x=>`<div class="row between" style="gap:8px;margin-top:4px"><span class="small" dir="${cfg.dir}" style="flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${esc(x.t)}</span><button class="btn-ghost" data-del="${x.id}" style="min-height:34px" aria-label="احذف">✕</button></div>`).join('')}</div>`:''}</details>
+    <button class="btn-ghost" data-go="home">رجوع</button>`;
+    v.querySelectorAll('[data-lang]').forEach(b=>b.onclick=()=>{SP.lang=b.dataset.lang;render()});
+    v.querySelectorAll('[data-mode]').forEach(b=>b.onclick=()=>{const it=spItems(b.dataset.mode,l);SP={step:'run',mode:b.dataset.mode,lang:l,items:it,i:0,res:[],stars:0,tries:0,out:null};render();if(SP.mode==='dict')speak(SP.items[0],l)});
+    $('spAdd').onclick=()=>{const t=$('spTxt').value.trim();if(t.length<2)return;S.spellCustom=[...(S.spellCustom||[]),{id:String(Date.now()),l,t:t.slice(0,600)}].slice(-20);persist(true);render()};
+    v.querySelectorAll('[data-del]').forEach(b=>b.onclick=()=>{S.spellCustom=(S.spellCustom||[]).filter(x=>x.id!==b.dataset.del);persist(true);render()});
+    v.querySelectorAll('[data-go]').forEach(b=>b.onclick=()=>go(b.dataset.go));return}
+  if(SP.step==='end'){
+    const ok=SP.res.reduce((a,x)=>a+x[0],0),tot=SP.res.reduce((a,x)=>a+x[1],0),pc=tot?Math.round(100*ok/tot):0;
+    v.innerHTML=`<section class="card" style="text-align:center"><div style="font-size:3em">${pc>=80?'🌟':'👏'}</div><h2>${pc>=80?'أحسنتِ يا جودي!':'جهد جميل يا جودي!'}</h2><p>${SP.mode==='dict'?'كتبتِ':'قرأتِ'} <b>${ok}</b> من <b>${tot}</b> كلمة بشكل صحيح.</p><p class="muted small">${pc>=80?'ممتاز! جرّبي لغة ثانية.':'كل مرة تتحسّنين. نعيد مرة ثانية؟'}</p>
+     <div class="row" style="justify-content:center;gap:8px"><button class="btn-p" id="spAgain">جولة جديدة</button><button class="btn-ghost" id="spMenu">القائمة</button></div></section>`;
+    $('spAgain').onclick=()=>{const m=SP.mode,lg=SP.lang;SP={step:'run',mode:m,lang:lg,items:spItems(m,lg),i:0,res:[],stars:0,tries:0,out:null};render();if(m==='dict')speak(SP.items[0],lg)};
+    $('spMenu').onclick=()=>{SP={step:'menu',lang:SP.lang};render()};return}
+  const it=SP.items[SP.i],last=SP.i>=SP.items.length-1;
+  const head=`<section class="card"><div class="row between"><b>${SP.mode==='dict'?'✍️ إملاء':'📖 قراءة'} · ${cfg.n}</b><span class="chip"><bdi dir="ltr">${SP.i+1} / ${SP.items.length}</bdi></span></div></section>`;
+  const next=(a,b)=>{SP.res.push([a,b]);if(last){spLog(SP.mode,SP.res.reduce((x,y)=>x+y[0],0),SP.res.reduce((x,y)=>x+y[1],0));SP.step='end';render()}else{SP.i++;SP.out=null;SP.tries=0;SP.said='';SP.err='';render();if(SP.mode==='dict')speak(SP.items[SP.i],l)}};
+  if(SP.mode==='dict'){
+    const words=spShow(l,it);
+    v.innerHTML=head+`<section class="card" style="text-align:center"><div class="row" style="justify-content:center;gap:8px"><button class="btn-p" id="spSay" style="min-height:56px;font-size:1.1em">🔊 اسمعي الجملة</button><button class="btn-ghost" id="spSlow" style="min-height:56px">🐢 كلمة كلمة</button></div>
+     <textarea id="spIn" dir="${cfg.dir}" lang="${l==='ar'?'ar':l==='he'?'he':l}" rows="2" autocapitalize="off" autocorrect="off" spellcheck="false" style="width:100%;margin-top:12px;padding:12px;border-radius:12px;border:2px solid var(--line);background:var(--surface);font-size:1.3em" placeholder="اكتبي ما سمعتِ هنا">${esc(SP.val||'')}</textarea>
+     ${SP.out?`<div id="spRes">${spWords(SP.out.ops,cfg.dir,false)}<p style="margin:10px 0 0"><b>${SP.out.bad?'قريب! الكلمات الحمراء فيها خطأ. الجواب الصحيح مكتوب فيها.':'ممتاز! كل الكلمات صحيحة 🎉'}</b></p></div>`:''}
+     <div class="row" style="justify-content:center;gap:8px;margin-top:12px">${!SP.out?`<button class="btn-p" id="spChk">تحقّقي ✓</button>`:SP.out.bad?`<button class="btn-p" id="spRetry">جرّبي مرة ثانية</button><button class="btn-ghost" id="spNext">${last?'انتهينا':'التالي ←'}</button>`:`<button class="btn-p" id="spNext">${last?'انتهينا':'التالي ←'}</button>`}</div></section>
+     <button class="btn-ghost" id="spQuit">خروج</button>`;
+    $('spSay').onclick=()=>speak(it,l);$('spSlow').onclick=()=>speak(words.join('. ')+'.',l);
+    $('spIn').oninput=e=>{SP.val=e.target.value};
+    if($('spChk'))$('spChk').onclick=()=>{const val=($('spIn').value||'').trim();if(!val){toastT('اكتبي ما سمعتِ أولًا.');return}SP.val=val;
+      const tg=spStrip(l,it).split(' '),ws=spStrip(l,val).split(' ').filter(Boolean);const ops=spAlign(tg,ws,(a,b)=>a===b);
+      let ti=0;ops.forEach(o=>{if(o.t!=='extra'){o.show=words[ti]||o.a;ti++}});
+      const bad=ops.filter(o=>o.t!=='ok').length,okn=ops.filter(o=>o.t==='ok').length;SP.out={ops,bad,ok:okn,tot:tg.length};
+      if(!bad){const gain=SP.tries===0?2:1;addStars(gain,'إملاء صحيح');SP.stars+=gain;chime()}
+      SP.tries++;render()};
+    if($('spRetry'))$('spRetry').onclick=()=>{SP.out=null;render();speak(it,l)};
+    if($('spNext'))$('spNext').onclick=()=>{const o=SP.out;SP.val='';next(o.ok,o.tot)};
+    $('spQuit').onclick=()=>{SP={step:'menu',lang:l};render()};return}
+  /* reading */
+  const tg=spShow(l,it),R=SP.out;
+  const wordsHtml=R?spWords(R.ops,cfg.dir,true):`<div dir="${cfg.dir}" style="font-size:1.45em;line-height:2;margin-top:8px;text-align:start">${esc(it)}</div>`;
+  v.innerHTML=head+`<section class="card" style="text-align:center">${wordsHtml}
+   ${R?`<p style="margin:10px 0 0"><b>${R.pc>=85?'قراءة رائعة! 🌟':R.pc>=50?'قراءة جيدة! الكلمات الحمراء نتدرّب عليها: اضغطي عليها لتسمعيها.':'لنحاول مرة ثانية. اسمعي النص أولًا ثم اقرئي.'}</b></p><p class="muted small" style="margin:4px 0 0">قرأتِ ${R.ok} من ${R.tot} كلمة. (التصحيح بالتعرّف على الصوت وقد لا يكون دقيقًا 100٪.)</p>`:''}
+   ${SP.err?`<p class="notice" style="margin-top:10px">${esc(({nosr:'هذا المتصفح لا يدعم تصحيح القراءة بالصوت. جرّبي Safari على الآيفون أو Chrome على الأندرويد.',denied:'لم يُسمح باستعمال الميكروفون. اطلبي من ماما أو بابا السماح من إعدادات المتصفح.',empty:'لم أسمع شيئًا. قرّبي الهاتف قليلًا وأعيدي القراءة.'})[SP.err]||'حدثت مشكلة في التسجيل. جرّبي مرة ثانية.')}</p>`:''}
+   ${SP.on?`<p id="spLive" dir="${cfg.dir}" class="muted" style="margin-top:10px;min-height:1.6em">${esc(SP.said||'')}</p>`:''}
+   <div class="row" style="justify-content:center;gap:8px;margin-top:12px">${SP.on?`<button class="btn-p" id="spStop" style="min-height:56px;background:var(--bad,#c0392b)">⏹ انتهيت</button>`:`<button class="btn-ghost" id="spHear" style="min-height:56px">🔊 اسمعي النص</button><button class="btn-p" id="spRec" style="min-height:56px">🎙️ ${R?'اقرئي مرة ثانية':'ابدئي القراءة'}</button>${R?`<button class="btn-ghost" id="spNext" style="min-height:56px">${last?'انتهينا':'التالي ←'}</button>`:''}`}</div></section>
+   <button class="btn-ghost" id="spQuit">خروج</button>`;
+  v.querySelectorAll('[data-w]').forEach(b=>b.onclick=()=>speak(R.ops[+b.dataset.w].show||R.ops[+b.dataset.w].a,l));
+  if($('spHear'))$('spHear').onclick=()=>speak(it,l);
+  if($('spStop'))$('spStop').onclick=()=>{try{SP.recObj&&SP.recObj.stop()}catch(e){}};
+  if($('spNext'))$('spNext').onclick=()=>{const o=SP.out;next(o.ok,o.tot)};
+  if($('spRec'))$('spRec').onclick=()=>{
+    const SRc=window.SpeechRecognition||window.webkitSpeechRecognition;SP.err='';SP.out=null;
+    if(!SRc){SP.err='nosr';render();return}
+    stopSpeak();const r=new SRc();r.lang=cfg.sr;r.interimResults=true;r.continuous=true;SP.recObj=r;SP.on=true;SP.said='';
+    r.onresult=ev=>{let fin='',itm='';for(let i=0;i<ev.results.length;i++){if(ev.results[i].isFinal)fin+=ev.results[i][0].transcript+' ';else itm+=ev.results[i][0].transcript}SP.said=(fin+itm).trim();const e=$('spLive');if(e)e.textContent=SP.said};
+    r.onerror=ev=>{if(ev.error==='not-allowed'||ev.error==='service-not-allowed')SP.err='denied';else if(ev.error==='no-speech')SP.err='empty';else if(ev.error!=='aborted')SP.err='x'};
+    r.onend=()=>{SP.on=false;SP.recObj=null;const said=SP.said||'';
+      if(said&&!SP.err){const a=spLoose(l,it).split(' '),b=spLoose(l,said).split(' ').filter(Boolean);
+        const ops=spAlign(a,b,(x,y)=>x===y||(x.length>=4&&y.length>=4&&spLev(x,y)<=1));
+        let ti=0;ops.forEach(o=>{if(o.t!=='extra'){o.show=tg[ti]||o.a;ti++}});
+        const okn=ops.filter(o=>o.t==='ok').length,pc=Math.round(100*okn/Math.max(1,a.length));SP.out={ops,ok:okn,tot:a.length,pc};
+        if(pc>=85){addStars(2,'قراءة جيدة');SP.stars+=2;chime()}}
+      else if(!said&&!SP.err)SP.err='empty';
+      if(VIEW==='spell')render()};
+    try{r.start();render()}catch(e){SP.on=false;SP.err='x';render()}};
+  $('spQuit').onclick=()=>{try{SP.recObj&&SP.recObj.abort()}catch(e){}SP={step:'menu',lang:l};render()};
+}
 
 /* ============ SCHOOL, TESTS, OPEN QUESTIONS ============ */
 const daysUntil=d=>Math.round((new Date(d+'T00:00:00')-new Date(today()+'T00:00:00'))/864e5);
@@ -1350,7 +1465,7 @@ document.querySelectorAll('[data-nav]').forEach(b=>b.onclick=()=>{if(E&&!E.done&
 function render(){
   document.querySelectorAll('[data-nav]').forEach(b=>b.setAttribute('aria-current',(b.dataset.nav===VIEW||(VIEW==='lesson'&&b.dataset.nav==='learn')||(VIEW.startsWith('exam')&&b.dataset.nav==='exam'))?'page':'false'));
   const v=$('view');
-  ({home:PROFILE?vHomeJ:vHome,learn:vLearn,lesson:vLesson,exam:vExamSetup,examrun:vExamRun,examres:vExamRes,progress:vProgress,settings:vSettings,achieve:vAchieve,addtopic:vAddTopic,testnew:vTestNew,open:vOpen,sessiondone:vSessionDone,timetable:vTimetable,social:vSocial,story:vStory,recall:vRecall,calm:vCalm}[VIEW]||vHome)(v);
+  ({home:PROFILE?vHomeJ:vHome,learn:vLearn,lesson:vLesson,exam:vExamSetup,examrun:vExamRun,examres:vExamRes,progress:vProgress,settings:vSettings,achieve:vAchieve,addtopic:vAddTopic,testnew:vTestNew,open:vOpen,sessiondone:vSessionDone,timetable:vTimetable,social:vSocial,story:vStory,recall:vRecall,calm:vCalm,spell:vSpell}[VIEW]||vHome)(v);
   if(['home','lesson','examrun','examres','open','learn'].includes(VIEW)&&sessionActive()){v.insertAdjacentHTML('afterbegin',sessionStrip())}
   bindSession(v);bindInterests(v);v.querySelectorAll('[data-focusbtn]').forEach(b=>b.onclick=()=>setFocus(true));
   updateTeacherMode();updateStarChip();
