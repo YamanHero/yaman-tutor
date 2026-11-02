@@ -18,5 +18,17 @@
         }
       ]
     }
+  ],
+  "rewrites": [
+    {
+      "source": "/",
+      "has": [
+        {
+          "type": "host",
+          "value": "judy-tutor.vercel.app"
+        }
+      ],
+      "destination": "/judy.html"
+    }
   ]
 }
