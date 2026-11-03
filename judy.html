@@ -1619,6 +1619,13 @@ const PICDOC=`رسم تفاعلي لكل خطوة في الحقل pic (JSON). ا
 {"type":"geo","shape":"square"} (square وrectangle وtriangle وrhombus وpentagon وhexagon وcircle)
 {"type":"steps","lines":["12 + 5","= 17"],"why":["نضيف 5"]}
 {"type":"choice","q":"…","o":["…","…"],"c":0,"w":"…"}`;
+function repairJSON(b){/* قصّ JSON مقطوع عند آخر عنصر كامل */
+  for(let i=b.length;i>20;i--){const ch=b[i-1];if(ch!=='}'&&ch!==']')continue;
+    const cand=b.slice(0,i);let st=[],ins=false,esc=false;
+    for(const c of cand){if(esc){esc=false;continue}if(c==='\\'){esc=true;continue}if(c==='"'){ins=!ins;continue}if(ins)continue;if(c==='{'||c==='[')st.push(c);else if(c==='}'||c===']')st.pop()}
+    if(ins)continue;const close=st.reverse().map(c=>c==='{'?'}':']').join('');
+    try{return JSON.parse(cand+close)}catch(_){}}
+  return null}
 async function generateTopic(){
   const sub=subj(ADD.sub);ADD.busy=true;ADD.msg=PROFILE?'الأستاذ سامر يرسم لك الدرس 🎨 ويلوّنه… انتظري دقيقة واحدة.':'الأستاذ سامر يكتب الدرس… قد يستغرق ذلك دقيقة أو دقيقتين.';render();
   const jp=PROFILE?`أنت معلّمة مبدعة وحنونة تكتب درسًا ممتعًا لطفلة اسمها جودي، عمرها 8 سنوات، في الصف الثالث في مدرسة عربية في إسرائيل. جودي ذكية جدًا وخيالها غني وتفهم بالصور.
@@ -1633,7 +1640,7 @@ ${PICDOC}
 كل خطوة يجب أن يكون لها pic مناسب يشرح الفكرة بالصورة، وكل عنوان خطوة يبدأ بإيموجي.
 اكتبي كائن JSON واحدًا فقط بهذا الشكل:
 {"n":"اسم الموضوع القصير","steps":[{"t":"عنوان الخطوة","v":"","x":"الشرح: من 3 إلى 4 أسطر قصيرة، يفصل بينها \n","pic":{"type":"cards","l":"ar","items":[["🐰","أرنب","…"]]},"k":[["مصطلح","معناه"]],"q":"سؤال تمرين بسيط","o":["خيار","خيار","خيار","خيار"],"c":0,"h":"تلميح لا يكشف الإجابة","w":"لماذا الإجابة صحيحة"}],"bank":[{"q":"سؤال","o":["","","",""],"c":0,"w":"شرح قصير"}]}
-المطلوب: من 4 إلى 5 خطوات، في كل خطوة 1 إلى 3 مصطلحات في k، و 8 أسئلة في bank متدرّجة: 3 سهلة و3 متوسطة وسؤالان تحدٍّ يتطلّبان تفكيرًا. c هو رقم الخيار الصحيح من 0 إلى 3، وغيّري موضعه بين الأسئلة.`:null;
+المطلوب: 4 خطوات فقط، في كل خطوة 1 إلى 3 مصطلحات في k، و 6 أسئلة فقط في bank متدرّجة: 3 سهلة و2 متوسطة وسؤال تحدٍّ واحد يتطلّب تفكيرًا. اجعلي الشرح في كل خطوة من 3 إلى 4 أسطر فقط، حتى لا يطول الجواب. c هو رقم الخيار الصحيح من 0 إلى 3، وغيّري موضعه بين الأسئلة.`:null;
   const prompt=jp||`أنت معلّم خبير يكتب درسًا لطالب اسمه يمان في الصف العاشر أو الحادي عشر في مدرسة عربية في إسرائيل. يمان على طيف التوحّد.
 المادة: ${sub.n}
 الموضوع: ${ADD.name||'(استخرج الموضوع من الصور المرفقة)'}
@@ -1645,9 +1652,15 @@ ${ADD.imgs.length?'مرفقة صور من كتاب يمان أو دفتره. ا�
 {"n":"اسم الموضوع القصير","steps":[{"t":"عنوان الخطوة","v":"مثال أو صيغة قصيرة جدًا (سطر واحد) أو نص فارغ","x":"الشرح: 3 إلى 5 أسطر قصيرة، يفصل بينها \n","k":[["مصطلح","معناه بجملة قصيرة"]],"q":"سؤال تمرين عن هذه الخطوة","o":["خيار","خيار","خيار","خيار"],"c":0,"h":"تلميح لا يكشف الإجابة","w":"شرح قصير لماذا الإجابة صحيحة"}],"bank":[{"q":"سؤال","o":["","","",""],"c":0,"w":"شرح قصير"}]}
 المطلوب: من 3 إلى 5 خطوات، في كل خطوة 2 إلى 4 مصطلحات في k، و 8 أسئلة في bank بصعوبة متدرّجة. c هو رقم الخيار الصحيح من 0 إلى 3، وغيّر موضعه بين الأسئلة.`;
   const content=ADD.imgs.length?[...ADD.imgs.map(d=>({type:'image',source:{type:'base64',media_type:'image/jpeg',data:d}})),{type:'text',text:prompt+'\n\nأجب بـ JSON فقط.'}]:prompt+'\n\nأجب بـ JSON فقط.';
-  try{const r=await api('ask',{method:'POST',body:JSON.stringify({messages:[{role:'user',content}],max:7000})});
-    const txt=r.text||'';const m=txt.match(/```(?:json)?\s*([\s\S]*?)```/);const body=m?m[1]:txt.slice(txt.indexOf('{'),txt.lastIndexOf('}')+1);
-    const t=validTopic(JSON.parse(body),ADD.sub);if(!t)throw {code:'invalid'};ADD.draft=t;ADD.msg='';
+  try{let t=null,last=null;
+    for(let at=0;at<2&&!t;at++){
+      try{const c2=at&&typeof content==='string'?content+'\nاختصر: 3 خطوات و4 أسئلة في bank فقط.':content;
+        const r=await api('ask',{method:'POST',body:JSON.stringify({messages:[{role:'user',content:c2}],max:8000})});
+        const txt=r.text||'';const m=txt.match(/```(?:json)?\s*([\s\S]*?)```/);let body=m?m[1]:txt.slice(txt.indexOf('{'),txt.lastIndexOf('}')+1);
+        let o;try{o=JSON.parse(body)}catch(_){o=repairJSON(body)}
+        t=validTopic(o,ADD.sub)}catch(e){last=e;if(e&&(e.code==='rate_limited'||e.code==='not_granted'))throw e}
+    }
+    if(!t)throw last||{code:'invalid'};ADD.draft=t;ADD.msg='';
   }catch(e){ADD.msg=e&&e.code==='rate_limited'?'طلبات كثيرة الآن. جرّب بعد دقيقة.':e&&(e.code==='not_granted')?'المعلّم الذكي غير مفعّل بعد (يحتاج مفتاح ANTHROPIC_API_KEY في Vercel). يمكنك استعمال الإضافة اليدوية.':'لم تنجح كتابة الدرس هذه المرة. جرّب مرة أخرى، أو أضف تفاصيل أوضح.'}
   ADD.busy=false;render();
 }
