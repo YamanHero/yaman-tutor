@@ -726,7 +726,7 @@ if(PROFILE){try{const m=document.querySelector('link[rel=manifest]');if(m)m.href
 /* ============ JUDY PROFILE (grade 3) ============ */
 try{if('serviceWorker' in navigator&&!localStorage.getItem('sw_reset_2')){localStorage.setItem('sw_reset_2','1');navigator.serviceWorker.getRegistrations().then(rs=>Promise.all(rs.map(r=>r.unregister()))).then(()=>caches.keys()).then(ks=>Promise.all(ks.map(k=>caches.delete(k)))).then(()=>location.reload()).catch(()=>{})}}catch(e){}
 const KID=PROFILE==='judy'?'جودي':'يمان';
-const FEM=[['اختر','اختاري'],['احتجت','احتجتِ'],['أحسنت','أحسنتِ'],['ممتاز','ممتازة'],['رائع','رائعة'],['أنهيت','أنهيتِ'],['أكملت','أكملتِ'],['حاولت','حاولتِ'],['جرّب','جرّبي'],['تعلّمت','تعلّمتِ'],['اضغط','اضغطي'],['ابدأ','ابدئي'],['تابع','تابعي'],['أجبت','أجبتِ'],['نجحت','نجحتِ'],['فهمت','فهمتِ'],['أخطأت','أخطأتِ'],['قرأت','قرأتِ'],['وصلت','وصلتِ'],['كتبت','كتبتِ']];
+const FEM=[['اختر','اختاري'],['احتجت','احتجتِ'],['أحسنت','أحسنتِ'],['ممتاز','ممتازة'],['رائع','رائعة'],['أنهيت','أنهيتِ'],['أكملت','أكملتِ'],['حاولت','حاولتِ'],['جرّب','جرّبي'],['تعلّمت','تعلّمتِ'],['اضغط','اضغطي'],['ابدأ','ابدئي'],['تابع','تابعي'],['أجبت','أجبتِ'],['نجحت','نجحتِ'],['فهمت','فهمتِ'],['أخطأت','أخطأتِ'],['قرأت','قرأتِ'],['وصلت','وصلتِ'],['كتبت','كتبتِ'],['اكتب','اكتبي'],['تكلّم','تكلّمي'],['اسمع','اسمعي'],['اسأل','اسألي'],['اقرأ','اقرئي'],['لاحظ','لاحظي'],['تعرف','تعرفين'],['فعلت','فعلتِ'],['شاهدت','شاهدتِ'],['سمعت','سمعتِ'],['طلبت','طلبتِ'],['قلت','قلتِ'],['ذهبت','ذهبتِ'],['أنهِ','أنهي'],['سلّم','سلّمي'],['اطلب','اطلبي'],['اشكر','اشكري'],['أنجزت','أنجزتِ'],['حقّقت','حقّقتِ'],['أخذت','أخذتِ'],['قدّم','قدّمي'],['اقترح','اقترحي'],['ادعُ','ادعي'],['عرّف','عرّفي'],['لو سمحت','لو سمحتِ'],['ذكّرني','ذكّريني'],['أنت','أنتِ'],['تحبّ','تحبّين'],['تريد','تريدين']];
 const fy=s=>{if(!PROFILE||typeof s!=='string')return s;let o=s.replace(/يمان/g,KID);for(const [a,b] of FEM)o=o.replace(new RegExp('(?<![\\u0600-\\u06FF])'+a+'(?![\\u0600-\\u06FF])','g'),b);return o};
 if(PROFILE==='judy'){
 const J=(id,s,n,steps,bank)=>({id,s,n,lab:'concepts',leg:{},steps:steps.map(([t,x,q,o,c,h,k])=>({t,x,q,o,c,h,w:h,p:{k:k||[]}})),bank:bank.map(([q,o,c,w])=>({q,o,c,w}))});
@@ -1122,7 +1122,10 @@ function vCalm(v){
 const SYSJ=`أنت "الأستاذ سامر"، معلّم لطيف وصبور لطفلة اسمها جودي، عمرها 8 سنوات، في الصف الثالث في مدرسة عربية في إسرائيل. تتعلّم: الرياضيات، العربية، الإنجليزية، العبرية، الفرنسية.
 
 قواعدك:
-- اكتب بالعربية البسيطة جدًا، بجمل قصيرة (من 5 إلى 8 كلمات). لا تزيد عن 4 جمل في الجواب الواحد.
+- جودي متفوّقة ومتقدّمة على عمرها: لا تبسّطي أكثر من اللازم ولا تخاطبيها كطفلة صغيرة. اكتبي بعربية سليمة وغنية، وجمل واضحة من 8 إلى 12 كلمة، وبين 5 و7 جمل في الجواب. استعملي مفردات جديدة وفسّريها بسرعة (مثل «المحيط: طول الحدود حول الشكل»).
+- لا تكتفي بـ«كيف» بل اشرحي «لماذا»: السبب والقاعدة خلف الفكرة، واربطيها بفكرة أخرى تعرفها. ثم اطلبي منها أن تفكّر: «ماذا يحدث لو…؟» أو «هل تجدين طريقة أسرع؟» أو «هل القاعدة تنطبق دائمًا؟».
+- ابدئي من مستوى أعلى من الصف الثالث بدرجة واحدة (مثلًا ضرب وقسمة وكسور بسيطة وألغاز منطق، قراءة نصوص قصيرة، جمل كاملة في اللغات). إذا أجابت صح بسرعة فارفعي الصعوبة فورًا بسؤال تحدٍّ؛ وإذا تعثّرت فعودي خطوة واحدة فقط بصورة جديدة.
+- في كل جواب أنهي بسؤال تفكير واحد (وليس سؤال حفظ)، وأحيانًا بسؤال «تحدّي النجمة ⭐» أصعب قليلًا.
 - اشرح بمثال من حياة طفلة: ألعاب، حلويات، حيوانات، العائلة، المدرسة. كوني مبدعة: اجعلي كل شرح قصة صغيرة أو مغامرة قصيرة بشخصيات (أرنب يعدّ الجزر، أميرة تقسم الكعكة…) وغيّري الأمثلة كل مرة. ادخلي في الموضوع فورًا دون مقدّمات.
 - في الإنجليزية والعبرية والفرنسية: اكتب الكلمة بلغتها ثم معناها بالعربية، ثم طريقة نطقها بحروف عربية.
 - لا تستعمل جداول ولا مصطلحات صعبة.
@@ -1161,6 +1164,7 @@ function vHomeJ(v){
   <div class="grid" style="grid-template-columns:repeat(2,1fr);gap:10px">
    <button class="card jtile" data-go="spell" style="--pc:var(--s-ar)"><span class="jt-e">✍️</span><b>إملاء وقراءة</b></button>
    <button class="card jtile" data-go="calm" style="--pc:var(--s-chem)"><span class="jt-e">🫶</span><b>أنا أشعر…</b></button>
+   <button class="card jtile" data-go="social" style="--pc:var(--s-he)"><span class="jt-e">💬</span><b>صديقاتي وأنا</b></button>
   </div>
   <section class="card"><h3>اختاري مادة</h3><div class="grid" style="grid-template-columns:repeat(2,1fr);gap:10px;margin-top:10px">${SUBJ.map(s=>{const ts=T.filter(t=>t.s===s.id),dn=ts.filter(t=>S.lessons[t.id]?.done).length,em={math:'🔢',ar:'📖',en:'🔤',he:'🇮🇱',fr:'🥐'}[s.id]||s.ic;return `<button class="jtile jsub" data-sub="${s.id}" style="--pc:var(${s.c})" aria-label="${s.n}: ${dn} من ${ts.length}"><span class="jt-e">${em}</span><b>${s.n}</b><span class="jt-d" aria-hidden="true">${ts.map(t=>S.lessons[t.id]?.done?'●':'○').join(' ')}</span></button>`}).join('')}</div></section>
   <div class="muted small" style="text-align:center">رقم النسخة: <bdi dir=\"ltr\">${esc(BOOTV||'…')}</bdi></div>`;
@@ -1623,13 +1627,13 @@ async function generateTopic(){
 ${ADD.goal?'الهدف: '+ADD.goal:''}
 ${ADD.notes?'ملاحظات من الأهل: '+ADD.notes:''}
 ${ADD.imgs.length?'مرفقة صور من كتاب جودي. ابنِ الدرس على محتواها بدقة.':''}
-قواعد الكتابة: عربية بسيطة جدًا مناسبة لعمر 8 سنوات، جمل قصيرة (من 5 إلى 8 كلمات)، خاطبي جودي بصيغة المؤنث. اجعلي الدرس قصة ومغامرة قصيرة بشخصية لطيفة (أرنب، قطة، أميرة، رائد فضاء…) تظهر في كل خطوة، مع أمثلة من حياة طفلة: حلويات وألعاب وحيوانات والعائلة. كل المعلومات صحيحة بدقة. في الإنجليزية والعبرية والفرنسية اكتبي الكلمة بلغتها ثم معناها بالعربية ثم نطقها بحروف عربية بين قوسين.
+قواعد الكتابة: جودي متفوّقة ومتقدّمة على عمرها، فاجعلي المستوى أعلى من الصف الثالث بدرجة واحدة. عربية سليمة وغنية بجمل واضحة من 8 إلى 12 كلمة، مع مفردات جديدة تُشرح فورًا. اشرحي «لماذا» وليس «كيف» فقط، واربطي الفكرة بفكرة أخرى. في الخطوتين الأخيرتين أضيفي سؤال تفكير أو تحدٍّ. خاطبي جودي بصيغة المؤنث. اجعلي الدرس قصة ومغامرة قصيرة بشخصية لطيفة (أرنب، قطة، أميرة، رائد فضاء…) تظهر في كل خطوة، مع أمثلة من حياة طفلة: حلويات وألعاب وحيوانات والعائلة. كل المعلومات صحيحة بدقة. في الإنجليزية والعبرية والفرنسية اكتبي الكلمة بلغتها ثم معناها بالعربية ثم نطقها بحروف عربية بين قوسين.
 الخطوة الأولى دائمًا بعنوان «هدفنا اليوم 🎯»: تشرح بجملتين ممتعتين ماذا سنتعلّم ولماذا هو مفيد أو مضحك، ورسمها pic من نوع cards بإيموجي يعبّر عن الهدف.
 ${PICDOC}
 كل خطوة يجب أن يكون لها pic مناسب يشرح الفكرة بالصورة، وكل عنوان خطوة يبدأ بإيموجي.
 اكتبي كائن JSON واحدًا فقط بهذا الشكل:
 {"n":"اسم الموضوع القصير","steps":[{"t":"عنوان الخطوة","v":"","x":"الشرح: من 3 إلى 4 أسطر قصيرة، يفصل بينها \n","pic":{"type":"cards","l":"ar","items":[["🐰","أرنب","…"]]},"k":[["مصطلح","معناه"]],"q":"سؤال تمرين بسيط","o":["خيار","خيار","خيار","خيار"],"c":0,"h":"تلميح لا يكشف الإجابة","w":"لماذا الإجابة صحيحة"}],"bank":[{"q":"سؤال","o":["","","",""],"c":0,"w":"شرح قصير"}]}
-المطلوب: من 4 إلى 5 خطوات، في كل خطوة 1 إلى 3 مصطلحات في k، و 8 أسئلة في bank سهلة ومتدرّجة. c هو رقم الخيار الصحيح من 0 إلى 3، وغيّري موضعه بين الأسئلة.`:null;
+المطلوب: من 4 إلى 5 خطوات، في كل خطوة 1 إلى 3 مصطلحات في k، و 8 أسئلة في bank متدرّجة: 3 سهلة و3 متوسطة وسؤالان تحدٍّ يتطلّبان تفكيرًا. c هو رقم الخيار الصحيح من 0 إلى 3، وغيّري موضعه بين الأسئلة.`:null;
   const prompt=jp||`أنت معلّم خبير يكتب درسًا لطالب اسمه يمان في الصف العاشر أو الحادي عشر في مدرسة عربية في إسرائيل. يمان على طيف التوحّد.
 المادة: ${sub.n}
 الموضوع: ${ADD.name||'(استخرج الموضوع من الصور المرفقة)'}
@@ -2360,6 +2364,44 @@ const SCEN=[
  {id:'disagree',ic:'🤝',t:'خلاف في مشروع جماعي',who:'لينا، زميلة في مجموعة المشروع، تريد أن يكون العرض عن الحيوانات',goal:'قل إن عندك فكرة أخرى، بلطف، وحاولا الوصول إلى اتفاق.',open:'أنا أقترح أن يكون مشروعنا عن الحيوانات. موافق؟'},
  {id:'sorry',ic:'🙏',t:'اعتذار لصديق',who:'أحمد، صديق، زعلان قليلًا لأن يمان قاطعه كثيرًا أمس',goal:'اعتذر بالخطوات الثلاث: ماذا حدث، آسف، ماذا ستفعل.',open:'…مرحبًا.'},
  {id:'studio',ic:'🎙️',t:'مقابلة في استوديو الدبلجة',who:'الأستاذ نزار، مدبلج ومخرج دبلجة (شخصية خيالية) في استوديو في دمشق، يحب أن يشرح عمله للشباب',goal:'أنت صحفي صغير: اسأل الأستاذ نزار 3 أسئلة مفتوحة عن عمله، واسمع أجوبته.',open:'أهلًا بك في الاستوديو! تفضّل، الميكروفون جاهز. ماذا تريد أن تعرف؟'}];
+
+const SCENJ=[
+ {id:'newgirl',ic:'👋',t:'صديقة جديدة في الصف',who:'ليان، طالبة جديدة في صف جودي، خجولة قليلًا، تحب الرسم',goal:'عرّفي بنفسك، واسألي ليان سؤالين عنها.',open:'مرحبًا… أنا ليان. هذا أول يوم لي في المدرسة.',sug:['أهلًا يا ليان، أنا جودي! أهلًا بك في صفّنا.','ماذا تحبّين أن تفعلي في الاستراحة؟','هل تحبّين الرسم؟ أنا أحبّه أيضًا.']},
+ {id:'recess',ic:'🪢',t:'اللعب في الاستراحة',who:'سلمى وهدى، صديقتان تلعبان بالحبل في الساحة، لطيفتان',goal:'اطلبي بلطف أن تلعبي معهما.',open:'نحن نلعب بالحبل! ماذا تريدين يا جودي؟',sug:['هل يمكنني أن ألعب معكما؟','لعبتكما جميلة. أستطيع أن أدير الحبل أولًا.','لا شيء، شكرًا.']},
+ {id:'teacher',ic:'🧑‍🏫',t:'طلب مساعدة من المعلّمة',who:'المعلّمة هالة، معلّمة الرياضيات، مشغولة قليلًا لكنها لطيفة',goal:'قولي إنك لم تفهمي التمرين واطلبي أن تشرحه لك.',open:'نعم يا جودي؟ تفضّلي، عندي دقيقة.',sug:['لو سمحتِ، لم أفهم التمرين الثالث. هل تشرحينه لي؟','عندي سؤال عن الواجب.','لا شيء، شكرًا.']},
+ {id:'invite',ic:'🎂',t:'دعوة صديقة إلى بيتك',who:'رنا، صديقة من الصف، مشغولة هذا الأسبوع (سترفض بلطف أول مرة وتقترح يومًا آخر)',goal:'ادعي رنا لتلعب عندك، وتقبّلي الجواب بلطف.',open:'مرحبًا يا جودي! كيف حالك اليوم؟',sug:['أنا بخير، وأنتِ؟','هل تريدين أن تأتي إلى بيتنا يوم الجمعة لنلعب؟','أهلًا رنا!']},
+ {id:'shop',ic:'🍬',t:'في الدكّان',who:'أبو خالد، صاحب الدكّان، كبير في السن، ودود',goal:'اسألي عن سعر حلوى، واشتريها، واشكريه.',open:'أهلًا وسهلًا يا حبيبتي! ماذا تريدين؟',sug:['مرحبًا، كم سعر هذه الحلوى لو سمحت؟','عندك عصير تفاح؟','السلام عليكم.']},
+ {id:'game',ic:'🧩',t:'خلاف على لعبة',who:'ريم، صديقة تريد أن تلعب لعبتها المفضّلة فقط',goal:'قولي بلطف إن عندك فكرة أخرى، واقترحي أن يكون لكل واحدة دور.',open:'أنا أريد أن نلعب بالدمى فقط!',sug:['فكرتك جميلة. ما رأيك أن نلعب بالدمى ثم بالمكعّبات؟','أنا لا أحب الدمى.','ممكن نختار بالقرعة؟']},
+ {id:'sorry',ic:'🙏',t:'اعتذار لصديقة',who:'دانا، صديقة حزينة قليلًا لأن جودي أخذت قلمها دون أن تسألها',goal:'اعتذري بثلاث خطوات: ماذا حدث، آسفة، ماذا ستفعلين المرة القادمة.',open:'…مرحبًا يا جودي.',sug:['مرحبًا يا دانا. أخذت قلمك دون أن أسألك، وأنا آسفة.','هل أنتِ حزينة مني؟','أهلًا.']},
+ {id:'party',ic:'🎈',t:'حفلة عيد ميلاد',who:'مريم، صاحبة عيد الميلاد، سعيدة وتستقبل الضيفات',goal:'هنّئيها، وقدّمي لها الهدية، وقولي جملة لطيفة.',open:'أهلًا يا جودي! شكرًا لأنك أتيتِ إلى حفلتي!',sug:['عيد ميلاد سعيد يا مريم! هذه هدية لك.','كم عمرك اليوم؟','حفلتك جميلة!']}];
+const RPSYSJ=s=>`أنت "الأستاذ سامر"، معلّم لطيف، وتساعد جودي (طفلة عمرها 8 سنوات، في الصف الثالث، ذكية جدًا وخيالها غني) على التدرّب على الصداقة والمحادثة في مشهد تمثيلي آمن وممتع.
+المشهد: «${s.t}». أنت تؤدّي دور: ${s.who}. جودي تؤدّي دورها هي نفسها.
+هدف جودي في المشهد: ${s.goal}
+
+في كل ردّ اكتب بالضبط هذه الأجزاء، كل جزء في سطر جديد ويبدأ بالكلمة نفسها:
+الشخصية: ردّ الشخصية على كلام جودي، جملة أو جملتان بعربية بسيطة وطبيعية مثل طفلة في عمرها، وابقَ في الدور.
+نصيحة: صوت الأستاذ سامر، سطر واحد: ابدأ بشيء محدّد فعلته جودي جيدًا، ثم نصيحة صغيرة واحدة فقط إن لزم، مع تفسير بسيط لماذا تساعد الصديقة. خاطبها بصيغة المؤنث وبلغة دافئة ومشجّعة.
+ثم كتلة اقتراحات ردود تستطيع جودي أن تضغط عليها إذا لم تعرف ماذا تقول، 3 ردود قصيرة مختلفة كلها مناسبة (واحد منها يحقّق الهدف بشكل ممتاز):
+\`\`\`viz
+{"type":"replies","o":["…","…","…"]}
+\`\`\`
+
+قواعد:
+- المشهد واقعي ولطيف. الشخصية لا تسخر من جودي ولا تكون قاسية.
+- إذا قالت جودي شيئًا غير مناسب اجتماعيًا (مقاطعة، كلام جارح بدون قصد)، الشخصية تتفاعل بشكل واقعي خفيف، و«نصيحة» تشرح بهدوء ماذا حدث وماذا تقول بدلًا من ذلك، مثل «تخيّلي شعور صديقتك».
+- إذا حقّقت جودي الهدف، قل ذلك في «نصيحة» بوضوح: «حقّقتِ هدف المشهد!»
+- إذا كتبت جودي «أنهيت التدريب»: لا تكتب «الشخصية» ولا اقتراحات. اكتب فقط:
+ملخّص: سطران: شيئان محدّدان فعلتهما جيدًا، وشيء واحد للتدريب في المرة القادمة، بتشجيع.
+- لا تذكر أنك نموذج ذكاء اصطناعي. لا تنسب أقوالًا أو أدوارًا لأشخاص حقيقيين.`;
+const CHALLJ=[
+ {id:'q_open',ic:'❓',t:'اسألي صديقة سؤالًا في الاستراحة',h:'مثلًا: «ماذا فعلتِ في العطلة؟» ثم اسمعي جوابها.'},
+ {id:'greet3',ic:'👋',t:'سلّمي على 3 أشخاص بالاسم هذا الأسبوع',h:'«صباح الخير يا …» مع ابتسامة.'},
+ {id:'follow',ic:'🔁',t:'اسألي سؤالًا عن شيء قالته صديقتك',h:'«قلتِ إنك … ماذا حدث بعد ذلك؟»'},
+ {id:'feel',ic:'🎭',t:'لاحظي شعور شخص في البيت من وجهه وصوته واسأليه',h:'«تبدو متعبًا اليوم، هل أنت بخير؟»'},
+ {id:'thanks',ic:'🙏',t:'اشكري معلّمتك على شيء محدّد',h:'«شكرًا، فهمت التمرين اليوم.»'},
+ {id:'help',ic:'✋',t:'اطلبي مساعدة في شيء لم تفهميه',h:'«لو سمحتِ، هل يمكنك أن تشرحي هذا مرة أخرى؟»'},
+ {id:'idea',ic:'💡',t:'في لعبة جماعية اقترحي فكرة بهدوء',h:'«عندي فكرة، ما رأيكم؟»'},
+ {id:'invite',ic:'🎮',t:'ادعي صديقة للّعب معك',h:'«هل تريدين أن نلعب معًا؟» واقبلي الجواب بلطف.'}];
 let RP=null;
 const RPSYS=s=>`أنت تساعد يمان (طالب في الصف العاشر أو الحادي عشر، على طيف التوحّد) على التدرّب على مهارات المحادثة الاجتماعية في مشهد تمثيلي آمن، مثل مشهد في استوديو دبلجة.
 المشهد: «${s.t}». أنت تؤدّي دور: ${s.who}. يمان يؤدّي دوره هو نفسه.
@@ -2381,9 +2423,9 @@ const RPSYS=s=>`أنت تساعد يمان (طالب في الصف العاشر 
 ملخّص: سطران: شيئان محدّدان فعلهما جيدًا، وشيء واحد للتدريب في المرة القادمة، بتشجيع من عالم الدبلجة.
 - لا تذكر أنك نموذج ذكاء اصطناعي. لا تنسب أقوالًا أو أدوارًا لأشخاص حقيقيين.`;
 function startRP(id){const s=SCEN.find(x=>x.id===id);if(!s)return;RP={id,turns:0};if(tAbort)tAbort.abort();
-  CHAT.push({role:'assistant',text:`🎬 مشهد تدريب: ${s.t}\nالهدف: ${s.goal}\nاكتب أو تكلّم كما لو كنت في الموقف الحقيقي. إذا لم تعرف ماذا تقول، اضغط على أحد الاقتراحات.`});
-  const sug={newkid:['أهلًا يا رامي، أنا يمان. أهلًا بك في صفّنا!','مرحبًا، من أي مدرسة جئت؟','أهلًا، أنا يمان.'],cartoon:['شاهدت كرتونًا مدبلجًا جميلًا. وأنت؟','لعبت قليلًا وشاهدت الكرتون.','لا شيء كثير. وأنت، ماذا فعلت؟'],teacher:['نعم، لو سمحتِ، لم أفهم التمرين الثالث. هل يمكنك أن تشرحيه؟','عندي سؤال عن الواجب.','لا شيء، شكرًا.'],invite:['أنا بخير، وأنت؟','بخير. هل تريد أن نلعب معًا يوم الجمعة؟','أهلًا كريم!'],shop:['أريد عصيرًا، كم سعره لو سمحت؟','مرحبًا يا عمّ، عندك دفاتر؟','السلام عليكم.'],disagree:['فكرتك جيدة. عندي فكرة أخرى: الفضاء. ما رأيك؟','لا أعرف.','ممكن نصوّت؟'],sorry:['مرحبًا أحمد. أمس قاطعتك كثيرًا، أنا آسف.','هل أنت زعلان مني؟','أهلًا.'],studio:['كيف أصبحت مدبلجًا؟','ما أصعب شيء في الدبلجة؟','كيف تغيّر صوتك لكل شخصية؟']}[id];
-  CHAT.push({role:'assistant',text:'الشخصية: '+s.open+'\n```viz\n'+JSON.stringify({type:'replies',o:sug})+'\n```'});
+  CHAT.push({role:'assistant',text:fy(`🎬 مشهد تدريب: ${s.t}\nالهدف: ${s.goal}\nاكتب أو تكلّم كما لو كنت في الموقف الحقيقي. إذا لم تعرف ماذا تقول، اضغط على أحد الاقتراحات.`)});
+  const sug0=s.sug,sug={newkid:['أهلًا يا رامي، أنا يمان. أهلًا بك في صفّنا!','مرحبًا، من أي مدرسة جئت؟','أهلًا، أنا يمان.'],cartoon:['شاهدت كرتونًا مدبلجًا جميلًا. وأنت؟','لعبت قليلًا وشاهدت الكرتون.','لا شيء كثير. وأنت، ماذا فعلت؟'],teacher:['نعم، لو سمحتِ، لم أفهم التمرين الثالث. هل يمكنك أن تشرحيه؟','عندي سؤال عن الواجب.','لا شيء، شكرًا.'],invite:['أنا بخير، وأنت؟','بخير. هل تريد أن نلعب معًا يوم الجمعة؟','أهلًا كريم!'],shop:['أريد عصيرًا، كم سعره لو سمحت؟','مرحبًا يا عمّ، عندك دفاتر؟','السلام عليكم.'],disagree:['فكرتك جيدة. عندي فكرة أخرى: الفضاء. ما رأيك؟','لا أعرف.','ممكن نصوّت؟'],sorry:['مرحبًا أحمد. أمس قاطعتك كثيرًا، أنا آسف.','هل أنت زعلان مني؟','أهلًا.'],studio:['كيف أصبحت مدبلجًا؟','ما أصعب شيء في الدبلجة؟','كيف تغيّر صوتك لكل شخصية؟']}[id];
+  CHAT.push({role:'assistant',text:'الشخصية: '+s.open+'\n```viz\n'+JSON.stringify({type:'replies',o:sug0||sug})+'\n```'});
   lastT=s.open;drawChat();drawRPBar();const tp=$('teacher');tp.classList.add('open');if(S.settings.autoread==='on')speak(s.open)}
 function endRP(){if(!RP)return;const s=SCEN.find(x=>x.id===RP.id);const n=RP.turns;const done=RP;
   if(n>=2){S.rpDone=(S.rpDone||0)+1;S.rpLog=[...(S.rpLog||[]),{d:today(),id:s.id,n}].slice(-60);addStars(5,'أكملت مشهد: '+s.t);checkBadges();persist()}
@@ -2399,7 +2441,8 @@ function vSocial(v){const n=S.rpDone||0,ts=T.filter(t=>t.s==='soc');
   ${challCard()}
   <button class="card link-row" data-go="story"><span style="font-size:1.6em">📖</span><span style="flex:1"><b>قصص لما سيحدث</b><br><span class="muted small">رحلة، معلّم بديل، مناسبة… سامر يكتب قصة تطمئنك قبل الحدث.</span></span><span class="go-arrow" aria-hidden="true">←</span></button>
   <section class="card"><h3>اختر مشهدًا</h3><div class="plan-list" style="margin-top:10px">${SCEN.map(s=>`<button class="plan-row" data-rp="${s.id}" style="--pc:var(--s-soc)"><span class="pic" style="--pc:var(--s-soc);font-size:1.4em">${s.ic}</span><span style="flex:1;min-width:0"><b>${esc(s.t)}</b><br><span class="muted small">${esc(s.goal)}</span></span><span class="go-arrow" aria-hidden="true">←</span></button>`).join('')}</div></section>
-  <section class="card"><h3>دروس قصيرة قبل التدريب</h3><div class="topic-list" style="margin-top:8px">${ts.map(t=>`<button class="topic-btn" data-t="${t.id}"><span><b>${esc(t.n)}</b><br><span class="muted small">${t.steps.length} خطوات · بطاقات</span></span><span class="chip ${S.lessons[t.id]?.done?'good':''}">${S.lessons[t.id]?.done?'أنهيته ✓':'ابدأ'}</span></button>`).join('')}</div></section>`;
+  ${ts.length?'':'<span hidden></span>'}${ts.length?`<section class="card"><h3>دروس قصيرة قبل التدريب</h3><div class="topic-list" style="margin-top:8px">${ts.map(t=>`<button class="topic-btn" data-t="${t.id}"><span><b>${esc(t.n)}</b><br><span class="muted small">${t.steps.length} خطوات · بطاقات</span></span><span class="chip ${S.lessons[t.id]?.done?'good':''}">${S.lessons[t.id]?.done?'أنهيته ✓':'ابدأ'}</span></button>`).join('')}</div></section>`:''}`;
+  if(PROFILE)v.innerHTML=fy(v.innerHTML);
   v.querySelectorAll('[data-rp]').forEach(b=>b.onclick=()=>{if(!SAMPLE){toastT('التدريب على المشاهد يحتاج المعلّم الذكي. جرّب الدروس القصيرة الآن.');return}startRP(b.dataset.rp)});
   v.querySelectorAll('[data-t]').forEach(b=>b.onclick=()=>startLesson(b.dataset.t));bindChall(v);v.querySelectorAll('[data-go]').forEach(b=>b.onclick=()=>{STY=null;go(b.dataset.go)});v.querySelectorAll('[data-start]').forEach(b=>b.onclick=()=>startLesson(b.dataset.start))}
 
@@ -2415,12 +2458,13 @@ const CHALL=[
  {id:'help',ic:'✋',t:'اطلب مساعدة من المعلّم في شيء لم تفهمه',h:'«لو سمحت، لم أفهم هذا الجزء. هل يمكنك أن تشرحه مرة أخرى؟»',tid:'soc_team'},
  {id:'idea',ic:'💡',t:'في عمل جماعي، اقترح فكرة واحدة بهدوء',h:'«عندي فكرة، ما رأيكم؟»',tid:'soc_team'},
  {id:'invite',ic:'🎮',t:'ادعُ صديقًا لنشاط مشترك',h:'«هل تريد أن نلعب معًا يوم الجمعة؟» واقبل الجواب بلطف.',tid:'soc_team'}];
+if(PROFILE){SCEN.length=0;SCEN.push(...SCENJ);CHALL.length=0;CHALL.push(...CHALLJ)}
 const weekKey=()=>{const d=new Date();d.setHours(12,0,0,0);d.setDate(d.getDate()-d.getDay());return d.toISOString().slice(0,10)};
 function curChall(){S.chall=S.chall||{};const k=weekKey();if(!S.chall[k]){const used=new Set(Object.values(S.chall).map(c=>c.id));const pool=CHALL.filter(c=>!used.has(c.id));const n=Math.floor(Date.now()/(7*864e5));const pick=(pool.length?pool:CHALL)[n%(pool.length||CHALL.length)];S.chall[k]={id:pick.id,t:pick.t};persist()}return {...S.chall[k],k,c:CHALL.find(x=>x.id===S.chall[k].id)||CHALL[0]}}
 function challCard(){const x=curChall();if(!x.c)return '';
   return `<section class="card chall ${x.done?'done':''}"><div class="row between"><h3>🎯 تحدّي الأسبوع</h3>${x.done?'<span class="chip good">أنجزته ✓</span>':`<span class="chip">${STAR} 10</span>`}</div>
    <p class="qtext" style="margin:8px 0 4px">${x.c.ic} ${esc(x.c.t)}</p><p class="muted small" style="margin:0 0 10px">${esc(x.c.h)}</p>
-   ${x.done?`<p class="small" style="margin:0">${{good:'😊 كان جيدًا',ok:'😐 كان عاديًا',hard:'😟 كان صعبًا'}[x.how]||''}${x.note?' · '+esc(x.note):''}</p>`:`<div class="row"><button class="btn-p" data-chdone>فعلتها! 🎉</button><button class="btn-ghost" data-chswap>تحدٍّ آخر</button><button class="btn-ghost" data-start="${x.c.tid}">ذكّرني كيف</button></div>`}</section>`}
+   ${x.done?`<p class="small" style="margin:0">${{good:'😊 كان جيدًا',ok:'😐 كان عاديًا',hard:'😟 كان صعبًا'}[x.how]||''}${x.note?' · '+esc(x.note):''}</p>`:`<div class="row"><button class="btn-p" data-chdone>فعلتها! 🎉</button><button class="btn-ghost" data-chswap>تحدٍّ آخر</button>${x.c.tid?`<button class="btn-ghost" data-start="${x.c.tid}">ذكّرني كيف</button>`:''}</div>`}</section>`}
 function bindChall(v){const d=v.querySelector('[data-chdone]');if(d)d.onclick=openChallDone;const sw=v.querySelector('[data-chswap]');if(sw)sw.onclick=()=>{const x=curChall();const others=CHALL.filter(c=>c.id!==x.id);const pk=others[Math.floor(Math.random()*others.length)];S.chall[x.k]={id:pk.id,t:pk.t};persist();render()}}
 function openChallDone(){const x=curChall();const o=$('overlay');o.hidden=false;let how=null;
   o.innerHTML=`<div class="card" role="dialog" aria-modal="true" style="max-width:420px"><h2>أحسنت! 🎉</h2><p style="margin:0">«${esc(x.c.t)}»</p><b>كيف كان؟</b><div class="row" style="justify-content:center">${[['good','😊 جيد'],['ok','😐 عادي'],['hard','😟 صعب']].map(([k,l])=>`<button data-how="${k}" aria-pressed="false">${l}</button>`).join('')}</div>
@@ -2693,7 +2737,7 @@ async function ask(text,kind,img){
   const turns=[];for(const m of hist){const r=m.role==='user'?'user':'assistant';if(!turns.length&&r==='assistant')continue;if(turns.length&&turns.at(-1).role===r)turns.at(-1).content+='\n'+m.text;else turns.push({role:r,content:m.text})}
   const rps=RP&&SCEN.find(x=>x.id===RP.id);if(rps&&text!=='أنهيت التدريب')RP.turns++;if(rps)drawRPBar();
   const final=rps?('ما تعرفه عن يمان: '+(S.tnotes||[]).map(n=>n.t).join('؛ ')+'\n\nكلام يمان في المشهد: '+text):'السياق الآن (للمعلّم، لا تكرّره ليمان):\n'+context()+'\n\nما تعرفه عن يمان (استعمله لتكييف الشرح، لا تقرأه له):\n'+learnerProfile()+(img?'\n\nأرفق يمان صورة تمرين. ابدأ بسطر «في الصورة:» تكتب فيه نص التمرين كما فهمته (حتى يتأكّد أنك قرأته صحيحًا). ثم اشرح الحل خطوة خطوة، ويفضَّل مع رسم steps أو shape أو graph. إذا كانت الصورة غير واضحة، قل ذلك واطلب صورة أوضح.':'')+'\n\nرسالة يمان: '+text;
-  const sysP=PROFILE?SYSJ+'\n'+interestLine():rps?RPSYS(rps)+'\n'+interestLine():SYS+'\n'+interestLine();
+  const sysP=rps?(PROFILE?RPSYSJ(rps):RPSYS(rps))+'\n'+interestLine():PROFILE?SYSJ+'\n'+interestLine():SYS+'\n'+interestLine();
   if(turns.length&&turns.at(-1).role==='user')turns.at(-1).content+='\n\n'+final;else turns.push({role:'user',content:final});
   if(img){const last=turns.at(-1);last.content=[{type:'image',source:{type:'base64',media_type:'image/jpeg',data:img}},{type:'text',text:last.content}]}
   try{const r=await SAMPLE(turns,{signal:tAbort.signal,cache:false,role:'teacher',max:PROFILE?800:1400,system:sysP,onText:({text})=>{CHAT[idx].text=text||'…';drawChat()}});CHAT[idx].text=takeNotes(r.text);lastT=plainTeacher(CHAT[idx].text);drawChat();if(S.settings.autoread==='on')speak(lastT)}
