@@ -419,6 +419,8 @@ html[data-motion="off"] *{animation:none!important;transition:none!important}
   .plan{grid-template-columns:minmax(0,1fr)}
 }
 @media (max-width:560px){.brand b{white-space:nowrap}.save-chip{font-size:0;width:12px;height:12px;padding:0;border-radius:50%;background:#f59e0b;border:0;flex:0 0 auto}.card{padding:15px}.formula{font-size:1.35em}.brand small{display:none}.brand b{font-size:1.2em}.top-in{flex-wrap:nowrap;gap:8px;padding-block:8px}.subjects{grid-template-columns:repeat(3,minmax(0,1fr))}.subj{padding:10px;align-items:center;text-align:center}.subj .ic{width:36px;height:36px}.lesson-head,.lesson-body{padding-left:14px;padding-right:14px}}
+.fl-row{display:flex;flex-wrap:wrap;align-items:center;gap:6px;margin:6px 0}.fl-n{position:relative;display:flex;flex-direction:column;align-items:center;gap:2px;min-width:78px;padding:10px 8px;border-radius:14px;border:2px solid var(--line);background:var(--surface);color:var(--text);cursor:pointer;font:inherit}.fl-n.on{border-color:var(--accent);background:color-mix(in srgb,var(--accent) 12%,var(--surface))}.fl-e{font-size:1.7em;line-height:1}.fl-num{position:absolute;top:2px;inset-inline-start:6px;font-style:normal;font-size:.7em;color:var(--muted)}.fl-a{color:var(--muted);font-size:1.2em}.fl-d{margin-top:6px;padding:8px 10px;border-radius:10px;background:var(--surface2);min-height:2.6em;line-height:1.7}
+table.cmp{border-collapse:collapse;width:100%;font-size:.92em}table.cmp th,table.cmp td{border:1px solid var(--line);padding:6px 8px;text-align:start}table.cmp thead th{background:var(--surface2)}.tk-chat{max-height:42vh;min-height:200px}#tkMic.on{background:#dc2626;color:#fff}
 </style>
 </head>
 <body>
@@ -1077,6 +1079,7 @@ function routeFromHash(){
   if(r==='review'){const due=dueReviews();if(due.length)startExam({pool:due.slice(0,12).map(r=>r.q),n:Math.min(12,due.length),mode:'practice',timer:'none',review:true,ids:[]});else go('home');return true}
   if(r==='test'){go('testnew');return true}
   if(r==='social'){go('social');return true}
+  if(r==='talk'&&!PROFILE){go('talk');return true}
   if(r==='recall'){setTimeout(startRecall,600);return true}
   if(r==='calm'){CALM=null;go('calm');return true}
   if(r==='spell'){SP=null;go('spell');return true}
@@ -1520,7 +1523,7 @@ document.querySelectorAll('[data-nav]').forEach(b=>b.onclick=()=>{if(E&&!E.done&
 function render(){
   document.querySelectorAll('[data-nav]').forEach(b=>b.setAttribute('aria-current',(b.dataset.nav===VIEW||(VIEW==='lesson'&&b.dataset.nav==='learn')||(VIEW.startsWith('exam')&&b.dataset.nav==='exam'))?'page':'false'));
   const v=$('view');
-  ({home:PROFILE?vHomeJ:vHome,learn:vLearn,lesson:vLesson,exam:vExamSetup,examrun:vExamRun,examres:vExamRes,progress:vProgress,settings:vSettings,achieve:vAchieve,addtopic:vAddTopic,testnew:vTestNew,open:vOpen,sessiondone:vSessionDone,timetable:vTimetable,social:vSocial,story:vStory,recall:vRecall,calm:vCalm,spell:vSpell}[VIEW]||vHome)(v);
+  ({home:PROFILE?vHomeJ:vHome,learn:vLearn,lesson:vLesson,exam:vExamSetup,examrun:vExamRun,examres:vExamRes,progress:vProgress,settings:vSettings,achieve:vAchieve,addtopic:vAddTopic,testnew:vTestNew,open:vOpen,sessiondone:vSessionDone,timetable:vTimetable,social:vSocial,talk:vTalk,story:vStory,recall:vRecall,calm:vCalm,spell:vSpell}[VIEW]||vHome)(v);
   if(['home','lesson','examrun','examres','open','learn'].includes(VIEW)&&sessionActive()){v.insertAdjacentHTML('afterbegin',sessionStrip())}
   bindSession(v);bindInterests(v);v.querySelectorAll('[data-focusbtn]').forEach(b=>b.onclick=()=>setFocus(true));
   updateTeacherMode();updateStarChip();
@@ -1549,6 +1552,7 @@ function vHome(v){
   </section>
   ${recallCard()}
   ${eveningCard()}
+  <button class="card link-row" data-go="talk" style="border-inline-start:6px solid var(--s-en,var(--accent))"><span style="font-size:1.6em">🗣️</span><span style="flex:1"><b>حوار مع الأستاذ سامر</b><br><span class="muted small">اختر موضوعًا، واسمع الشرح وشاهد الرسم، وتحدّث معه بصوتك.</span></span></button>
   <button class="card link-row" data-go="calm" style="border-inline-start:6px solid var(--s-chem)"><span style="font-size:1.6em">🫶</span><span style="flex:1"><b>أنا أشعر…</b><br><span class="muted small">متوتر؟ غاضب؟ مرتبك؟ اختر شعورك وسنهدأ معًا.</span></span><span class="muted">←</span></button>
   ${homeExtras()}
   <button class="card link-row" data-go="social" style="border-inline-start:6px solid var(--s-soc)"><span style="font-size:1.6em">🎬</span><span style="flex:1"><b>استوديو المهارات الاجتماعية</b><br><span class="muted small">تدرّب على محادثة حقيقية مع الأستاذ سامر. 5 نجوم لكل مشهد.</span></span><span class="go-arrow" aria-hidden="true">←</span></button>
@@ -2365,7 +2369,7 @@ function vzGeo(el,sp,st){const g=GEO[sp.shape]||GEO.square;if(!st.v)st.v={mode:s
   el.querySelectorAll('[data-m]').forEach(b=>b.onclick=()=>{sv.mode=sv.mode===b.dataset.m?'':b.dataset.m;el.querySelectorAll('[data-m]').forEach(x=>x.classList.toggle('on',x.dataset.m===sv.mode));draw()});
   draw()}
 function mountViz(root){root.querySelectorAll('.viz[data-vk]').forEach(el=>{const k=el.dataset.vk,sp=VZS[k];if(!sp)return;const st=VZS[k+'_st']||(VZS[k+'_st']={});
-  try{({shape:vzShape,graph:vzGraph,steps:vzSteps,choice:vzChoice,fraction:vzFraction,replies:vzReplies,objects:vzObjects,blocks:vzBlocks,cards:vzCards,geo:vzGeo}[sp.type]||(()=>{el.remove()}))(el,sp,st)}catch(e){el.remove()}})}
+  try{({shape:vzShape,graph:vzGraph,steps:vzSteps,choice:vzChoice,fraction:vzFraction,replies:vzReplies,objects:vzObjects,blocks:vzBlocks,cards:vzCards,geo:vzGeo,flow:vzFlow,compare:vzCompare}[sp.type]||(()=>{el.remove()}))(el,sp,st)}catch(e){el.remove()}})}
 
 /* ============ SOCIAL: ROLE-PLAY STUDIO ============ */
 const SCEN=[
@@ -2764,6 +2768,117 @@ function syncTOpen(){const o=$('teacher').classList.contains('open');document.do
 new MutationObserver(syncTOpen).observe($('teacher'),{attributes:true,attributeFilter:['class']});
 if(window.visualViewport){const vv=window.visualViewport;const fit=()=>{document.documentElement.style.setProperty('--vvh',vv.height+'px');const t=$('teacher');if(t.classList.contains('open')){t.style.transform=vv.offsetTop?`translateY(${vv.offsetTop}px)`:'';const c=$('chat');c.scrollTop=c.scrollHeight}};vv.addEventListener('resize',fit);vv.addEventListener('scroll',fit);fit()}
 $('teacherFab').onclick=()=>{const t=$('teacher');t.classList.toggle('open');if(t.classList.contains('open')&&!matchMedia('(pointer:coarse)').matches)$('tInput').focus()};$('tClose').onclick=()=>$('teacher').classList.remove('open');
+
+/* ============ TALK: natural conversation with Samer ============ */
+const TALKSYS=`أنت "الأستاذ سامر"، معلّم ماهر وصبور وهادئ، تتحدّث الآن مع يمان (الصف العاشر أو الحادي عشر في مدرسة عربية في إسرائيل، منهاج وزارة التربية ومستوى البجروت) في حوار طبيعي لشرح موضوع دراسي. يمان على طيف التوحّد: يفهم جيدًا عندما يكون الكلام حرفيًا ومنظّمًا ومتوقّعًا.
+
+هذا حوار مسموع ومرئي، وليس درسًا مكتوبًا:
+- تكلّم كما يتكلّم معلّم جالس بجانبه: جمل قصيرة وطبيعية، بلا عناوين ثابتة وبلا قوالب. كل ردّ من 50 إلى 90 كلمة تقريبًا (كتل الرسم لا تُحسب).
+- فكرة واحدة في كل ردّ. في أول ردّ عن موضوع جديد قل بجملة واحدة خريطة الطريق: «سنشرح هذا في ثلاثة أجزاء: …، وهذا هو الجزء الأول».
+- اختم كل ردّ بشيء واحد فقط: سؤال قصير يفحص الفهم، أو خياران ليختار ما يريد («نكمل أم نرسمها؟»). لا تطرح أكثر من سؤال.
+- الكتابة ستُقرأ بصوت عالٍ، فاكتب نصًّا يُقرأ جيدًا: لا جداول ولا رموز غريبة ولا إيموجي داخل الجمل. الرموز الرياضية بسيطة (x² و 3x + 2 = 8). المصطلحات: اكتبها بالعربية ثم بين قوسين بالإنجليزية أو العبرية عند الحاجة.
+- تأكّد من صحة كل معلومة وكل حساب. إذا لم تكن متأكدًا قل ذلك.
+- إذا قال يمان «مش فاهم» فلا تكرّر الشرح نفسه: غيّر الطريقة (رسم، رقم أصغر، تشبيه آخر).
+- إذا أجاب عن سؤالك فقل أولًا هل هو صحيح، ثم أشر إلى موضع الخطأ بدقة إن وُجد.
+- يمان قد يكتب أو يتكلّم بالعامية أو بأخطاء. افهم قصده ولا تصحّح لغته.
+- في مادة العبرية أو الإنجليزية: قدّم الكلمة بلغتها ثم معناها بالعربية، واستعمل بطاقات النطق. اشرح القواعد بالعربية وأعطِ أمثلة بلغتها.
+- التشبيهات من عالم يمان (الدبلجة، الرسوم المتحرّكة) تكون أحيانًا فقط وعندما تفيد فعلًا.
+
+أدوات الشرح المرئية والصوتية: أضف رسمًا واحدًا على الأكثر في الردّ، داخل كتلة كود من نوع viz بصيغة JSON صحيحة فقط، بعد جملة قصيرة تقول ليمان ماذا يضغط وماذا يلاحظ. استعمل الرسم كلما أفاد، وفي أغلب الردود التي تشرح فكرة جديدة:
+1) سلسلة أو دورة أو مراحل (التمثيل الضوئي، الجهاز الهضمي، دورة الماء، أحداث تاريخية، خطوات برهان). يضغط يمان على كل مرحلة فيسمع شرحها، أو يضغط «شغّل الكل» فتُقرأ بالترتيب:
+\`\`\`viz
+{"type":"flow","title":"التمثيل الضوئي","cycle":false,"nodes":[["☀️","ضوء الشمس","تمتصّ الورقة ضوء الشمس بواسطة الكلوروفيل."],["💧","الماء","يصل الماء من الجذور إلى الورقة."],["🍬","الغلوكوز","تصنع النبتة السكر وتطلق الأكسجين."]]}
+\`\`\`
+nodes: من 2 إلى 7 مراحل، كل مرحلة [إيموجي، اسم قصير، شرح بجملة أو جملتين]. أضف "l":"he" أو "en" إذا كان الشرح بتلك اللغة.
+2) مقارنة بين شيئين أو ثلاثة (خلية نباتية وحيوانية، فعل ماضٍ ومضارع): {"type":"compare","title":"…","cols":["الخلية النباتية","الخلية الحيوانية"],"rows":[["الجدار الخلوي","موجود","غير موجود"]]} (حتى 6 صفوف).
+3) بطاقات مفردات تنطقها عند الضغط: {"type":"cards","l":"he","items":[["📖","ספר","كتاب"]]} (l هو ar أو en أو he أو fr؛ كل عنصر [إيموجي، الكلمة بلغتها، معناها بالعربية]؛ حتى 8).
+4) شكل هندسي مع مؤشّرات: {"type":"shape","shape":"kite","p":{"d1":8,"d2":6}} (الأشكال: rect و square و triangle و parallelogram و trapezoid و kite و rhombus و circle، القيم من 1 إلى 12).
+5) رسم دالة: {"type":"graph","f":"a*x^2+b*x+c","p":{"a":1,"b":-2,"c":-3},"x":[-5,5]} (استعمل * و ^ والمتغيّر x فقط؛ f يمكن أن تكون قائمة حتى 3 دوال).
+6) حل خطوة خطوة: {"type":"steps","lines":["2x + 3 = 11","2x = 8","x = 4"],"why":["نطرح 3 من الطرفين","نقسم على 2"]}
+7) كسر: {"type":"fraction","n":3,"d":4}
+8) سؤال بخيارات يضغط عليها: {"type":"choice","q":"…","o":["…","…","…"],"c":1,"w":"سبب الجواب الصحيح"} (c رقم الجواب الصحيح من 0؛ لا تكشف الحل قبلها).
+عندما يطلب يمان «ارسم لي» أو «أعطني مثالًا» فاستجب بالأداة الأنسب فورًا.
+
+ستصلك مع كل رسالة معلومات عن يمان وعن مواضيعه الضعيفة. استعملها بلطف عندما تفيد.
+إذا سأل عن شيء خارج الدراسة فأجب باختصار ولطف ثم أرجعه للموضوع. إذا بدا متعبًا فاقترح استراحة قصيرة.`;
+const TSUBJ=[
+ {id:'bio',ic:'🧬',n:'أحياء',lang:'ar-SA',sug:['الخلية وأجزاؤها','التمثيل الضوئي','الجهاز الهضمي','الدورة الدموية','الوراثة والجينات']},
+ {id:'math',ic:'🔢',n:'رياضيات',lang:'ar-SA',sug:['الدوال التربيعية','حل المعادلات','المساحات والأشكال','الكسور والنسب','المتتاليات']},
+ {id:'he',ic:'🇮🇱',n:'عبري',lang:'he-IL',sug:['פעלים בזמן עבר','מילות קישור','הבנת הנקרא','סוגי משפטים','כתיבת טיעון']},
+ {id:'ar',ic:'📖',n:'عربي',lang:'ar-SA',sug:['الفاعل والمفعول به','الجملة الاسمية والفعلية','الأفعال المزيدة','أسلوب الشرط','كتابة فقرة']},
+ {id:'en',ic:'🔤',n:'إنجليزي',lang:'en-US',sug:['Present perfect','Conditionals','Reading comprehension','Linking words','Writing a paragraph']},
+ {id:'phy',ic:'⚛️',n:'فيزياء',lang:'ar-SA',sug:['السرعة والتسارع','قوانين نيوتن','الدارات الكهربائية','الطاقة والشغل']},
+ {id:'chem',ic:'🧪',n:'كيمياء',lang:'ar-SA',sug:['الجدول الدوري','الروابط الكيميائية','الحموض والقواعد','المول والحسابات']},
+ {id:'his',ic:'🏛️',n:'تاريخ وأخرى',lang:'ar-SA',sug:['الحرب العالمية الأولى','الثورة الصناعية','أي موضوع آخر']}];
+let TALK={sub:null,msgs:[],busy:false,auto:true,hf:false,lang:'ar-SA',abort:null,rec:null,listening:false,topic:''};
+function talkLangSel(l){return `<select id="tkLang" aria-label="لغة الميكروفون" style="min-height:40px"><option value="ar-SA" ${l==='ar-SA'?'selected':''}>🎙️ عربي</option><option value="he-IL" ${l==='he-IL'?'selected':''}>🎙️ עברית</option><option value="en-US" ${l==='en-US'?'selected':''}>🎙️ English</option></select>`}
+function vTalk(v){
+  const T0=TALK,SRok=!!(window.SpeechRecognition||window.webkitSpeechRecognition);
+  if(!T0.msgs.length&&!T0.busy){
+    const cur=TSUBJ.find(x=>x.id===T0.sub);
+    v.innerHTML=`<section class="card"><h2>🗣️ حوار مع الأستاذ سامر</h2><p class="muted" style="margin:.3em 0 0">اختر مادة وموضوعًا، أو اكتب أي موضوع. نتحدّث معًا كأننا جالسان جنبًا إلى جنب: أنا أشرح بالصوت والرسم، وأنت تسأل وتجيب بصوتك أو بالكتابة.</p></section>
+    <section class="card"><h3>اختر مادة</h3><div class="row" style="gap:8px;flex-wrap:wrap;margin-top:8px">${TSUBJ.map(x=>`<button type="button" class="${x.id===T0.sub?'btn-p':'btn-ghost'}" data-tsub="${x.id}" style="min-height:48px">${x.ic} ${x.n}</button>`).join('')}</div>
+     ${cur?`<h3 style="margin-top:14px">مواضيع مقترحة في ${cur.n}</h3><div class="row" style="gap:8px;flex-wrap:wrap;margin-top:8px">${cur.sug.map((s,i)=>`<button type="button" class="chip" data-tsug="${i}" style="min-height:44px;cursor:pointer" ${/^[A-Za-z]/.test(s)||/[֐-׿]/.test(s)?'dir="auto"':''}>${esc(s)}</button>`).join('')}</div>`:''}
+     <form id="tkStart" class="row" style="margin-top:14px;gap:8px"><input id="tkTopic" placeholder="أو اكتب موضوعك: مثال: لماذا تنقسم الخلية؟" value="${esc(T0.topic)}" style="flex:1;min-height:48px;border:1.5px solid var(--line);border-radius:12px;padding:0 12px;background:var(--surface);color:var(--text)"><button class="btn-p" type="submit">ابدأ الحوار</button></form></section>`;
+    v.querySelectorAll('[data-tsub]').forEach(b=>b.onclick=()=>{T0.sub=b.dataset.tsub;T0.lang=TSUBJ.find(x=>x.id===T0.sub).lang;render()});
+    v.querySelectorAll('[data-tsug]').forEach(b=>b.onclick=()=>{const s=cur.sug[+b.dataset.tsug];talkBegin(s)});
+    $('tkStart').onsubmit=e=>{e.preventDefault();const t=$('tkTopic').value.trim();if(!t){$('tkTopic').focus();return}talkBegin(t)};
+    $('tkTopic').oninput=()=>{T0.topic=$('tkTopic').value};
+    return}
+  const cur=TSUBJ.find(x=>x.id===T0.sub);
+  v.innerHTML=`<section class="card tk-card"><div class="row between" style="gap:8px;flex-wrap:wrap"><b>🗣️ ${esc(T0.title||'حوار')}${cur?' · '+cur.n:''}</b><div class="row" style="gap:6px;flex-wrap:wrap">
+     <button type="button" class="${T0.auto?'btn-p':'btn-ghost'}" id="tkAuto" aria-pressed="${T0.auto}" style="min-height:40px">🔊 قراءة تلقائية</button>
+     ${SRok?`<button type="button" class="${T0.hf?'btn-p':'btn-ghost'}" id="tkHf" aria-pressed="${T0.hf}" style="min-height:40px">🎧 محادثة بالصوت</button>`:''}
+     <button type="button" class="btn-ghost" id="tkNew" style="min-height:40px">موضوع جديد</button></div></div>
+    <div class="chat tk-chat" id="tkChat" aria-live="polite"></div>
+    <div class="row tk-q" style="gap:6px;flex-wrap:wrap;margin:8px 0">${[['أبسط','اشرح لي هذا بطريقة أبسط.'],['ارسم لي','ارسم لي هذه الفكرة بأداة مناسبة.'],['مثال','أعطني مثالًا آخر.'],['اختبرني','اختبرني بسؤال قصير على ما شرحته.'],['نكمل','نكمل الجزء التالي.']].map(([a,b])=>`<button type="button" class="chip" data-tq="${esc(b)}" style="min-height:40px;cursor:pointer">${a}</button>`).join('')}<button type="button" class="chip" id="tkRepeat" style="min-height:40px;cursor:pointer">🔊 أعد الأخير</button><button type="button" class="chip" id="tkStop" style="min-height:40px;cursor:pointer">⏹ أوقف الصوت</button></div>
+    <form id="tkForm" class="row" style="gap:6px"><input id="tkIn" autocomplete="off" placeholder="اكتب أو تكلّم…" style="flex:1;min-height:48px;border:1.5px solid var(--line);border-radius:12px;padding:0 12px;background:var(--surface);color:var(--text)">
+     ${SRok?`<button type="button" class="btn-ghost" id="tkMic" aria-label="تكلّم" title="تكلّم" style="min-width:52px;min-height:48px;font-size:1.3em">🎙️</button>${talkLangSel(T0.lang)}`:''}
+     <button class="btn-p" type="submit" style="min-height:48px">أرسل</button></form></section>`;
+  drawTalk();
+  $('tkAuto').onclick=()=>{T0.auto=!T0.auto;if(!T0.auto)stopSpeak();render()};
+  if($('tkHf'))$('tkHf').onclick=()=>{T0.hf=!T0.hf;if(T0.hf){T0.auto=true;talkListen()}else{talkStopListen()}render()};
+  $('tkNew').onclick=()=>{stopSpeak();talkStopListen();if(T0.abort)T0.abort.abort();TALK={...T0,msgs:[],busy:false,hf:false,title:'',topic:''};render()};
+  $('tkStop').onclick=()=>{stopSpeak();talkStopListen()};
+  $('tkRepeat').onclick=()=>{const m=[...T0.msgs].reverse().find(x=>x.role==='assistant'&&x.text);if(m)speak(plainTeacher(m.text),talkSpeakLang())};
+  v.querySelectorAll('[data-tq]').forEach(b=>b.onclick=()=>talkSend(b.dataset.tq));
+  $('tkForm').onsubmit=e=>{e.preventDefault();const x=$('tkIn').value.trim();$('tkIn').value='';if(x)talkSend(x)};
+  if($('tkLang'))$('tkLang').onchange=()=>{T0.lang=$('tkLang').value};
+  if($('tkMic'))$('tkMic').onclick=()=>{if(T0.listening)talkStopListen();else talkListen()};
+}
+function talkSpeakLang(){return 'ar'}
+function drawTalk(){const c=$('tkChat');if(!c)return;
+  c.innerHTML=TALK.msgs.map((m,i)=>`<div class="msg ${m.role==='user'?'u':'t'}">${m.role==='user'?esc(m.text):(m.text==='…'?'<span class="muted">سامر يفكّر…</span>':fmtMsg(m.text,'tk'+i)+(m.text&&!TALK.busy?`<div style="margin-top:6px"><button type="button" class="chip" data-say="${i}" style="min-height:36px;cursor:pointer">🔊 اسمع</button></div>`:''))}</div>`).join('');
+  mountViz(c);c.querySelectorAll('[data-say]').forEach(b=>b.onclick=()=>speak(plainTeacher(TALK.msgs[+b.dataset.say].text),talkSpeakLang()));c.scrollTop=c.scrollHeight}
+function talkBegin(topic){TALK.title=topic.slice(0,60);const s=TSUBJ.find(x=>x.id===TALK.sub);TALK.msgs=[];talkSend('أريد أن أفهم: '+topic+(s?' (مادة '+s.n+')':'')+'. ابدأ الشرح معي.')}
+function talkStopListen(){const T0=TALK;T0.listening=false;if(T0.rec){try{T0.rec.onend=null;T0.rec.stop()}catch(e){}T0.rec=null}const b=$('tkMic');if(b){b.textContent='🎙️';b.classList.remove('on')}const i=$('tkIn');if(i)i.placeholder='اكتب أو تكلّم…'}
+function talkListen(){const SR=window.SpeechRecognition||window.webkitSpeechRecognition,T0=TALK;if(!SR||T0.listening||T0.busy||VIEW!=='talk')return;try{stopSpeak()}catch(e){}
+  const rec=new SR();T0.rec=rec;rec.lang=T0.lang;rec.interimResults=true;rec.continuous=false;let fin='';const inp=$('tkIn');
+  rec.onresult=ev=>{let it='';for(let i=ev.resultIndex;i<ev.results.length;i++){const r=ev.results[i];if(r.isFinal)fin+=r[0].transcript;else it+=r[0].transcript}if(inp)inp.value=(fin+it).trim()};
+  rec.onerror=ev=>{T0.listening=false;if(ev.error==='not-allowed'||ev.error==='service-not-allowed'){T0.hf=false;talkSay('لم يُسمح باستعمال الميكروفون. يمكنك أن تكتب سؤالك.')}else if(ev.error==='no-speech'){T0.hf=false}};
+  rec.onend=()=>{const was=T0.listening;T0.listening=false;T0.rec=null;const b=$('tkMic');if(b){b.textContent='🎙️';b.classList.remove('on')}const x=(inp&&inp.value||'').trim();if(inp){inp.value='';inp.placeholder='اكتب أو تكلّم…'}if(x&&VIEW==='talk')talkSend(x);else if(VIEW==='talk'&&T0.hf===false){const h=$('tkHf');if(h){h.classList.replace('btn-p','btn-ghost');h.setAttribute('aria-pressed','false')}}};
+  try{rec.start();T0.listening=true;const b=$('tkMic');if(b){b.textContent='⏺';b.classList.add('on')}if(inp)inp.placeholder='أستمع إليك… تكلّم الآن'}catch(e){T0.listening=false}}
+function talkSay(t){TALK.msgs.push({role:'assistant',text:fy(t)});drawTalk()}
+async function speakAndWait(text,lang){const p=speak(text,lang);try{await p}catch(e){}await new Promise(r=>{const t=setInterval(()=>{if(!('speechSynthesis' in window)||!speechSynthesis.speaking){clearInterval(t);r()}},250);setTimeout(()=>{clearInterval(t);r()},60000)})}
+async function talkSend(text){const T0=TALK;if(T0.busy)return;stopSpeak();talkStopListen();
+  T0.msgs.push({role:'user',text});S.asked=(S.asked||0)+1;if(!$('tkChat'))render();
+  if(!SAMPLE){T0.msgs.push({role:'assistant',text:'المعلّم الذكي غير متاح الآن. جرّب بعد قليل، أو افتح درسًا من الصفحة الرئيسية.'});drawTalk();return}
+  T0.busy=true;T0.msgs.push({role:'assistant',text:'…'});drawTalk();const idx=T0.msgs.length-1;
+  if(T0.abort)T0.abort.abort();T0.abort=new AbortController();
+  const turns=[];for(const m of T0.msgs.slice(0,idx).filter(m=>m.text&&m.text!=='…').slice(-12)){const r=m.role==='user'?'user':'assistant';const tx=m.text.replace(/```\s*viz[\s\S]*?```/g,'[رسم تفاعلي]');if(!turns.length&&r==='assistant')continue;if(turns.length&&turns.at(-1).role===r)turns.at(-1).content+='\n'+tx;else turns.push({role:r,content:tx})}
+  if(turns.length&&turns.at(-1).role==='user')turns.at(-1).content+='\n\n(للمعلّم، لا تكرّره: '+fy(learnerProfile()||'لا معلومات سابقة')+(T0.sub?' · المادة: '+TSUBJ.find(x=>x.id===T0.sub).n:'')+')';
+  try{const r=await SAMPLE(turns,{signal:T0.abort.signal,cache:false,role:'teacher',max:1100,system:TALKSYS+'\n'+interestLine(),onText:({text})=>{T0.msgs[idx].text=text||'…';if(VIEW==='talk')drawTalk()}});
+    T0.msgs[idx].text=takeNotes(r.text);T0.busy=false;if(VIEW==='talk')drawTalk();
+    if(T0.auto&&VIEW==='talk'){await speakAndWait(plainTeacher(T0.msgs[idx].text),talkSpeakLang());if(T0.hf&&VIEW==='talk'&&!T0.busy)talkListen()}}
+  catch(e){T0.busy=false;if(e&&(e.code==='aborted'||e.name==='AbortError'))return;T0.msgs[idx].text=e&&e.code==='daily_limit'?'الأستاذ سامر أنهى عمله لهذا اليوم 🌙 نكمل غدًا!':'لم أستطع الردّ الآن. اضغط «أعد» أو أرسل سؤالك مرة أخرى.';if(VIEW==='talk')drawTalk()}}
+function vzFlow(el,sp,st){const ns=(Array.isArray(sp.nodes)?sp.nodes:[]).filter(n=>Array.isArray(n)&&n[1]).slice(0,7),l=sp.l||'ar';if(ns.length<2){el.remove();return}
+  const rtl=l==='ar'||l==='he';let tok=0;
+  el.innerHTML=`<div class="vz-h">${esc(sp.title||'مراحل')}</div><div class="fl-row">${ns.map((n,i)=>`<button type="button" class="fl-n" data-i="${i}"><span class="fl-e">${esc(n[0]||'•')}</span><b>${esc(n[1])}</b><i class="fl-num">${i+1}</i></button>${i<ns.length-1?'<span class="fl-a" aria-hidden="true">←</span>':''}`).join('')}${sp.cycle?'<span class="fl-a" aria-hidden="true">↺</span>':''}</div><div class="fl-d" aria-live="polite" ${rtl?'':'dir="ltr"'}>اضغط على مرحلة لتسمع شرحها.</div><button type="button" class="btn-ghost fl-all" style="min-height:40px;margin-top:6px">▶ شغّل الكل</button>`;
+  const pick=i=>{el.querySelectorAll('.fl-n').forEach(b=>b.classList.toggle('on',+b.dataset.i===i));el.querySelector('.fl-d').textContent=(i+1)+'. '+(ns[i][2]||ns[i][1])};
+  el.querySelectorAll('.fl-n').forEach(b=>b.onclick=()=>{tok++;const i=+b.dataset.i;pick(i);speak((ns[i][1]+'. '+(ns[i][2]||'')),l)});
+  el.querySelector('.fl-all').onclick=async()=>{const my=++tok;for(let i=0;i<ns.length;i++){if(my!==tok)return;pick(i);await speakAndWait(ns[i][1]+'. '+(ns[i][2]||''),l)}}}
+function vzCompare(el,sp){const cols=(sp.cols||[]).slice(0,3).map(String),rows=(sp.rows||[]).slice(0,6).filter(r=>Array.isArray(r));if(!cols.length||!rows.length){el.remove();return}
+  el.innerHTML=`<div class="vz-h">${esc(sp.title||'مقارنة')}</div><div style="overflow-x:auto"><table class="cmp"><thead><tr><th></th>${cols.map(c=>`<th>${esc(c)}</th>`).join('')}</tr></thead><tbody>${rows.map(r=>`<tr><th>${esc(r[0]||'')}</th>${cols.map((_,i)=>`<td>${esc(r[i+1]||'')}</td>`).join('')}</tr>`).join('')}</tbody></table></div>`}
 
 /* ============ BOOT ============ */
 $('focusExit').onclick=()=>setFocus(false);
